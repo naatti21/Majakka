@@ -1,128 +1,48 @@
-# MAJAKKA — APP-SPEC v0.2
+# MAJAKKA — APP-SPEC
 
-**Päivä:** 2026-10-24  
-**Tila:** Ensimmäinen paikallinen synteettinen v0.1-prototyyppi toteutettu; mobiilijulkaisua ei vielä varmennettu  
-**Yhteinen kehitysohje:** App Engineering Playbook v1.9.2  
-**Kieli:** peli ja pelin käyttöliittymä englanniksi; sisäinen kehityskeskustelu suomeksi.  
-**Nimi:** Majakka on työnimi; kansainvälistä brändinimeä ei ole lukittu.
+**Version:** First Light v0.2 (2026-10-24)  
+**Project:** independent `naatti21/Majakka`  
+**Shared engineering basis:** Äppejä App Engineering Playbook v1.9.2. No playbook change required.  
+**Product language:** English. Development notes may be Finnish.
 
-## Toteutuksen delta 24.10.2026
+## Purpose
 
-- **Toteutettu prototyypissä:** kolme kuvitteellista aluetta, 22 julkista nodia, kolme pientä signaalihaastetta, simuloidut viivästetyt purskeet, oma Beacon-merkki ilman julkisia linkkejä, IndexedDB, paikallinen päiväkirja, opt-in-äänet, offline-PWA-kuori.
-- **Ei vielä toteutettu:** viiden oikean turvapaikan määrittely, todellinen GPS/karttadata, pelaajien keskinäinen rihmasto, palvelin ja huijauksenesto, matkaecho sekä oikean maailman turvallisuusarvio.
-- **Tekninen päätös:** ensimmäinen julkaisutiedostopaketti on suoraan ajettavaa HTML/CSS/JS:ää ilman build-komentoa. Aiemmin ehdotettu TypeScript/Vite arvioidaan vasta monimoduulisessa vaiheessa; Playbook-periaatteet pysyvät.
-- **Laatutaso:** Node-testit ja selainlogiikan offline-eristystestaus tässä ympäristössä; fyysisen Androidin Pages-testit odottavat käyttäjän arviota.
+**Restore the Light. Reconnect the World.** A quiet location-inspired game: players influence publicly located nodes and an anonymous mycelium-like network; the world develops slowly and responds through light and music. No factions or forced activity.
 
-## 1. Tuotelupaus
+## Non-negotiable principles
 
-**“Valaistaan maailma jälleen.”** / *Restore the Light. Reconnect the World.* (englanninkielinen slogan vielä ehdotus)
+- One shared world, one personal discovery layer, five strictly private sanctuaries (home, work, three choices) in the **future** real-game concept. Sanctuaries are never public or linked to public nodes.
+- No live revelation of individual player positions or journeys. Public links require sufficient distinct contributions and delayed aggregate publication; delaying alone is not sufficient for privacy.
+- A node can dim but not die. Rest/inactivity never deletes progress. Distant participation and couch play are meaningful.
+- Different levels of interaction: distant echo, passive encounter, deliberate attunement. Power expressed mainly through light, sound, and node state instead of competitive counters.
+- Coherent generative audio: each area shares a musical palette; never play dozens of node melodies simultaneously. Audio is optional.
+- Be visually polished: premium dark cartography, restrained amber/cyan glow, organic threads, subtle feedback.
 
-Majakka on rauhallinen, näyttävä, paikkatietoon kytkeytyvä peli, jossa maailma palautuu vähitellen kohinasta harmoniaan. Pelaajat eivät kilpaile joukkueina eivätkä näe toistensa sijainteja. Toisten läsnäolo näkyy viivästettyinä, yhteisinä muutoksina julkisissa nodeissa ja rihmastossa.
+## v0.2 implemented
 
-**Lukitut suunnittelurajat:**
-- Ei Alliance/Horde-tyyppisiä joukkueita tai aluevaltauksia.
-- Liikkumattomuudesta ei rangaista; koti- ja kahvitaukosessioilla on oikeaa sisältöä.
-- Yksittäisen käyttäjän liikettä, läsnäoloa tai kulkureittiä ei julkaista.
-- Koti, työ ja kolme muuta yksityistä turvapaikkaa näkyvät vain omalle käyttäjälle, eivätkä linkity julkiseen verkkoon.
-- Nodit voivat heiketä/hiipua, mutta eivät kuole pysyvästi.
-- Julkisen verkon muutokset tapahtuvat viivästetyissä purskeissa, eivät livenä.
-- Visuaalinen suunta: tumma, premium, hillitty neon, orgaaninen rihmasto, pehmeä valo ja laadukas liike/ääni. Ei pakollista 3D:tä tai AR:ää.
+- Static PWA shell, responsive interface, local IndexedDB saved state; standalone game logic `core.js`.
+- MapLibre GL JS plus OpenFreeMap Fiord **online map** with local fallback.
+- Three fictional demonstration nodes at approximate Tampere downtown coordinates. They do not represent an automated or validated POI selection algorithm.
+- Simulated walking and geographic proximity (near, faint, distant) with visible reception bars.
+- Lumen gained at node visits (per node per simulated pulse), capped, and from an at-home rest action (once per simulated pulse). No forced GPS permission.
+- Spending Lumen creates pending charge; a local delayed pulse applies it. Once all three nodes awaken, a triangular harmony field and three links become visible. Never confuse this simulation with real shared-player progress.
+- Small, bounded harmonized Web Audio chimes instead of repetitive dial tasks. No audio required to make progress.
 
-## 2. Pelin tilat
+## Not implemented
 
-**Kuuntelu / Home:** lyhyt 1–5 minuutin pelisessio, jossa käsitellään jo löytyneitä signaaleja, koetaan maailman muutoksia ja tehdään merkityksellinen pieni valinta. Ei päivittäistä kirjautumispakkoa.
+- Real GPS, native background travel, safe-space UI and local-coordinate security enforcement.
+- Real POI discovery, cross-region gameplay, true shared-world service, account identity, anti-spoofing, threshold-based node/link aggregation.
+- Deep audio composition, extended game-loop diversity, remote backup, cross-device sync, production privacy review, accessibility/device performance sign-off.
 
-**Tutkiminen / Explore:** sovelluksen ollessa auki pelaaja voi löytää julkisia nodeja, vahvistaa niitä sekä löytää signaalityyppejä. Haja-asutusalueet eivät saa olla tyhjiä; tiheys ja arvokkuus eivät perustu pelkästään kaupunkien POI-määriin.
+## Build and release
 
-**Matkakaiku / Travel Echo (myöhempi):** vapaaehtoinen opt-in-tila, jossa matkan aikana kohdattuja alueita voidaan auttaa hitaasti. Julkaisu perustuu aggregaatioon ja viiveeseen; ei julkista reittiviivaa. Lentäminen ei automaattisesti aktivoi kaikkia alle jääviä nodeja. Ajoneuvoa ajaessa ei vaadita näytön käyttöä.
+- GitHub Pages or Cloudflare Pages static publishing: output directory `.`; no build step.
+- `node --test tests/core.test.mjs` runs pure rules tests.
+- Shared Playbook remains canonical; Majakka design specifics live here. Delta updates preferred over duplicate playbooks.
 
-## 3. Julkinen maailma
+## Next quality gates
 
-- Nodi: julkinen turvallinen karttakohde tai pelin hyväksymä julkisen alueen ankkuri.
-- Nodin elinkaari: uinuva → heräävä → hehkuva → kiintotähti; visuaalinen voimakkuus voi laskea pysyvän historian katoamatta.
-- Linkki: mahdollinen kahden julkisen nodin välinen yhteys, jota voi tukea riittävästi toisistaan riippumattomien osallistujien kollektiivinen toiminta.
-- Purske: aikataulutettu ja viivästetty julkisen maailman tilapäivitys; samalle käyttäjälle rajoitettu vaikutus ja cooldown.
-- Rihmasto: yhteinen maailman kerros; jokaisella pelaajalla lisäksi oma yksityinen löytö-/kuuntelukerros.
-- Musiikki: nodit, yhteydet ja alueet muodostavat kasvavia sointirakenteita; kaupungin sinfonia ei saa tehdä harvasta alueesta arvotonta.
-
-**Ei vielä lukittu:** mikä on aidosti kiinnostava 2–5 minuutin ydintehtävä, millaisia signaalien tulkinta-/rytmi-/logiikkahaasteita se sisältää, miten osaaminen kasvaa ja millaiseen pitkän ajan päämäärään se liittyy. Näitä ei naamioida valmiiksi peliksi.
-
-## 4. Tekninen linja
-
-### Vaihe A — paikallinen pelattava PWA, ei palvelinta
-- Prototyyppi v0.1: staattinen HTML/CSS/JavaScript ilman käännöstä, mobiili ensin. TypeScript + Vite optio myöhemmin tarpeeseen.
-- Julkaisu: oma GitHub-repo; Cloudflare Pages -esikatselu olemassa olevan toimintamallin mukaan.
-- Kartta: aluksi tyylitelty synteettinen kartta; myöhemmin MapLibre GL JS ja asianmukaisesti lisensoitu karttatiilipalvelu.
-- Visuaalit: SVG/Canvas ja tarvittaessa kevyet WebGL-efektit; suorituskyky mitataan oikealla Android-puhelimella.
-- Äänet: Web Audio API; vähintään myös äänetön/visuaalinen pelitapa.
-- Tallennus: IndexedDB, paikalliset saavutukset, asetukset ja muutokset; versioitu skeema.
-- Sijainti: ensin valinnainen foreground-GPS, ei lupauksia suljetun PWA:n taustasijainnista.
-
-### Vaihe B — rajattu yhteinen maailma
-- Esimerkkivaihtoehto: Supabase Postgres + PostGIS (julkiset nodit, spatiaalikyselyt), RLS/suljetut palvelinoperaatiot ja Cron/Edge Functions (viivästetyt purskeet).
-- Kaikki julkiset vaikutukset lasketaan palvelinpuolella: vastaanoton rajaus, deduplikointi, cooldown, riittävän monen riippumattoman osallistujan vähimmäisraja, viive ja väärinkäytön esto.
-- Tietoturvan uhkamalli tarkistetaan ennen ensimmäistä julkista synkronointia. "Nimetön" ei tarkoita automaattisesti, ettei yksittäistä pelaajaa voida päätellä.
-- Backend on tekninen ehdotus, ei valittu sopimus eikä luotu palvelu.
-
-### Vaihe C — natiivikuori vain todettuun tarpeeseen
-- Jos opt-in-matkakaiku vaatii sijaintia taustalla, tutkitaan Capacitor-paketointi Androidille ensin ja tarvittaessa iOS:lle.
-- Capacitorin tavallinen Geolocation-plugin ei suoraan tarjoa taustapaikannusta; se vaatii erillisen natiivin ratkaisun, lupakäytännöt, akkukokeet ja sovelluskauppojen säännöt.
-- Taustapaikannus ei ole prototyypin edellytys. Ei oletusarvoista seurantaa.
-
-## 5. Tietosuojan suunnittelurajat
-
-1. Turvapaikkojen tarkat koordinaatit vain paikallisessa säilytyksessä, eivät osaksi julkisia linkkejä tai synkronoitavaa raakareittiä.
-2. Julkisiin nodeihin kohdistuvat vaikutukset eivät saa paljastaa kotia, työtä tai yksittäistä matkaketjua. Tarvitaan myös yksityisyyttä suojaava käsittely turvapaikkojen lähellä.
-3. GPS:n pyöristäminen ei yksin riitä anonymisoimaan liikettä. Suunnittele raportointitiheys, yhteenvetoalueet, viive, kynnysarvot, kyselyrajat ja tietojen poistaminen yhdessä.
-4. Cooldown ja "eri käyttäjiä" -ehto vaativat väärinkäyttöä kestäviä tunnisteita tai vastaavan mekanismin. Tätä ei voi luvata sekä täysin tunnisteettomaksi että huijausvarmaksi ilman suunnittelua.
-5. Pelaaja voi kieltäytyä sijaintiluvasta ja silti kokeilla pelin ydintä.
-6. Testeissä ei käytetä oikeita käyttäjien koti-/työ-/kulkureittitietoja.
-
-## 6. Ensimmäinen prototyyppi — tarkka laajuus
-
-**Tavoite:** testata, onko Majakka pelinä kiinnostava myös sohvalla, ei rakentaa kokonaista paikkatietopalvelua.
-
-- Kolme simuloitua aluetta: keskusta, pieni taajama ja harva maaseutu.
-- 15–30 synteettistä julkista nodia ja viisi erillistä yksityistä turvapaikkaa (testikoordinaatit).
-- 3–4 visuaalista noditilaa, mahdollisia yhteyksiä, yksi hidas purskemalli ja aikasiirto 7 päivän yli.
-- Vähintään kolme erilaista pienhaastetta samalla signaalikielellä; toistoja ja vaikeustasoja testataan, ei rakenneta vielä massatuotantoa.
-- Home/Explore-näkymät, alkuperäisen Majakka-tyylin mukainen käyttöliittymä, yksi hallittu animaatioketju ja kevyt äänimaailma.
-- Käyttäjän oma edistyminen säilyy reloadin yli ja toimii offline-tilassa (karttatiilien offline-ehtoja rikkomatta).
-
-**Hyväksymisportti ennen palvelinta:**
-- Pelaaja ymmärtää ensimmäisessä sessiossa, mitä tekee ja miksi.
-- Kolme lyhyttä sessiota eivät ole vain saman viritysrutiinin toistoa.
-- Harvan alueen simulaatio tuntuu mielekkäältä eikä rankaise paikallaan pysymisestä.
-- Visualisointi toimii sujuvasti oikealla Android-puhelimella, ja tärkeät tekstit ovat luettavia.
-- Turvapaikkojen erillisyys, offline-käytös ja tallennuksen säilyminen voidaan osoittaa testeillä.
-- Ulkoisen maailman toteutukseen EI edetä ennen kuin ydinkoukku on osoittanut lupaavuutta.
-
-## 7. Dokumentaatio ja QA
-
-- Tämä `APP-SPEC` on Majakan oma dokumentti, eikä muuta muiden sovellusten speksejä.
-- `GAME-LOOP-LAB.md`: testattavat pelisilmukat, hyväksymisehdot, käyttäjäpalautteen löydökset (luodaan kokeiden yhteydessä).
-- `PRIVACY-THREAT-MODEL.md`: ennen todellisen sijainnin yhteiskäyttöä (luodaan ennen vaihetta B).
-- Uutta yhteistä Playbook-versiota ei tarvita tällä hetkellä; yleispätevät opit voidaan lisätä myöhemmin delta-muutoksina.
-- `00_NOW`: lisää Majakka omaksi **konsepti/prototyyppi, ei tuotantoon** -riviksi, kun repositorio tai ensimmäinen testiversio todella syntyy.
-- Perus-Quality gate: yksi kanoninen testikomento; Node-yksikkötestit + Playwright-mobiili/sijaintikielto/offline; GitHub Actions; julkaisujen GO/NO-GO Playbookin mukaan.
-- Toimitus mobiilityönkulkuun: vain muuttuneet GitHub-tiedostot ja niiden tarkat polut; `.js`/`.ts` tarvittaessa ZIPinä.
-
-## 8. Päätettävät kysymykset
-
-1. Onko 2–5 minuutin kuuntelu-/logiikkatoiminto aidosti hauskempaa kuin rutiiniviritys?
-2. Mikä on merkityksellinen pelaajan valinta, jonka seuraus näkyy myöhemmin?
-3. Miten yksinpelaaja etenee, jos muita pelaajia ei ole lähialueella?
-4. Mikä on opt-in-matkakaiun minimiseuranta ja sallittu virrankulutus?
-5. Millainen musiikillinen rakenne skaalautuu yhdestä nodista kaupungin sinfoniaan?
-
-## 9. Viralliset tekniset lähteet (tarkistettu 24.10.2026)
-
-- MapLibre GL JS: https://maplibre.org/maplibre-gl-js/docs/
-- Capacitor: https://capacitorjs.com/docs
-- Capacitor geolocation: https://next.capacitorjs.com/docs/apis/geolocation
-- Supabase PostGIS: https://supabase.com/docs/guides/database/extensions/postgis
-- Supabase Cron: https://supabase.com/docs/guides/cron
-- OpenStreetMap tile usage: https://operations.osmfoundation.org/policies/tiles/
-- Android background location guidance: https://support.google.com/googleplay/android-developer/answer/9799150
-
-**Tarkastettu / Validated:** tämä on keskustelussa vahvistettujen periaatteiden ja erikseen merkittyjen teknisten ehdotusten johdonmukainen lähtödokumentti, ei toteutus- tai testiraportti.
+1. Actual Android PWA test on deployed URL; inspect online real-map tiles, text and click hit targets, and offline shell.
+2. Validate whether the first field awakening actually feels like interacting with Tampere geography; collect qualitative feedback.
+3. Decide if collecting and spending Lumen is interesting for more than a few minutes; don't add many minigames to mask a weak loop.
+4. Model anonymity, cross-user aggregation, protected areas, rate-limits and location abuse before implementing any real shared world.

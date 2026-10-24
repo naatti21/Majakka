@@ -1,62 +1,16 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import vm from 'node:vm';
-
-const source=readFileSync(new URL('../app.js',import.meta.url),'utf8');
-// Exercise deterministic domain logic without loading a web browser, network or storage.
-const code=source.replace(/\binit\(\);\s*$/,'')+'\n;globalThis.__test={AREAS,GLYPHS,getStrength,getNodeLevel,state,setState:s=>state=s,nodeById,inKnownNode,sanitize};';
-const context={Math,Number,Object,Array,String,console};
-vm.runInNewContext(code,context);
-const {AREAS,getStrength,getNodeLevel,setState,nodeById,inKnownNode,sanitize}=context.__test;
-const all=Object.values(AREAS).flatMap(area=>area.nodes);
-const saved=()=>({area:'harbor',selected:'h1',cycle:0,solved:{},anchors:{},journal:[],sound:false});
-
-test('three regions and 22 uniquely identified public nodes',()=>{
-  assert.equal(Object.keys(AREAS).length,3);
-  assert.equal(all.length,22);
-  assert.equal(new Set(all.map(n=>n[0])).size,all.length);
-});
-test('each region has public nodes without requiring other players',()=>{
-  for(const area of Object.values(AREAS))assert.ok(area.nodes.length>=7);
-});
-test('coordinates remain within safe map bounds',()=>{
-  for(const node of all){assert.ok(node[2]>=5&&node[2]<=95);assert.ok(node[3]>=5&&node[3]<=95);}
-});
-test('links always connect public-public nodes; beacon is never linked',()=>{
-  for(const area of Object.values(AREAS))for(const link of area.links){
-    assert.equal(link.length,2);
-    for(const index of link)assert.ok(Number.isInteger(index)&&index>=0&&index<area.nodes.length);
-    assert.notEqual(link[0],link[1]);
-  }
-});
-test('node strength never falls to zero after any simulated pulse',()=>{
-  for(const cycle of [0,1,5,20,100,1000]){
-    setState({...saved(),cycle});
-    for(const node of all)assert.ok(getStrength(node)>=.16);
-  }
-});
-test('restoration persists as positive strength, even when region falls quiet',()=>{
-  setState({...saved(),cycle:5});
-  const before=getStrength(nodeById('h1'));
-  setState({...saved(),cycle:5,solved:{h1:true}});
-  assert.ok(getStrength(nodeById('h1'))>before);
-});
-test('signal challenges provide memory, pattern and phase variants',()=>{
-  const kinds=new Set(all.map(n=>n[5]%3));
-  assert.deepEqual([...kinds].sort(),[0,1,2]);
-});
-test('state load rejects unknown node IDs, malformed area and inflated cycles',()=>{
-  const bad=sanitize({area:'oops',selected:'fake',cycle:999999,solved:{fake:true,h2:true}});
-  assert.equal(bad.area,'harbor');assert.equal(bad.selected,'h1');assert.equal(bad.cycle,1000);
-  assert.equal(bad.solved.h2,true);assert.equal(bad.solved.fake,undefined);
-  assert.equal(inKnownNode('fake'),false);
-});
-test('saved state never loads the selection from another region',()=>{
-  const s=sanitize({area:'wild',selected:'h1'});
-  assert.equal(s.area,'wild');assert.equal(s.selected,'w1');
-});
-test('no application code requests real GPS or remote services',()=>{
-  assert.doesNotMatch(source,/navigator\.geolocation|watchPosition|fetch\s*\(/);
-  assert.doesNotMatch(readFileSync(new URL('../index.html',import.meta.url),'utf8'),/https?:\/\//);
-});
+import C from '../core.js';
+const id=C.NODES.map(n=>n.id);
+test('three geographically placed demo nodes are distinct and public',()=>{assert.equal(C.NODES.length,3);assert.equal(new Set(id).size,3);assert.ok(C.NODES.every(n=>n.lat>61.49&&n.lat<61.51&&n.lng>23.75&&n.lng<23.78));});
+test('distance is geographic and does not penalize inactivity',()=>{const d=C.distanceMeters(C.NODES[0],C.NODES[0]);assert.equal(d,0);assert.equal(C.proximity(d),'near');assert.equal(C.proximity(150),'faint');assert.equal(C.proximity(700),'distant');});
+test('quiet collection works from couch once per pulse',()=>{const s=C.blank();s.lumen=0;assert.equal(C.quietCollect(s).gain,2);assert.equal(C.quietCollect(s).ok,false);C.pulse(s);assert.equal(C.quietCollect(s).gain,2);});
+test('demo walk harvests once per node and pulse',()=>{const s=C.blank();s.lumen=0;assert.equal(C.visit(s,id[0]).gain,4);assert.equal(C.visit(s,id[0]).gain,0);C.pulse(s);assert.equal(C.visit(s,id[0]).gain,2);});
+test('first discovery is permanent',()=>{const s=C.blank();C.visit(s,id[0]);assert.deepEqual(s.discovered,[id[0]]);C.pulse(s);C.visit(s,id[0]);assert.deepEqual(s.discovered,[id[0]]);});
+test('attunement consumes Lumen and proximity changes effect',()=>{const s=C.blank();s.lumen=10;assert.equal(C.attune(s,id[0]).ok,false);C.visit(s,id[0]);const near=C.attune(s,id[0]);assert.equal(near.gain,2);const before=s.lumen;C.visit(s,id[1]);const distant=C.attune(s,id[0]);assert.equal(distant.gain,1);assert.equal(s.lumen,Math.min(C.MAX_LUMEN,before+4)-C.ATTUNE_COST);});
+test('world does not reveal pending changes until a pulse',()=>{const s=C.blank();C.visit(s,id[0]);C.attune(s,id[0]);assert.equal(s.world[id[0]],undefined);assert.equal(C.edges(s).length,0);C.pulse(s);assert.equal(s.world[id[0]],2);});
+test('two awakened nodes create link, third forms field only after pulse',()=>{const s=C.blank();for(const node of C.NODES){C.visit(s,node.id);C.attune(s,node.id);}assert.equal(C.edges(s).length,0);assert.equal(s.field,false);const p=C.pulse(s);assert.equal(p.newEdges,3);assert.equal(p.fieldOpen,true);assert.equal(s.field,true);});
+test('no loss of previously stabilized nodes on quiet pulses',()=>{const s=C.blank();for(const n of C.NODES){C.visit(s,n.id);C.attune(s,n.id);}C.pulse(s);for(let i=0;i<100;i++)C.pulse(s);assert.equal(s.field,true);assert.equal(C.edges(s).length,3);});
+test('no remote attunement of undiscovered node',()=>{const s=C.blank();assert.equal(C.attune(s,id[1]).ok,false);});
+test('load sanitizes tampered state and rejects out of bounds position',()=>{const s=C.sanitize({schema:2,player:{lat:0,lng:0},selected:'bogus',lumen:100000,discovered:['bogus',id[0]],world:{bogus:999,id0:100},field:true,cycle:900000});assert.equal(s.lumen,C.MAX_LUMEN);assert.equal(s.selected,id[0]);assert.deepEqual(s.player,C.START);assert.equal(s.field,false);assert.deepEqual(s.discovered,[id[0]]);});
+test('v0.1 state cannot overwrite first-light state',()=>assert.deepEqual(C.sanitize({area:'harbor',cycle:23}),C.blank()));

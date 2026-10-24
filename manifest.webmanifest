@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Majakka — Restore the Light",
+  "name": "MAJAKKA — First Light",
   "short_name": "Majakka",
-  "description": "A quiet world, slowly returning to harmony. Offline-first local prototype.",
+  "description": "First Light v0.2 — an atmospheric local world prototype.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
