@@ -71,3 +71,12 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - New service worker caches only own app shell network-first, preserving local game state; external tile requests are never intercepted/prefetched.
 - Geographic projection round-trip checked with five cross-world coordinate samples.
 - **Remote tile delivery and real Android device after this patch remain unverified**. The test plan is to check streets and swipe/pinch, then GPS recenter. Tile provider failures are visible after 12 seconds.
+
+
+## v0.3.6 — Nocturne visual pass
+
+- Changed/new assets only: `nocturne.css`, `index.html` (load link), `sw.js` (cache bump), README and QA log.
+- No changes to raster-map.js, core.js, app.js, live-field.js or related gameplay rules.
+- CSS declarations/blocks have balanced braces; references and script order checked.
+- No new third-party scripts, fonts or tile providers; OSM copyright attribution retained.
+- **No Android screenshot or on-device FPS measurement yet.** Check zoomed-in road legibility, labels, live GPS marker, muted forest/highway palette and halo contrast outdoors.
