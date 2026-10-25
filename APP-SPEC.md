@@ -46,3 +46,8 @@
 2. Validate whether the first field awakening actually feels like interacting with Tampere geography; collect qualitative feedback.
 3. Decide if collecting and spending Lumen is interesting for more than a few minutes; don't add many minigames to mask a weak loop.
 4. Model anonymity, cross-user aggregation, protected areas, rate-limits and location abuse before implementing any real shared world.
+
+
+### v0.3.1 — Live Field test gate (25 Oct 2026)
+
+Optional browser geolocation only, 12-minute foreground session with manual stop. No saved track, no real generated POIs, no multiplayer or shared contributions, and Tampere demo nodes hidden during live mode. At most two scan and three conservative movement Lumen rewards per session, subject to accuracy, cooldown and speed gates. Requires secure context, permission and live map tile delivery. Browser E2E and actual Android field test remain open. Keep future real POI safety and privacy architecture separate from this test.

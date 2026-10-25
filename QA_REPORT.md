@@ -27,3 +27,13 @@
 - Browser micro-fixture (390 × 844): edge-node actions opened; anomaly selection opened separate edge controls; spend and world-pulse interactions responded. This is a **mock harness**, not full Pages or Android end-to-end QA.
 - Real-world map loading, GPS, audio playback, Android and Cloudflare deployment: **not verified** in this update.
 - All cooperative-looking mechanics remain isolated **single-device demonstration**. No shared user contributions, live data or actual safety guarantee was tested.
+
+
+## v0.3.1 — opt-in live trial
+
+- New isolated GPS pure core and foreground session UI; maps follow a real location only after user gesture and permission.
+- Automated new core tests: **7/7 PASS** (fix validation, distance, jitter rejection, movement cooldown/cap, speed, scan limits).
+- JavaScript syntax checks passed for new live scripts.
+- Browser harness was attempted but blocked by the testing environment (`ERR_BLOCKED_BY_ADMINISTRATOR`) before page load: **browser E2E NOT VERIFIED**.
+- Actual Android GPS permission, map tiles, Pages deployment and phone ergonomics: **NOT RUN** at authoring time.
+- Privacy caveat: viewed-area tile requests still go to map provider. GPS positions are RAM-only; no tracking in the background.

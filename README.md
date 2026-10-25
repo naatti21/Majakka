@@ -58,3 +58,12 @@ No Ingress-style factions, no streaks, no activity-based loss, no competitive le
 - Small ↻ button advances the artificial world pulse; reset clears the local trial state. Existing Harmony and Memory views remain optional.
 
 **Not implemented:** actual GPS proximity, background travel recording, remote shared pool, player-safe publish thresholds, server-side anti-cheat, real moving corruption. These remain design and security gates, not implied live functions.
+
+
+## Live field trial — v0.3.1 (foreground only)
+
+A new **◎ LIVE** button enables a voluntary 12-minute GPS test through the browser. Nothing requests location before the user taps this control. On a fresh fix the map follows the user's location and draws a local sonde marker. The Tampere demo nodes, rift and field are hidden while live mode is active to avoid presenting simulated locations as real-world sites. Tap **■ STOP** to end early. Switching apps / hiding the page also ends the location watcher. A later visit never restarts it automatically.
+
+**✧ Scan** offers up to two modest Lumen gains per live session with a cooldown; slow movement may offer up to three more, subject to accuracy, distance, time and speed gates. These are test economics, not live public-world contributions. No GPS coordinate or trail is saved to IndexedDB/localStorage, and no coordinates are sent to a Majakka game server. The third-party map tile provider can infer the viewed region from tile requests. Location stays in RAM during this short trial; only the existing Lumen balance can change. No real public nodes or GPS-backed visits are implemented. GPS needs HTTPS and browser permission. If map tiles fail, the location experience is incomplete.
+
+Run `node --test tests/live-core.test.mjs` for the pure GPS distance and reward gating tests. Real-device permission and map tracking are **not yet verified**.

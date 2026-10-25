@@ -1,0 +1,24 @@
+/* Opt-in foreground geolocation: keep the map center unobstructed. */
+#live-toggle{position:fixed;z-index:25;right:12px;top:calc(224px + env(safe-area-inset-top,0px));height:42px;min-width:66px;padding:0 10px;color:#d9f8f4;border:1px solid #6ad6c77d;border-radius:21px;background:#092635e8;box-shadow:0 5px 28px #0009;font-weight:700;font-size:11px;letter-spacing:.06em}
+#live-toggle[aria-pressed="true"]{background:#235a60;color:#e9fff6;box-shadow:0 0 15px #4fd4bf65}
+#live-readout{position:fixed;left:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:22;width:min(65vw,250px);padding:11px 12px;border-radius:13px;background:#081c2bef;border:1px solid #72d4c36a;box-shadow:0 11px 30px #0007;backdrop-filter:blur(13px);font-size:11px;line-height:1.45;color:#d5eae9;pointer-events:none}
+#live-readout strong{display:block;color:#84e2d5;letter-spacing:.06em;font-size:11px;margin-bottom:3px}
+#live-readout small{display:block;font-size:9px;opacity:.85;margin-top:5px}
+#live-scan{position:fixed;z-index:23;right:12px;bottom:calc(91px + env(safe-area-inset-bottom,0px));min-width:102px;min-height:44px;border-radius:23px;padding:8px 12px;border:1px solid #f0ca846b;background:#143441f5;color:#f2dbad;font-size:11px;font-weight:700;box-shadow:0 6px 25px #0008}
+#live-scan:disabled{opacity:.47}
+#live-person{position:absolute;width:22px;height:22px;border:3px solid #eafff8;border-radius:50%;background:#5cdbcf;box-shadow:0 0 0 8px #5cdbcf2d,0 0 25px #44eddd;transform:translate(-50%,-50%);pointer-events:none;z-index:14}
+#live-person::after{content:"";position:absolute;inset:-19px;border-radius:50%;border:1px dashed #b4fff397;animation:livebreathe 3s ease-in-out infinite}
+#live-person.sweeping::after{animation:livescan .85s ease-out 1}
+body.live-gps #world-markers,body.live-gps #field-layer,body.live-gps #hud-rift-markers{display:none!important}
+body.live-gps .map-bar .pulse-badge,body.live-gps #hud-world-pulse,body.live-gps #quiet-collect,body.live-gps #map-intro{display:none!important}
+body.live-gps .map-legend{bottom:calc(152px + env(safe-area-inset-bottom,0px));max-width:60vw}
+#live-readout[hidden],#live-scan[hidden],#live-person[hidden]{display:none!important}
+@keyframes livebreathe{50%{opacity:.5;transform:scale(1.12)}}
+@keyframes livescan{to{transform:scale(3.2);opacity:0}}
+@media(max-width:355px){#live-readout{width:58vw;padding:8px;font-size:10px}#live-scan{min-width:91px;padding:6px}}
+@media(prefers-reduced-motion:reduce){#live-person::after{animation:none}}
+
+/* Keep map attribution readable instead of covering it with the scan button. */
+body.live-gps .map-legend{display:none!important}
+body.live-gps .map-credit{bottom:calc(160px + env(safe-area-inset-bottom,0px))!important}
+body.live-gps .maplibregl-ctrl-bottom-right{bottom:calc(135px + env(safe-area-inset-bottom,0px))!important}
