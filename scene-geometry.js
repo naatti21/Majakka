@@ -7,7 +7,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const DEG=111320;
- const colors={quiet:'#69dcca',awake:'#efc984',rift:'#aa6cc9',restored:'#eec784',trial:'#6accbd',corrupted:'#6c667f',player:'#79e9e0',lumen:'#f2d18d'};
+ const colors={quiet:'#69dcca',awake:'#efc984',rift:'#aa6cc9',restored:'#eec784',trial:'#6accbd',corrupted:'#6c667f',distant:'#456f78',player:'#79e9e0',lumen:'#f2d18d'};
  function circle(point,meters,segments=24){
   if(!point||!Number.isFinite(point.lat)||!Number.isFinite(point.lng)||!Number.isFinite(meters)||meters<=0)throw new Error('Invalid geometry');
   const latRadius=meters/DEG,lngRadius=meters/(DEG*Math.max(.08,Math.cos(point.lat*Math.PI/180))),coords=[];
@@ -28,8 +28,8 @@
     continue;
    }
    const main=kind==='player',rift=kind==='rift',restored=kind==='restored';
-   const radius=main?15:rift?38:kind==='trial'?21:27;
-   const tall=main?9:rift?40:restored?46:kind==='awake'?65:51;
+   const radius=main?15:rift?38:kind==='trial'?21:kind==='distant'?13:27;
+   const tall=main?9:rift?40:restored?46:kind==='awake'?65:kind==='distant'?21:51;
    ground.push(shape(p.id,'aura',p,radius,0,color));
    ground.push(shape(p.id,'footprint',p,radius*.43,0,color));
    shafts.push(shape(p.id,'light-shell',p,main?4.5:rift?8:9,tall,color));

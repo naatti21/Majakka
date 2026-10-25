@@ -88,3 +88,31 @@ body.journal-open #living-objective,body.field-open #living-objective{display:no
  background:#133847;border:1px solid #8bdbcd83;color:#c9f2e9;
  padding:8px 12px;min-height:38px;border-radius:13px;font:650 11px system-ui,sans-serif}
 body.journal-open #living-report{display:block}
+
+/* v0.6.1 — dispersed silhouettes and fully visual rhythm. */
+.living-point.distant{pointer-events:none!important;opacity:.46;filter:saturate(.55)}
+.living-point.distant i{width:10px;height:10px;border:1px solid #acc8cf;background:#507b8a;
+ box-shadow:0 0 0 10px #274a5e2a,0 0 16px #5d89965b}
+.living-point.distant span{display:none}
+.living-rhythm-track{position:relative;width:100%;height:48px;margin:8px 0 5px;
+ background:linear-gradient(90deg,#13303e,#204c59,#13303e);
+ border:1px solid #8abfbd77;border-radius:15px;overflow:hidden}
+.living-rhythm-track::before,.living-rhythm-track::after{
+ content:"";position:absolute;top:0;bottom:0;width:1px;background:#8dbbbb42}
+.living-rhythm-track::before{left:25%}.living-rhythm-track::after{left:75%}
+.living-rhythm-gate{position:absolute;left:50%;top:0;bottom:0;width:16%;
+ transform:translateX(-50%);background:#eec78c22;
+ border-left:2px solid #efd49f;border-right:2px solid #efd49f;
+ box-shadow:inset 0 0 12px #f5d6a348}
+.living-rhythm-marker{position:absolute;top:5px;left:0;width:17px;height:37px;z-index:2;
+ border-radius:9px;transform:translateX(-50%);background:#84eddf;
+ border:1px solid #e8fff7;box-shadow:0 0 13px #6ce2d6b5;
+ pointer-events:none}
+.living-rhythm-track.in-window .living-rhythm-marker{background:#f6d9a1;box-shadow:0 0 15px #edd18ce0}
+.living-rhythm-caption{display:block;font-size:11px;letter-spacing:0;margin:5px 0;color:#bde1d9}
+.living-rhythm-count{font-size:18px;letter-spacing:.22em;color:#f4d69b;margin:9px 0}
+#living-answers .living-rhythm-alternative{font-size:11px;min-width:115px;color:#a6d9d5;
+ background:#1a3442;border-color:#527f88}
+.living-pattern-reference{font-size:12px;letter-spacing:.06em;color:#e1c38e;padding:5px 0}
+@media(max-width:370px){#living-answers .living-rhythm-alternative{min-width:90px;padding:0 5px}}
+@media(prefers-reduced-motion:reduce){.living-rhythm-marker{transition:none!important}}

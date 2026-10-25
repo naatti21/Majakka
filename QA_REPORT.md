@@ -117,3 +117,14 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - 3D beacons connect via geo-anchored arch segments with nonzero base and height (3D fill extrusions), no 3D ground connection lines. 2D retains curved path fallback.
 - Aggregate-only location-free per-day field diary and Memory copy/erase controls.
 - Pure logical/geographic and source syntax checked; **external WebGL/MapLibre layer validation and Android live trial remain untested**. If a device cannot render 3D arcs it must still be able to return to 2D.
+
+
+## v0.6.1 — User-tested cluster and silent-rhythm response
+
+- Replaced repeated, tight (under ~200 m) three-node clusters with deterministic seeded 300–750-m distributed points per stable region, plus eight visually dim and non-interactive neighbor-region echoes.
+- Remote-only node contributions now settle for 20 hours between contributions. Close-range GPS within 85 m may finish sooner. Persisted remote timestamps are added to the existing sanitized saved state; old state defaults to zero.
+- Rhythm now shows continuously moving cursor + center hit window, 3-beat visual success counter, and an untimed accessible pattern alternative. Sounds and vibration remain optional.
+- Preserved existing local region keys and progress; existing nodes shift map position due to changed layout.
+- New pure regional distribution/cooldown tests, JS parser checks and scripted UI smoke tests scheduled; physical Android feel and map rendering **not yet verified**.
+
+**Validated in Code Mode before commit:** 15/15 pure spatial/progression tests passed including multi-cell deterministic scatter, eight neighboring silhouettes and remote cooldown/bypass behavior. Silent rhythm UI mock passed five checks: visual rhythm built with clear button labels, successful three taps with sound off, progress persisted, no raw coordinate strings in stored data, animation frame cancelled on completion. New 3D and 2D rendering on actual Android **not yet tested**.

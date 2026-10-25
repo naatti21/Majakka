@@ -6,12 +6,14 @@ const home={lat:62.2415,lng:25.7482};
 test('virtual local preview has three independent nodes, one rift and six sparks',()=>{
  const w=C.positions(home);
  assert.equal(w.nodes.length,3);assert.equal(w.lumen.length,6);
- assert.ok(C.meters(home,w.rift)<200);
+ assert.ok(C.meters(home,w.rift)>200 && C.meters(home,w.rift)<430);
  assert.equal(new Set(w.nodes.map(x=>x.lat+':'+x.lng)).size,3);
 });
-test('all node distances are bounded, with one initially near node',()=>{
+test('nodes are distributed over a district, not clustered beside player',()=>{
  const w=C.positions(home),d=w.nodes.map(p=>C.meters(home,p));
- assert.ok(d.every(x=>x>20&&x<210));assert.ok(d.some(x=>x<=85));
+ assert.ok(d.every(x=>x>280&&x<800));
+ const distances=[[0,1],[0,2],[1,2]].map(([a,b])=>C.meters(w.nodes[a],w.nodes[b]));
+ assert.ok(distances.every(m=>m>450));
 });
 test('near location boosts node contribution and costs less',()=>{
  const w=C.positions(home),s=C.blank(),n=w.nodes[0];
@@ -82,4 +84,39 @@ test('weaving disallows locked endpoints, duplicate links and invalid IDs',()=>{
  assert.equal(C.weave(s,'echo-0','echo-2',{method:'lumen',lumen:0}).ok,false);
  assert.equal(C.weave(s,'echo-0','echo-2',{method:'decode'}).ok,true);
  assert.equal(C.weave(s,'echo-2','echo-0',{method:'decode'}).ok,false);
+});
+
+test('constellation orientation and names change deterministically by neighborhood',()=>{
+ const a=C.region(home),b=C.region({lat:home.lat+.025,lng:home.lng+.025});
+ const wa=C.positions(a.center),wb=C.positions(b.center);
+ assert.deepEqual(C.positions(a.center),wa);
+ assert.notDeepEqual(wa.nodes.map(n=>n.lng),wb.nodes.map(n=>n.lng));
+ assert.equal(wa.nodes.length,3);
+});
+test('eight neighbor-region echoes are visible but distinct and non-interactive',()=>{
+ const a=C.region(home),world=C.positions(a.center),outer=C.projection(C.blank(),world).outer;
+ assert.equal(outer.length,8);
+ assert.ok(outer.every(n=>n.id.startsWith('ambient-')&&n.kind==='distant'));
+ assert.ok(outer.filter(n=>C.meters(n,world.origin)>500).length>=5);
+ assert.deepEqual(outer,C.projection(C.blank(),world).outer);
+});
+test('remote node contributions need hours between pulses but remain playable from home',()=>{
+ const world=C.positions(home),s=C.blank(),n=world.nodes[0],now=1700000000000;
+ const first=C.contribute(s,{target:n.id,method:'decode',player:home,accuracy:8,lumen:0,world,now});
+ assert.equal(first.ok,true);assert.equal(first.gain,1);
+ C.pulse(s);
+ const repeat=C.contribute(s,{target:n.id,method:'decode',player:home,accuracy:8,lumen:0,world,now:now+600000});
+ assert.equal(repeat.ok,false);
+ const later=C.contribute(s,{target:n.id,method:'decode',player:home,accuracy:8,lumen:0,world,now:now+C.REMOTE_SETTLE_MS+1000});
+ assert.equal(later.ok,true);
+ C.pulse(s);assert.equal(s.nodes[0],2);
+});
+test('a real nearby signal can resolve a remote node without waiting a day',()=>{
+ const world=C.positions(home),s=C.blank(),n=world.nodes[0],now=1700000000000;
+ C.contribute(s,{target:n.id,method:'decode',player:home,accuracy:8,lumen:0,world,now});
+ C.pulse(s);
+ const stronger=C.contribute(s,{target:n.id,method:'lumen',player:n,accuracy:6,lumen:2,world,now:now+120000});
+ assert.equal(stronger.ok,true);
+ assert.equal(stronger.cost,2);
+ C.pulse(s);assert.equal(s.nodes[0],2);
 });

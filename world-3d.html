@@ -134,7 +134,7 @@ function drawPhysicalWorld(points){
          'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
  map.on('click','majakka-physical-hit',e=>{
   const id=e.features?.[0]?.properties?.id;
-  if(!id||id==='player')return;
+  if(!id||id==='player'||id.startsWith('ambient-'))return;
   if(mode==='live'){
    if(id==='veil')reply('live-rift-select');
    else if(id.startsWith('echo-'))reply('live-node-select',{id});
@@ -180,6 +180,7 @@ function showWorld(){
   points.push(...live.nodes);
   points.push(live.rift);
   points.push(...live.lumen);
+  points.push(...(live.outer||[]));
   if(live.interference>0&&live.rift.kind!=='restored'){
    const G=globalThis.MajakkaSceneGeometry;
    haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});

@@ -26,6 +26,7 @@ function sanitize(input){
  s.visited=Array.isArray(input.visited)?input.visited.filter(x=>/^echo-[0-2]$/.test(x)).slice(0,3):[];
  s.links=Array.isArray(input.links)?[...new Set(input.links.filter(x=>['0-1','0-2','1-2'].includes(x)))]:[];
  s.lastPulseAt=Math.min(Date.now(),Math.max(0,Number(input.lastPulseAt)||0));
+ s.remoteAt=[0,1,2].map(i=>Math.max(0,Math.min(Date.now(),Number(input.remoteAt?.[i])||0)));
  return s;
 }
 function saveProgress(){
@@ -113,7 +114,7 @@ function renderMap(){
  if(!world||!isActive()||document.body.classList.contains('perspective-ready')){layer.replaceChildren();return;}
  if(typeof map==='undefined'||!map||!mapReady)return;
  const data=L.projection(progress,world);
- const items=[...data.nodes,data.rift,...data.lumen];
+ const items=[...data.nodes,data.rift,...data.lumen,...(data.outer||[])];
  layer.replaceChildren();
  if(data.edges?.length){
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -155,10 +156,13 @@ function renderMap(){
   if(pt.x< -55||pt.x>innerWidth+55||pt.y< -55||pt.y>innerHeight+55)continue;
   const b=document.createElement('button');b.type='button';b.className='living-point '+p.kind;
   b.style.left=pt.x+'px';b.style.top=pt.y+'px';
-  b.setAttribute('aria-label',p.kind==='lumen'?'Collect Lumen preview':p.kind==='rift'||p.kind==='restored'?'Interference preview':p.name+' virtual node');
+  b.setAttribute('aria-label',p.kind==='lumen'?'Collect Lumen preview':p.kind==='rift'||p.kind==='restored'?'Interference preview':p.kind==='distant'?'Unexplored region signal':p.name+' virtual node');
   b.innerHTML='<i aria-hidden="true"></i>';
-  if(p.kind!=='lumen'){const text=document.createElement('span');text.textContent=p.name;b.appendChild(text);}
-  b.addEventListener('click',()=>p.kind==='lumen'?collect(p.id):choose(p.id));
+  if(p.kind!=='lumen'&&p.kind!=='distant'){const text=document.createElement('span');text.textContent=p.name;b.appendChild(text);}
+  if(p.kind==='distant'){
+   b.disabled=true;
+   b.title='An undiscovered region. This light is not a verified real-world point of interest.';
+  }else b.addEventListener('click',()=>p.kind==='lumen'?collect(p.id):choose(p.id));
   layer.appendChild(b);
  }
 }
@@ -174,7 +178,9 @@ function infoText(){
  const p=current(),distance=L.meters(position,p),near=L.near(position,p,accuracy);
  if(chosen==='veil')return 'INTERFERENCE · '+progress.rift+'/'+L.RIFT_TARGET+' · '+(progress.riftClear?'Restored':'Needs two world pulses');
  const i=world.nodes.findIndex(n=>n.id===chosen),n=progress.nodes[i];
- return (p.name.toUpperCase())+' · '+(near?'CLEAR':'FAINT')+' · '+Math.round(distance)+' m · '+(n>=2?'Awake':n+'/2 resonance');
+ const next=progress.remoteAt?.[i]&&Date.now()-progress.remoteAt[i]<L.REMOTE_SETTLE_MS;
+ const status=near?'CLEAR':next?'DISTANT · SETTLING':'FAINT';
+ return p.name.toUpperCase()+' · '+status+' · '+Math.round(distance)+' m · '+(n>=2?'Awake':n+'/2 resonance');
 }
 function pairKey(a,b){return [a.replace('echo-',''),b.replace('echo-','')].sort().join('-');}
 function openLinkOptions(){
@@ -214,8 +220,11 @@ function updateUI(){
   info.textContent=infoText();
   const done=chosen==='veil'?progress.riftClear:progress.nodes[world.nodes.findIndex(n=>n.id===chosen)]>=2;
   const pending=chosen==='veil'?progress.riftPending:Boolean(progress.pending[world.nodes.findIndex(n=>n.id===chosen)]);
-  by('living-spend').disabled=done||pending;
-  by('living-decode').disabled=done||pending;
+  const remoteCooling=chosen!=='veil'&&!L.near(position,p,accuracy)&&
+    Boolean(progress.remoteAt?.[world.nodes.findIndex(n=>n.id===chosen)])&&
+    Date.now()-progress.remoteAt[world.nodes.findIndex(n=>n.id===chosen)]<L.REMOTE_SETTLE_MS;
+  by('living-spend').disabled=done||pending||remoteCooling;
+  by('living-decode').disabled=done||pending||remoteCooling;
   by('living-weave').hidden=chosen==='veil'||!done;
   by('living-weave').disabled=chosen==='veil'||!done;
   by('living-spend').textContent='✧ '+(chosen==='veil'?'Stabilize':L.near(position,p,accuracy)?'Attune · 2':'Attune · 3');
@@ -266,7 +275,7 @@ function nextPulse(){
  redraw();updateUI();emit();positive(r.opened?'field':r.cleared?'clear':'pulse');
  message(r.reason+(gain?' ✧ +'+gain:'')+(r.opened?' · Fields '+counters.fields:'')+(r.cleared?' · Restorations '+counters.veils:''));
 }
-function cancel(){clearTimeout(stageTimer);challenge=null;by('living-challenge').hidden=true;}
+function cancel(){clearTimeout(stageTimer);challenge?.cleanup?.();challenge=null;by('living-challenge').hidden=true;}
 function startDecode(){
  if(!chosen||!world)return;
  cancel();
@@ -304,22 +313,66 @@ function startDecode(){
    button.addEventListener('click',()=>n===answer?success():failure());answers.appendChild(button);
   }
  }else{
-  // Three-beat cadence with visible time intervals. No sound necessary.
-  prompt.textContent='Pulse rhythm · tap three steady beats (about one per second)';
-  symbols.textContent='○  ○  ○';
-  const button=document.createElement('button');button.type='button';button.textContent='Tap';
-  const times=[];
-  button.addEventListener('click',()=>{
-   const now=performance.now();times.push(now);symbols.textContent='● '.repeat(times.length)+'○ '.repeat(3-times.length);
-   fb('decode');
-   if(times.length===3){
-    const a=times[1]-times[0],b=times[2]-times[1];
-    if(a>=600&&a<=1200&&b>=600&&b<=1200&&Math.abs(a-b)<220)success();
-    else failure();
+  // An entirely visible metronome. No hearing, vibration or remembered audio required.
+  prompt.textContent='Visual rhythm · tap when the moving light meets the center gate';
+  const track=document.createElement('div');track.className='living-rhythm-track';
+  const gate=document.createElement('span');gate.className='living-rhythm-gate';
+  const marker=document.createElement('span');marker.className='living-rhythm-marker';
+  gate.setAttribute('aria-hidden','true');marker.setAttribute('aria-hidden','true');
+  track.append(gate,marker);symbols.appendChild(track);
+  const caption=document.createElement('small');caption.className='living-rhythm-caption';
+  caption.textContent='Center gate · 0 of 3 beats';caption.setAttribute('aria-live','polite');symbols.appendChild(caption);
+  const indicator=document.createElement('div');indicator.className='living-rhythm-count';indicator.textContent='○ ○ ○';symbols.appendChild(indicator);
+  const button=document.createElement('button');button.type='button';button.textContent='TAP ON LIGHT';
+  const interval=1500,started=performance.now();let hits=0,lastCycle=-1,raf=0;
+  let phase=0;
+  const animate=(timestamp)=>{
+   if(!challenge||challenge.variant!==2)return;
+   phase=((timestamp-started)%interval)/interval;
+   marker.style.left=(phase*100)+'%';
+   const aligned=Math.abs(phase-.5)<=.17;
+   track.classList.toggle('in-window',aligned);
+   raf=requestAnimationFrame(animate);
+  };
+  const animateSafe=()=>{raf=requestAnimationFrame(animate);};
+  animateSafe();
+  const originalCancel=challenge;
+  challenge.cleanup=()=>cancelAnimationFrame(raf);
+  const untimed=document.createElement('button');untimed.type='button';
+  untimed.textContent='Untimed visual alternative';
+  untimed.className='living-rhythm-alternative';
+  untimed.addEventListener('click',()=>{
+   if(challenge!==originalCancel)return;
+   originalCancel.cleanup?.();originalCancel.cleanup=null;
+   track.remove();button.remove();untimed.remove();
+   prompt.textContent='Pattern reading · which cadence repeats the short–long–short motif?';
+   const motif=document.createElement('div');motif.className='living-pattern-reference';
+   motif.textContent='SHORT · LONG · SHORT';symbols.prepend(motif);
+   caption.textContent='Choose the matching pattern. No timer.';
+   indicator.textContent='▮ ▰ ▮';
+   for(const value of ['▮ ▮ ▰','▮ ▰ ▮','▰ ▮ ▮']){
+    const b=document.createElement('button');b.type='button';b.textContent=value;
+    b.setAttribute('aria-label',value==='▮ ▰ ▮'?'Short long short':'Different rhythm pattern');
+    b.addEventListener('click',()=>value==='▮ ▰ ▮'?success():failure());
+    answers.appendChild(b);
    }
   });
-  answers.appendChild(button);
-  const hint=document.createElement('small');hint.textContent='Count your own beat. You may use Lumen instead.';symbols.appendChild(hint);
+  button.addEventListener('click',()=>{
+   if(!challenge||challenge.variant!==2)return;
+   const elapsed=performance.now()-started;
+   const cycle=Math.floor(elapsed/interval),p=(elapsed%interval)/interval;
+   if(cycle===lastCycle)return; // only one accepted tap per sweep
+   if(Math.abs(p-.5)>.17){
+    caption.textContent='Watch the cyan dot reach the amber gate, then tap.';
+    fb('error');return;
+   }
+   lastCycle=cycle;hits++;fb('decode');
+   indicator.textContent='● '.repeat(hits)+'○ '.repeat(3-hits);
+   caption.textContent='Aligned · '+hits+' of 3 beats';
+   if(hits===3)success();
+  });
+  answers.append(button,untimed);
+
  }
 }
 by('living-spend').addEventListener('click',()=>apply('lumen'));
