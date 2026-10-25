@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const nodes=C.NODES;
 let state=C.blank(),db=null,map=null,mapReady=false,audioContext=null,toastTimer=0;
 
-function showMapStatus(message,retry=false){const status=$('map-load-status');if(!status)return;status.replaceChildren(document.createTextNode(message));status.hidden=false;if(retry){const btn=document.createElement('button');btn.type='button';btn.textContent='Retry map';btn.addEventListener('click',()=>{mapEngineFallbackUsed=false;startMap();});status.appendChild(btn);}}
+function showMapStatus(message,retry=false){const status=$('map-load-status');if(!status)return;status.replaceChildren(document.createTextNode(message));status.hidden=false;if(retry){const btn=document.createElement('button');btn.type='button';btn.textContent='Retry map';btn.addEventListener('click',()=>startMap());status.appendChild(btn);}}
 function clearMapStatus(){const status=$('map-load-status');if(status)status.hidden=true;}
 const fmt=n=>String(n).padStart(2,'0');
 const lookup=id=>nodes.find(n=>n.id===id);

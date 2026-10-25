@@ -11,7 +11,7 @@ self.addEventListener('fetch',event=>{
  event.respondWith((async()=>{
   try{
    const network=await fetch(request);
-   if(network.ok){caches.open(CACHE).then(cache=>cache.put(request,network.clone())).catch(()=>{});}
+   if(network.ok){const copy=network.clone();caches.open(CACHE).then(cache=>cache.put(request,copy)).catch(()=>{});}
    return network;
   }catch(error){
    const cached=await caches.match(request);
