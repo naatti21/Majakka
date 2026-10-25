@@ -88,3 +88,12 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - 2D raster engine and gameplay core unchanged. No new backend, real POI dataset, or saved GPS positions.
 - Standalone 3D module and controller parsed successfully; 2D/3D switching and error/timeout fallback code inspected.
 - Real Android rendering, two-finger rotate/tilt, 3D data/terrain availability and performance **NOT YET TESTED**. 3D mode is explicitly opt-in for that reason.
+
+
+## v0.4.1 — Device-feedback fix: perspective and gesture
+
+- User Android images confirm 3D map and preview lights operate, but fixed-pixel HTML beacons looked like stickers and scaled incorrectly against map depth.
+- Replaced demo and temporary live HTML beam markers with geographic polygons and map-native `fill-extrusion` volumes. Added `scene-geometry.js` pure geo helper and `tests/scene-geometry.test.mjs`.
+- Added **one-finger vertical tilt slider rail**; standard one-finger map panning unaffected.
+- Field fill and thread GeoJSON layers preserved, original gameplay and live GPS code unchanged.
+- Geometry and syntax validations conducted programmatically; new UI on actual Android **NOT YET VERIFIED**.

@@ -18,6 +18,9 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#061
 #message[hidden]{display:none}
 #pitch{position:absolute;z-index:12;right:9px;bottom:calc(156px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px}
 #pitch button{border:1px solid #92d9cf66;background:#0b2737e8;color:#ebf4ef;width:40px;height:40px;border-radius:50%;font-size:18px;box-shadow:0 5px 14px #0007}
+#tilt-slide{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;width:40px;height:108px;touch-action:none;user-select:none;border:1px solid #7dbfbb78;border-radius:23px;color:#d6f3ed;font-size:23px;background:linear-gradient(#123a46df,#0a2334ee);box-shadow:0 8px 22px #0008;cursor:ns-resize}
+#tilt-slide small{font-size:8px;letter-spacing:.08em;font-weight:750;color:#98cac4}
+#tilt-slide:focus-visible{outline:2px solid #f0ca87;outline-offset:3px}
 #hint{position:absolute;z-index:10;left:12px;top:calc(275px + env(safe-area-inset-top,0px));background:#081b29c9;color:#b9dbd8;padding:6px 9px;border-radius:9px;font-size:10px;pointer-events:none}
 #hint[hidden]{display:none}
 .beacon{position:relative;width:78px;height:92px;cursor:pointer;transform:translate(-50%,-10%);pointer-events:auto}
@@ -47,7 +50,8 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#061
 <div id="scene"></div>
 <div id="message">Preparing the 3D world…</div>
 <div id="hint">Use two fingers to rotate and tilt · Experimental 3D</div>
-<div id="pitch"><button id="steeper" type="button" title="Look toward horizon" aria-label="Tilt towards horizon">⇧</button><button id="flatter" type="button" title="Look from above" aria-label="Tilt towards overhead">⇩</button><button id="north" type="button" title="Face north" aria-label="Rotate north">N</button></div>
+<div id="pitch"><div id="tilt-slide" role="slider" tabindex="0" aria-label="Tilt map with one finger" aria-orientation="vertical" aria-valuemin="18" aria-valuemax="80" aria-valuenow="66">↕<small>TILT</small></div><button id="steeper" type="button" title="Look toward horizon" aria-label="Tilt towards horizon">⇧</button><button id="flatter" type="button" title="Look from above" aria-label="Tilt towards overhead">⇩</button><button id="north" type="button" title="Face north" aria-label="Rotate north">N</button></div>
+<script src="./scene-geometry.js?v=041"></script>
 <script type="module">
 const reply=(type,payload={})=>parent.postMessage({source:'majakka-3d',type,...payload},location.origin);
 const box=document.getElementById('message'),shown=(text)=>{box.textContent=text;box.hidden=false;};
@@ -82,39 +86,86 @@ function updateGeoJSON(id,features,type){
   }else map.addLayer({id:id+'-line',type:'line',source:id,paint:{'line-color':'#c4a670','line-width':2.5,'line-opacity':.8,'line-blur':1}});
  }
 }
+function addPhysicsSource(name,features){
+ const data={type:'FeatureCollection',features};
+ const src=map.getSource(name);
+ if(src)src.setData(data);
+ else map.addSource(name,{type:'geojson',data});
+}
+let physicsLayersReady=false;
+function drawPhysicalWorld(points){
+ const G=globalThis.MajakkaSceneGeometry;
+ if(!G)throw new Error('Missing first-party 3D light geometry');
+ const geo=G.build(points);
+ for(const [name,features] of Object.entries(geo))addPhysicsSource('majakka-physical-'+name,features);
+ if(physicsLayersReady)return;
+ const getColor=['get','color'];
+ map.addLayer({id:'majakka-ground',type:'fill',source:'majakka-physical-ground',
+  paint:{'fill-color':getColor,'fill-opacity':['match',['get','part'],'aura',.10,'footprint',.29,.1]}});
+ map.addLayer({id:'majakka-ground-rim',type:'line',source:'majakka-physical-ground',
+  filter:['==',['get','part'],'footprint'],
+  paint:{'line-color':getColor,'line-width':1.5,'line-opacity':.55}});
+ map.addLayer({id:'majakka-light-shell',type:'fill-extrusion',source:'majakka-physical-shafts',
+  filter:['==',['get','part'],'light-shell'],
+  paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],
+         'fill-extrusion-base':0,'fill-extrusion-opacity':.27}});
+ map.addLayer({id:'majakka-light-core',type:'fill-extrusion',source:'majakka-physical-shafts',
+  filter:['==',['get','part'],'light-core'],
+  paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],
+         'fill-extrusion-base':0,'fill-extrusion-opacity':.78}});
+ map.addLayer({id:'majakka-core-glow',type:'circle',source:'majakka-physical-cores',
+  paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,3,15,13,18,25],
+         'circle-opacity':.42,'circle-blur':.9,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+ map.addLayer({id:'majakka-core-spark',type:'circle',source:'majakka-physical-cores',
+  paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,1,15,3,18,6],
+         'circle-opacity':.95,'circle-blur':.1,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+ map.addLayer({id:'majakka-lumen-glow',type:'circle',source:'majakka-physical-lumens',
+  paint:{'circle-color':'#f4d994','circle-radius':['interpolate',['linear'],['zoom'],12,3,15,9,18,14],
+         'circle-opacity':.7,'circle-blur':.72,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+ map.addLayer({id:'majakka-lumen-spark',type:'circle',source:'majakka-physical-lumens',
+  paint:{'circle-color':'#ffe9b6','circle-radius':2.5,'circle-opacity':.9}});
+ // Transparent targets have stable 44px taps even though the physical beacons shrink toward the horizon.
+ map.addLayer({id:'majakka-physical-hit',type:'circle',source:'majakka-physical-targets',
+  paint:{'circle-radius':22,'circle-color':'#ffffff','circle-opacity':.01,
+         'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
+ map.addLayer({id:'majakka-lumen-hit',type:'circle',source:'majakka-physical-lumens',
+  paint:{'circle-radius':16,'circle-color':'#ffffff','circle-opacity':.01,
+         'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
+ map.on('click','majakka-physical-hit',e=>{
+  const id=e.features?.[0]?.properties?.id;
+  if(!id||id==='player')return;
+  if(id==='rift')reply('rift-select');
+  else if(id.startsWith('trial-'))reply('trial-node');
+  else if(mode==='demo'&&nodes.some(n=>n.id===id))reply('node-select',{id});
+ });
+ map.on('click','majakka-lumen-hit',()=>{if(mode==='live')reply('scan');});
+ physicsLayersReady=true;
+}
 function showWorld(){
  if(!map||!ready)return;
- document.getElementById('hint').textContent=mode==='live'?'TEST LIGHTS · temporary, not real places':'Two fingers: tilt & rotate · Tap light to interact';
+ document.getElementById('hint').textContent=mode==='live'?'PREVIEW LIGHTS · no real public nodes':'Drag ↕ to tilt · two fingers to rotate';
  clearMarkers();
- const features=[],lines=[];
+ const fieldFeatures=[],lines=[],points=[];
  if(mode==='demo'){
-  for(const n of nodes){
-   const awake=(world?.awake||[]).includes(n.id);
-   makeMarker(n,{awake,callback:()=>reply('node-select',{id:n.id})});
-  }
-  makeMarker({name:'Interference',lat:61.4966,lng:23.7646},{kind:'rift',awake:Boolean(world?.riftClear),callback:()=>reply('rift-select')});
-  if(world?.field){
-   features.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...nodes.map(n=>[n.lng,n.lat]),[nodes[0].lng,nodes[0].lat]]]},properties:{}});
-  }
+  for(const n of nodes)points.push({...n,kind:(world?.awake||[]).includes(n.id)?'awake':'quiet'});
+  points.push({id:'rift',name:'Interference',lat:61.4966,lng:23.7646,kind:world?.riftClear?'restored':'rift'});
+  if(world?.field)fieldFeatures.push({type:'Feature',
+    geometry:{type:'Polygon',coordinates:[[...nodes.map(n=>[n.lng,n.lat]),[nodes[0].lng,nodes[0].lat]]]},properties:{}});
   for(const [a,b] of (world?.edges||[])){
    const x=nodes.find(n=>n.id===a),y=nodes.find(n=>n.id===b);
    if(x&&y)lines.push({type:'Feature',geometry:{type:'LineString',coordinates:[[x.lng,x.lat],[y.lng,y.lat]]},properties:{}});
   }
  }else if(lastFix){
-  makeMarker({name:'You',...lastFix},{kind:'player'});
-  // Temporary visual anchors for testing depth; not real public nodes or POIs.
+  points.push({id:'player',name:'You',...lastFix,kind:'player'});
   const offsets=[[.0018,-.0018],[-.0017,.0019],[.0023,.0011]];
-  offsets.forEach(([dlat,dlng],i)=>{
-    makeMarker({name:'TEST LIGHT',lat:lastFix.lat+dlat,lng:lastFix.lng+dlng},{temporary:true,callback:()=>reply('trial-node')});
-  });
+  offsets.forEach(([dlat,dlng],i)=>points.push({id:'trial-'+i,name:'PREVIEW LIGHT',lat:lastFix.lat+dlat,lng:lastFix.lng+dlng,kind:'trial'}));
   for(let i=0;i<7;i++){
-   const offset=(i+1)*2.399963,lat=lastFix.lat+Math.sin(offset)*.0011,lng=lastFix.lng+Math.cos(offset)*.0021;
-   const e=document.createElement('div');e.className='lumen-speck';e.title='Simulated Lumen · tap to Scan';
-   e.setAttribute('aria-label','Scan nearby trial light');e.addEventListener('click',()=>reply('scan'));
-   markers.push(new lib.Marker({element:e,anchor:'center'}).setLngLat([lng,lat]).addTo(map));
+   const off=(i+1)*2.399963;
+   points.push({id:'lumen-'+i,kind:'lumen',lat:lastFix.lat+Math.sin(off)*.0011,lng:lastFix.lng+Math.cos(off)*.0021});
   }
  }
- updateGeoJSON('majakka-field',features,'field');
+ drawPhysicalWorld(points);
+ updateGeoJSON('majakka-field',fieldFeatures,'field');
  updateGeoJSON('majakka-threads',lines,'line');
 }
 function receive(data){
@@ -156,6 +207,36 @@ addEventListener('message',e=>{
 document.getElementById('steeper').addEventListener('click',()=>{if(map)map.easeTo({pitch:Math.min(80,map.getPitch()+12),duration:300});});
 document.getElementById('flatter').addEventListener('click',()=>{if(map)map.easeTo({pitch:Math.max(18,map.getPitch()-12),duration:300});});
 document.getElementById('north').addEventListener('click',()=>{if(map)map.easeTo({bearing:0,duration:500});});
+const tiltSlide=document.getElementById('tilt-slide');
+let tiltPointer=null,tiltLastY=0;
+const setPitch=(next)=>{
+ if(!map)return;
+ const value=Math.max(18,Math.min(80,next));
+ map.setPitch(value);
+ tiltSlide.setAttribute('aria-valuenow',String(Math.round(value)));
+};
+tiltSlide.addEventListener('pointerdown',e=>{
+ if(!map)return;
+ e.stopPropagation();e.preventDefault();
+ tiltPointer=e.pointerId;tiltLastY=e.clientY;
+ tiltSlide.setPointerCapture(e.pointerId);
+});
+tiltSlide.addEventListener('pointermove',e=>{
+ if(tiltPointer!==e.pointerId||!map)return;
+ e.preventDefault();e.stopPropagation();
+ setPitch(map.getPitch()+(tiltLastY-e.clientY)*.36);
+ tiltLastY=e.clientY;
+});
+const endTilt=e=>{if(tiltPointer===e.pointerId)tiltPointer=null;};
+tiltSlide.addEventListener('pointerup',endTilt);
+tiltSlide.addEventListener('pointercancel',endTilt);
+tiltSlide.addEventListener('keydown',e=>{
+ if(!map)return;
+ if(e.key==='ArrowUp'||e.key==='ArrowDown'){
+  e.preventDefault();setPitch(map.getPitch()+(e.key==='ArrowUp'?6:-6));
+ }
+});
+
 try {
  shown('Loading 3D engine…');
  try{lib=await import('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');}
@@ -172,7 +253,7 @@ try {
  map.touchZoomRotate.enableRotation();
  map.on('dragstart',()=>{userMoved=true;});
  map.on('load',()=>{
-  ready=true;hide();reply('ready');showWorld();
+  ready=true;try{showWorld();hide();reply('ready');}catch(error){console.warn('3D geometry unavailable',error);reply('error',{message:String(error?.message||error)});return;}
   // Enhancement only: loss of a terrain service must not blank the base map.
   try{
    if(typeof map.setSky==='function')map.setSky({'sky-color':'#07121d','horizon-color':'#203841','fog-color':'#12242e','sky-horizon-blend':.52,'horizon-fog-blend':.65});

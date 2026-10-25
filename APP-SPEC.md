@@ -56,3 +56,8 @@ Optional browser geolocation only, 12-minute foreground session with manual stop
 ### v0.4.0 3D prototype contract
 
 2D raster remains the dependable default and can be restored instantly. Opt-in 3D uses tilted/rotating vector tiles with optional terrain and building extrusions, simulated node depth and colored harmony fields. Any third-party failure restores 2D without deleting state. LIVE mode contains only temporary preview lights around user location until safe real public nodes and shared state are designed and implemented. User-facing copy must not claim true live multiplayer.
+
+
+### v0.4.1 depth corrections
+
+Optional 3D node effects use meter-based GeoJSON geometry and native map extrusion layers, not fixed-pixel floating HTML billboards. The beacon's ground ring and pillar must scale with camera altitude and pitch. Floating ambient particles may be subtle but should not misrepresent demo lights as real POIs. One-finger tilt is intentionally limited to a labelled right-edge touch rail so that default map panning stays reliable. Maintain immediate 2D fallback and no persistent location tracking.
