@@ -1,0 +1,38 @@
+/* MAJAKKA — peripheral map controls, no rising node sheet. */
+body.node-open #signal,body.interference-open #signal{display:none!important}
+body.node-open #demo-walk,body.node-open #attune,body.node-open #listen{display:block!important}
+body.interference-open #demo-walk,body.interference-open #attune,body.interference-open #listen{display:none!important}
+#hud-node-info,#hud-node-actions,#hud-rift-actions,#hud-rift-info,#hud-rhythm{position:fixed;z-index:21}
+#hud-node-info,#hud-rift-info{left:12px;bottom:calc(75px + env(safe-area-inset-bottom,0px));width:min(58vw,245px);border:1px solid #5d9d9a65;border-radius:12px;padding:10px 12px;background:#081a27e8;backdrop-filter:blur(16px);box-shadow:0 12px 45px #0009;pointer-events:none}
+#hud-node-info strong,#hud-rift-info strong{display:block;color:#e7f4f2;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hud-node-info small,#hud-rift-info small{display:block;color:#98b9c3;font-size:10px;margin-top:3px;line-height:1.3}
+#hud-node-actions,#hud-rift-actions{right:10px;bottom:calc(82px + env(safe-area-inset-bottom,0px));width:103px;display:flex;flex-direction:column;gap:7px;pointer-events:auto}
+#hud-node-actions button,#hud-rift-actions button{display:block;width:100%;min-height:43px!important;padding:7px 6px!important;border-radius:12px!important;background:#0a2633ed!important;border:1px solid #71d6cf66!important;color:#e9f3ef!important;font-size:10px!important;line-height:1.25!important;font-weight:650!important;letter-spacing:0!important;white-space:normal!important;box-shadow:0 2px 13px #03111b66}
+#hud-node-actions button:disabled,#hud-rift-actions button:disabled{opacity:.42!important}
+#hud-node-actions #attune,#hud-rift-actions #rift-spend{background:#b98b4bee!important;color:#081723!important;border-color:#e9c280!important}
+#hud-node-actions button span{display:none}
+#hud-rhythm{left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:27;background:#0b2332f8;border:1px solid #dcb66b8c;border-radius:16px;padding:13px;box-shadow:0 18px 60px #000c}
+#hud-rhythm[hidden],#hud-node-actions[hidden],#hud-node-info[hidden],#hud-rift-actions[hidden],#hud-rift-info[hidden]{display:none!important}
+#hud-rhythm h3{font-size:14px;margin:0 0 5px;color:#ebc681}
+#hud-rhythm p{font-size:11px;color:#bdcfd0;margin:0 0 10px;line-height:1.4}
+#hud-rhythm-display{font-size:21px;letter-spacing:8px;color:#f6d690;text-align:center;min-height:30px}
+#hud-rhythm-buttons{display:flex;justify-content:center;gap:12px;margin:10px 0}
+#hud-rhythm-buttons button{font-size:19px;width:55px;height:43px;border:1px solid #73bdba7c;border-radius:10px;background:#184050;color:#f1f5ee}
+#hud-rhythm-dismiss{background:transparent;border:0;color:#aabfc1;font-size:11px;padding:6px}
+#hud-rift-markers{position:absolute;inset:0;pointer-events:none;z-index:9}
+.rift-node{position:absolute;transform:translate(-50%,-50%);height:72px;width:72px;padding:0;border:0;border-radius:50%;pointer-events:auto;background:radial-gradient(circle,#190d2dc7 10%,#602d8e55 35%,transparent 71%);filter:drop-shadow(0 0 12px #8b44cf8c);display:grid;place-items:center;cursor:pointer}
+.rift-node::before{content:'';position:absolute;inset:8px;border:1px dashed #ac65e2be;border-radius:50%;animation:riftspin 16s linear infinite}
+.rift-node::after{content:'';width:19px;height:19px;border-radius:50%;background:#10081e;border:3px solid #9c59bd;box-shadow:0 0 0 9px #6e3aa936,0 0 24px #c169fb}
+.rift-node span{position:absolute;left:50%;top:65px;transform:translateX(-50%);font-size:10px;font-weight:600;white-space:nowrap;color:#dbbaf2;text-shadow:0 1px 5px #000,0 0 5px #000}
+.rift-node.restored{filter:drop-shadow(0 0 13px #f7c979);background:radial-gradient(circle,#89632e91,transparent 74%)}
+.rift-node.restored::before{border-color:#e9c479}.rift-node.restored::after{background:#f3cf87;border-color:#faf0d7;box-shadow:0 0 15px #e7a952}
+.node-marker.corrupted{filter:grayscale(.65) saturate(.6);opacity:.75}
+body.interference-open #hud-rift-actions,body.node-open #hud-node-actions{display:flex}
+body.interference-open #hud-rift-info,body.node-open #hud-node-info{display:block}
+#hud-rift-info{border-color:#a160d878}#hud-rift-info small{color:#ccacd9}
+#hud-rift-actions button{border-color:#af6cc65e!important}
+#hud-world-pulse{display:block!important;margin-top:68px!important;font-size:19px!important;color:#eaca83!important}
+body.interference-open #quiet-collect,body.interference-open .map-legend,body.interference-open .map-credit,body.interference-open #map-intro{display:none!important}
+@keyframes riftspin{to{transform:rotate(360deg)}}
+@media(max-width:350px){#hud-node-actions,#hud-rift-actions{width:92px;right:6px}#hud-node-info,#hud-rift-info{width:54vw;left:7px;padding:8px}}
+@media(prefers-reduced-motion:reduce){.rift-node::before{animation:none}}

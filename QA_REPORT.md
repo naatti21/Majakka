@@ -19,3 +19,11 @@
 - Spatial interaction is still simulated by a button; natural movement and hardware impact remain unexplored.
 
 **Validated:** locally for source code rules and fallback UI exercise, **not** for production deployment or on-device GPS behavior.
+
+
+## v0.3 UI + Interference trial — 25 Oct 2026
+
+- Local domain checks: 7/7 Node tests passed for cooldown, energy alternative, pending pulse, one-time reward, corrupted input and clear permanence.
+- Browser micro-fixture (390 × 844): edge-node actions opened; anomaly selection opened separate edge controls; spend and world-pulse interactions responded. This is a **mock harness**, not full Pages or Android end-to-end QA.
+- Real-world map loading, GPS, audio playback, Android and Cloudflare deployment: **not verified** in this update.
+- All cooperative-looking mechanics remain isolated **single-device demonstration**. No shared user contributions, live data or actual safety guarantee was tested.

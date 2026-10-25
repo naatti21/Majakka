@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import R from '../rift-core.js';
+test('starts dormant and finite',()=>{const s=R.blank();assert.equal(s.cleared,false);assert.equal(s.committed,0);});
+test('cooldown prevents repeated same-cycle contribution',()=>{const s=R.blank();assert.equal(R.contribute(s,{cycle:0,lumen:10,method:'lumen'}).cost,2);assert.equal(R.contribute(s,{cycle:0,lumen:10,method:'skill'}).ok,false);R.pulse(s);assert.equal(R.contribute(s,{cycle:0,lumen:10,method:'skill'}).ok,false);assert.equal(R.contribute(s,{cycle:1,lumen:10,method:'skill'}).ok,true);});
+test('skill and lumen routes have equal effect',()=>{const a=R.blank(),b=R.blank();R.contribute(a,{cycle:1,lumen:0,method:'skill'});R.contribute(b,{cycle:1,lumen:10,method:'lumen'});R.pulse(a);R.pulse(b);assert.equal(a.committed,b.committed);});
+test('cost and method validated',()=>{const s=R.blank();assert.equal(R.contribute(s,{cycle:0,lumen:0,method:'lumen'}).ok,false);assert.equal(R.contribute(s,{cycle:0,lumen:10,method:'cheat'}).ok,false);assert.equal(s.pending,0);});
+test('three cycles to clear; reward once only',()=>{const s=R.blank();for(let c=0;c<3;c++){R.contribute(s,{cycle:c,lumen:6,method:'lumen'});const result=R.pulse(s);assert.equal(result.reward,c===2?R.REWARD:0);}assert.equal(s.cleared,true);assert.equal(R.pulse(s).reward,0);assert.equal(R.contribute(s,{cycle:3,lumen:6,method:'skill'}).ok,false);});
+test('sanitize rejects inflated data and old versions',()=>{const s=R.sanitize({version:1,committed:100,pending:100,lastCycle:NaN,cleared:false,rewarded:true});assert.equal(s.committed,3);assert.equal(s.pending,0);assert.equal(s.cleared,true);assert.equal(R.sanitize({version:500}).committed,0);});
+test('progress commits only at delayed pulse',()=>{const s=R.blank();R.contribute(s,{cycle:4,lumen:2,method:'skill'});assert.equal(s.committed,0);assert.equal(s.pending,1);R.pulse(s);assert.equal(s.committed,1);assert.equal(s.pending,0);});

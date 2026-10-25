@@ -47,3 +47,14 @@ Real-map background uses **MapLibre GL JS 5.10.0** from jsDelivr and **OpenFreeM
 All progress stays on this device. No geolocation API is used. The optional map provider receives the map tile requests of the sample Tampere area when connected; see the provider's privacy policy. No private safe-space coordinates are used or shared.
 
 No Ingress-style factions, no streaks, no activity-based loss, no competitive leaderboards.
+
+
+## v0.3 — Perimeter HUD + Interference Trial (25 Oct 2026)
+
+- Node actions appear as narrow edge buttons and compact bottom information, leaving the map center usable.
+- One **local-only** violet interference zone gradually broadens its visual disturbance. It never deletes earned discoveries or world charge.
+- Stabilize once per simulated world pulse: spend 2 Lumen **or** solve an optional symbol-sequence challenge. Challenge length increases by local signal level; node decode is free at most once per node per cycle.
+- Three separated contributions restore the zone and grant one non-repeatable +3 Lumen reward. Demo does **not** simulate multiple real players or location tracking.
+- Small ↻ button advances the artificial world pulse; reset clears the local trial state. Existing Harmony and Memory views remain optional.
+
+**Not implemented:** actual GPS proximity, background travel recording, remote shared pool, player-safe publish thresholds, server-side anti-cheat, real moving corruption. These remain design and security gates, not implied live functions.
