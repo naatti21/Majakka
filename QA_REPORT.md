@@ -56,3 +56,8 @@
 - LIVE now programmatically selects World navigation when opened, so the Harmony panel no longer remains selected. When Harmony or Memory is opened intentionally, the GPS status and scan button are hidden until returning to World.
 - Live readout is smaller, the map stays at the currently viewed geography on STOP, and the sample Tampere node recenter is explicit.
 - JS syntax and patch contracts checked; actual Android after this fix remains **NOT TESTED**.
+
+
+## v0.3.4 — Emergency Android map regression rollback
+
+User reported total map failure after v0.3.3. Restored live-field.js and live-field.css from the last confirmed Android working commit (900db89), rather than stacking more speculative changes. Bumped PWA cache version to v0.3.4. GitHub source checks possible, Android retest remains open. Known old UX issues (GPS recenter, sheet overlap) are temporarily present; fix separately only after loading is confirmed.

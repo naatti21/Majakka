@@ -22,13 +22,3 @@ body.live-gps .map-legend{bottom:calc(152px + env(safe-area-inset-bottom,0px));m
 body.live-gps .map-legend{display:none!important}
 body.live-gps .map-credit{bottom:calc(160px + env(safe-area-inset-bottom,0px))!important}
 body.live-gps .maplibregl-ctrl-bottom-right{bottom:calc(135px + env(safe-area-inset-bottom,0px))!important}
-
-/* v0.3.3 — keep controls peripheral, and never stack GPS controls on a modal sheet. */
-#live-readout{width:min(54vw,208px)!important;padding:8px 10px!important;line-height:1.33!important;bottom:calc(76px + env(safe-area-inset-bottom,0px))!important}
-#live-readout strong{font-size:10px!important;margin-bottom:2px!important}
-#live-readout span{font-size:10px!important}
-#live-readout small{font-size:8px!important;margin-top:4px!important}
-#live-scan{bottom:calc(79px + env(safe-area-inset-bottom,0px))!important;min-height:42px!important}
-body.live-gps.field-open #live-readout,body.live-gps.field-open #live-scan,body.live-gps.journal-open #live-readout,body.live-gps.journal-open #live-scan,body.live-gps.node-open #live-readout,body.live-gps.node-open #live-scan{display:none!important}
-body.live-gps.field-open #live-person,body.live-gps.journal-open #live-person{opacity:.5}
-@media(max-width:355px){#live-readout{width:51vw!important}#live-scan{min-width:84px!important}}

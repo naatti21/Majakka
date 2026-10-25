@@ -77,3 +77,8 @@ MapLibre now loads before application initialization (`defer` instead of an asyn
 ## v0.3.3 — Foreground GPS map interaction fixes
 
 Live map now centers on the first accepted GPS position **once per opted-in session**, with no automatic following after that. Dragging before the first fix cancels even initial centering; tap the existing target (⌖) to explicitly recenter. Stopping LIVE does not jump the map back to Tampere: the target restores the demonstration view. Starting LIVE resets Harmony/Memory to World, and showing either panel later temporarily hides overlapping GPS readout/Scan controls. GPS info is shortened for a small screen. This fixes issues reported during the first real Android test.
+
+
+## v0.3.4 — restore last field-verified map configuration
+
+The previous GPS/HUD modification was rolled back after the user reported the map stopped loading. Restored live-field.js and live-field.css exactly from v0.3.2 (commit 900db89). All other v0.3.2 files remain in place. Service-worker cache version bumped to force a new app-shell installation. The previous recurring follow and Harmony overlap are known open issues; real-world map loading takes priority. **Phone retest required.**
