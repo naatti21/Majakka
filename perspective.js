@@ -29,7 +29,7 @@
   const awake=Array.isArray(C?.NODES)?C.NODES.filter(n=>(state.world[n.id]||0)>=C.CHARGE_TARGET).map(n=>n.id):[];
   let riftClear=false;
   try{riftClear=JSON.parse(localStorage.getItem('majakka-rift-local-v1')||'null')?.cleared===true;}catch{}
-  return {awake,edges:C.edges(state),field:state.field===true,riftClear};
+  return {awake,edges:C.edges(state),field:state.field===true,riftClear,live:globalThis.MajakkaLiving?.snapshot?.()||null};
  }
  function initial(){
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
@@ -54,7 +54,7 @@
   frame=document.createElement('iframe');frame.id='perspective-frame';frame.title='Majakka 3D perspective trial';
   frame.setAttribute('allow','fullscreen');
   // Same-origin iframe, no extra location permission. GPS supplied ephemerally by parent.
-  frame.src='./world-3d.html?v=041';
+  frame.src='./world-3d.html?v=050';
   viewport.appendChild(frame);
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
@@ -81,6 +81,10 @@
    if(currentMode()==='demo')document.querySelector('.rift-node')?.click();
   }else if(data.type==='scan'){
    if(currentMode()==='live')$('live-scan')?.click();
+  }else if(data.type==='live-node-select'||data.type==='live-rift-select'){
+   window.dispatchEvent(new CustomEvent('majakka:livingselect',{detail:{id:data.type==='live-rift-select'?'veil':data.id}}));
+  }else if(data.type==='live-lumen'){
+   window.dispatchEvent(new CustomEvent('majakka:livingcollect',{detail:{id:data.id}}));
   }else if(data.type==='trial-node'){
    if(typeof notify==='function')notify('This is a temporary visual test light, not a real public node.');
   }
@@ -92,6 +96,7 @@
  });
  window.addEventListener('majakka:livestart',()=>{if(ready)send('mode',{mode:'live'});});
  window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('mode',{mode:'demo'});});
+ window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
  // Sync after game actions without modifying the core game's pure rules.
  for(const id of ['attune','demo-walk','advance-pulse','rift-spend','rift-decode','hud-world-pulse','reset']){

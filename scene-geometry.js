@@ -7,7 +7,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const DEG=111320;
- const colors={quiet:'#69dcca',awake:'#efc984',rift:'#aa6cc9',restored:'#eec784',trial:'#6accbd',player:'#79e9e0',lumen:'#f2d18d'};
+ const colors={quiet:'#69dcca',awake:'#efc984',rift:'#aa6cc9',restored:'#eec784',trial:'#6accbd',corrupted:'#6c667f',player:'#79e9e0',lumen:'#f2d18d'};
  function circle(point,meters,segments=24){
   if(!point||!Number.isFinite(point.lat)||!Number.isFinite(point.lng)||!Number.isFinite(meters)||meters<=0)throw new Error('Invalid geometry');
   const latRadius=meters/DEG,lngRadius=meters/(DEG*Math.max(.08,Math.cos(point.lat*Math.PI/180))),coords=[];

@@ -20,7 +20,7 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#061
 #pitch button{border:1px solid #92d9cf66;background:#0b2737e8;color:#ebf4ef;width:40px;height:40px;border-radius:50%;font-size:18px;box-shadow:0 5px 14px #0007}
 #tilt-slide{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;width:40px;height:108px;touch-action:none;user-select:none;border:1px solid #7dbfbb78;border-radius:23px;color:#d6f3ed;font-size:23px;background:linear-gradient(#123a46df,#0a2334ee);box-shadow:0 8px 22px #0008;cursor:ns-resize}
 #tilt-slide small{font-size:8px;letter-spacing:.08em;font-weight:750;color:#98cac4}
-#tilt-slide:focus-visible{outline:2px solid #f0ca87;outline-offset:3px}
+#tilt-slide:focus-visible{outline:2px solid #f0ca87;outline-offset:3px}#pitch[hidden]{display:none!important}
 #hint{position:absolute;z-index:10;left:12px;top:calc(275px + env(safe-area-inset-top,0px));background:#081b29c9;color:#b9dbd8;padding:6px 9px;border-radius:9px;font-size:10px;pointer-events:none}
 #hint[hidden]{display:none}
 .beacon{position:relative;width:78px;height:92px;cursor:pointer;transform:translate(-50%,-10%);pointer-events:auto}
@@ -61,7 +61,7 @@ const nodes=[
  {id:'square',name:'Quiet Square',lat:61.49772,lng:23.76018},
  {id:'harbor',name:'Southern Lantern',lat:61.49422,lng:23.76218}
 ];
-let map=null,lib=null,world=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false;
+let map=null,lib=null,world=null,living=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false;
 const makeMarker=(point,{kind='node',awake=false,temporary=false,callback=()=>{}}={})=>{
  const el=document.createElement('div');
  el.className='beacon'+(awake?' awake':'')+(temporary?' temporary':'')+(kind==='rift'?' rift':'')+(kind==='player'?' player':'');
@@ -83,7 +83,8 @@ function updateGeoJSON(id,features,type){
   if(type==='field'){
    map.addLayer({id:id+'-fill',type:'fill',source:id,paint:{'fill-color':'#bb9559','fill-opacity':.19}});
    map.addLayer({id:id+'-outline',type:'line',source:id,paint:{'line-color':'#dfbd7c','line-width':2.5,'line-opacity':.78}});
-  }else map.addLayer({id:id+'-line',type:'line',source:id,paint:{'line-color':'#c4a670','line-width':2.5,'line-opacity':.8,'line-blur':1}});
+  }else if(type==='haze')map.addLayer({id:id+'-fill',type:'fill',source:id,paint:{'fill-color':'#392447','fill-opacity':.36}});
+  else map.addLayer({id:id+'-line',type:'line',source:id,paint:{'line-color':'#c4a670','line-width':2.5,'line-opacity':.8,'line-blur':1}});
  }
 }
 function addPhysicsSource(name,features){
@@ -134,18 +135,22 @@ function drawPhysicalWorld(points){
  map.on('click','majakka-physical-hit',e=>{
   const id=e.features?.[0]?.properties?.id;
   if(!id||id==='player')return;
+  if(mode==='live'){
+   if(id==='veil')reply('live-rift-select');
+   else if(id.startsWith('echo-'))reply('live-node-select',{id});
+   return;
+  }
   if(id==='rift')reply('rift-select');
-  else if(id.startsWith('trial-'))reply('trial-node');
-  else if(mode==='demo'&&nodes.some(n=>n.id===id))reply('node-select',{id});
+  else if(nodes.some(n=>n.id===id))reply('node-select',{id});
  });
- map.on('click','majakka-lumen-hit',()=>{if(mode==='live')reply('scan');});
+ map.on('click','majakka-lumen-hit',e=>{if(mode==='live'){const id=e.features?.[0]?.properties?.id;if(id)reply('live-lumen',{id});}});
  physicsLayersReady=true;
 }
 function showWorld(){
  if(!map||!ready)return;
- document.getElementById('hint').textContent=mode==='live'?'PREVIEW LIGHTS · no real public nodes':'Drag ↕ to tilt · two fingers to rotate';
+ document.getElementById('hint').textContent=mode==='live'?'VIRTUAL NODES · personal preview only':'Drag ↕ to tilt · two fingers to rotate';
  clearMarkers();
- const fieldFeatures=[],lines=[],points=[];
+ const fieldFeatures=[],lines=[],points=[],haze=[];
  if(mode==='demo'){
   for(const n of nodes)points.push({...n,kind:(world?.awake||[]).includes(n.id)?'awake':'quiet'});
   points.push({id:'rift',name:'Interference',lat:61.4966,lng:23.7646,kind:world?.riftClear?'restored':'rift'});
@@ -155,22 +160,32 @@ function showWorld(){
    const x=nodes.find(n=>n.id===a),y=nodes.find(n=>n.id===b);
    if(x&&y)lines.push({type:'Feature',geometry:{type:'LineString',coordinates:[[x.lng,x.lat],[y.lng,y.lat]]},properties:{}});
   }
+ }else if(living?.projection){
+  const live=living.projection;
+  points.push(...live.nodes);
+  points.push(live.rift);
+  points.push(...live.lumen);
+  if(live.interference>0&&live.rift.kind!=='restored'){
+   const G=globalThis.MajakkaSceneGeometry;
+   haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
+  }
+  if(lastFix)points.push({id:'player',name:'You',...lastFix,kind:'player'});
+  if(live.field&&live.nodes.length===3)fieldFeatures.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...live.nodes.map(n=>[n.lng,n.lat]),[live.nodes[0].lng,live.nodes[0].lat]]]},properties:{}});
+  for(const [a,b] of live.edges){
+    const x=live.nodes.find(n=>n.id===a),y=live.nodes.find(n=>n.id===b);
+    if(x&&y)lines.push({type:'Feature',geometry:{type:'LineString',coordinates:[[x.lng,x.lat],[y.lng,y.lat]]},properties:{}});
+  }
  }else if(lastFix){
   points.push({id:'player',name:'You',...lastFix,kind:'player'});
-  const offsets=[[.0018,-.0018],[-.0017,.0019],[.0023,.0011]];
-  offsets.forEach(([dlat,dlng],i)=>points.push({id:'trial-'+i,name:'PREVIEW LIGHT',lat:lastFix.lat+dlat,lng:lastFix.lng+dlng,kind:'trial'}));
-  for(let i=0;i<7;i++){
-   const off=(i+1)*2.399963;
-   points.push({id:'lumen-'+i,kind:'lumen',lat:lastFix.lat+Math.sin(off)*.0011,lng:lastFix.lng+Math.cos(off)*.0021});
-  }
  }
  drawPhysicalWorld(points);
+ updateGeoJSON('majakka-haze',haze,'haze');
  updateGeoJSON('majakka-field',fieldFeatures,'field');
  updateGeoJSON('majakka-threads',lines,'line');
 }
 function receive(data){
  if(data.type==='init'){
-  world=data.world||null;mode=data.mode==='live'?'live':'demo';
+  world=data.world||null;living=world?.live||null;mode=data.mode==='live'?'live':'demo';document.getElementById('pitch').hidden=false;
   if(data.fix)lastFix=data.fix;
   if(map&&ready){
    if(data.center&&Array.isArray(data.center))map.jumpTo({center:data.center,zoom:Math.max(13,data.zoom||15)});
@@ -188,7 +203,8 @@ function receive(data){
    if(!firstLiveCenter&&!userMoved)centerLive();
    showWorld();
   }
- }else if(data.type==='world'){world=data.world||{};if(ready&&mode==='demo')showWorld();}
+ }else if(data.type==='world'){world=data.world||{};living=world.live||living;if(ready)showWorld();}
+ else if(data.type==='living'){living=data.live||null;document.getElementById('pitch').hidden=Boolean(data.selected);if(ready&&mode==='live')showWorld();}
  else if(data.type==='recenter'){
   if(!map||!ready)return;
   if(mode==='live'&&lastFix)centerLive();

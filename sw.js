@@ -1,6 +1,6 @@
 /* Majakka v0.3.5: network-first app shell, cache only our own files, never third-party map tiles. */
-const CACHE='majakka-first-light-v0.4.1';
-const OWN=['./','./index.html','./styles.css','./map-shell.css','./map-hud-v0.3.css','./live-field.css','./nocturne.css','./perspective.css','./perspective.js','./world-3d.html','./scene-geometry.js','./raster-map.js','./core.js','./app.js','./map-shell.js','./rift-core.js','./map-hud-v0.3.js','./live-core.js','./live-field.js','./manifest.webmanifest','./assets/mark.svg','./assets/icon-192.png','./assets/icon-512.png'];
+const CACHE='majakka-first-light-v0.5.0';
+const OWN=['./','./index.html','./styles.css','./map-shell.css','./map-hud-v0.3.css','./live-field.css','./nocturne.css','./perspective.css','./perspective.js','./world-3d.html','./scene-geometry.js','./living-core.js','./living-world.js','./living-world.css','./raster-map.js','./core.js','./app.js','./map-shell.js','./rift-core.js','./map-hud-v0.3.js','./live-core.js','./live-field.js','./manifest.webmanifest','./assets/mark.svg','./assets/icon-192.png','./assets/icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('majakka-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));
 self.addEventListener('fetch',event=>{

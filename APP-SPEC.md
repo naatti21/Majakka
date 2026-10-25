@@ -61,3 +61,13 @@ Optional browser geolocation only, 12-minute foreground session with manual stop
 ### v0.4.1 depth corrections
 
 Optional 3D node effects use meter-based GeoJSON geometry and native map extrusion layers, not fixed-pixel floating HTML billboards. The beacon's ground ring and pillar must scale with camera altitude and pitch. Floating ambient particles may be subtle but should not misrepresent demo lights as real POIs. One-finger tilt is intentionally limited to a labelled right-edge touch rail so that default map panning stays reliable. Maintain immediate 2D fallback and no persistent location tracking.
+
+
+### Living World v0.5 constraints (25 Oct 2026)
+
+- LIVE permission only on user gesture, for a bounded foreground 12-minute session.
+- First sufficiently accurate fix defines three *virtual* private, unverified game coordinates and one local rift (no POI validation). They do not persist on device or server, are not safe walking directions and vanish on STOP.
+- Node contribution: near action costs 2 Lumen and contributes 2, farther action costs 3 and contributes 1. Both allow an optional decode substitute. Only one contribution to a node per world pulse. Awaken target 2. Three awakened nodes form one persistent-for-session geometric field.
+- Rift: two contributions across separate pulse cycles; one reward and permanently clear within the trial. Pulses dim nodes visually while unresolved but do not delete previous successes.
+- Resource economy: six collectible preview spark points per session (requires actual proximity), pre-existing scans and movement echoes; shared device-local daily ceiling of 12 earned Lumen including milestones. No geo info stored with aggregate counts.
+- Milestone counters are local-only. No authoritative anti-cheat or actual multiplayer until backend and privacy audit.

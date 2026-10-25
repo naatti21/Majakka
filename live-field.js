@@ -20,7 +20,8 @@
   gotFix=true;const prev=fix;fix=next;window.dispatchEvent(new CustomEvent('majakka:livefix',{detail:{lat:next.lat,lng:next.lng,accuracy:next.accuracy}}));
   if(!anchor&&next.accuracy<=65)anchor=next;
   if(L.canRewardMove(anchor,next,now,rewardAt,moveRewards)){
-    const gain=Math.min(1,C.MAX_LUMEN-state.lumen);if(gain){state.lumen+=gain;save();render();moveRewards+=1;rewardAt=now;tell('Movement resonance · ✧ +1 Lumen');}
+    const gain=globalThis.MajakkaLiving?.award?.(1,'movement')??Math.min(1,C.MAX_LUMEN-state.lumen);
+    if(gain){if(!globalThis.MajakkaLiving){state.lumen+=gain;save();render();}moveRewards+=1;rewardAt=now;tell('Movement resonance · ✧ +1 Lumen');}
     anchor=next;
   }
   if(typeof map!=='undefined'&&map&&typeof map.easeTo==='function'&&mapReady){
@@ -66,10 +67,10 @@
   if(!active||!gotFix||!fix){tell('Waiting for your location.');return;}
   const now=Date.now();if(!L.canScan(now,scanAt,scans)){tell('The local signal is settling. Try again later.');return;}
   scanAt=now;scans++;
-  const gain=Math.min(1,C.MAX_LUMEN-state.lumen);if(gain){state.lumen+=gain;save();render();}
+  const gain=globalThis.MajakkaLiving?.award?.(1,'scan')??Math.min(1,C.MAX_LUMEN-state.lumen);if(gain&&!globalThis.MajakkaLiving){state.lumen+=gain;save();render();}
   dot.classList.remove('sweeping');void dot.offsetWidth;dot.classList.add('sweeping');
   if(navigator.vibrate)navigator.vibrate(25);
-  tell(gain?'Local resonance gathered · ✧ +1 Lumen':'Scan complete. Your sonde is full.');
+  tell(gain?'Local resonance gathered · ✧ +1 Lumen':'Scan complete. No more charge available in this trial today.');
  });
  document.addEventListener('visibilitychange',()=>{if(active&&document.hidden)stop('Location paused when Majakka went into the background.');});
  window.addEventListener('pagehide',()=>{if(active)stop('Location ended.');});

@@ -97,3 +97,13 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - Added **one-finger vertical tilt slider rail**; standard one-finger map panning unaffected.
 - Field fill and thread GeoJSON layers preserved, original gameplay and live GPS code unchanged.
 - Geometry and syntax validations conducted programmatically; new UI on actual Android **NOT YET VERIFIED**.
+
+
+## v0.5.0 — Living World test gate
+
+- Pure `living-core.js`: tested three unique nearby virtual nodes, short-distance handling, poor GPS accuracy, once-per-cycle node contribution, two-stage veil restoration, field opening, one-time milestone rewards and lack of repeated farming within one session.
+- Same live world rendered in 2D with projected markers and shaded interference, in 3D with geo-anchored extrusions/field polygon and vector haze.
+- Live progress (coordinates, positions, selected target) remains session RAM only; personal aggregate counters and per-day earned amount are stored locally without location.
+- Existing 3D and 2D basemap implementations unchanged. LIVE and optional 3D still require mobile real-device verification.
+- Two optional choices per interaction: spend Lumen or perform a short memory-sequence decoding. Diverse minigame types and complete audiovisual feedback remain a separate quality milestone.
+- Avoid walking toward random virtual positions: this is an interface/gameplay trial only; there is no safe-place validation or public-node database.

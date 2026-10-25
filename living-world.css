@@ -1,0 +1,42 @@
+/* v0.5 Living World — peripheral HUD, no map-height sheets. */
+#living-ui[hidden],#living-info[hidden],#living-actions[hidden],#living-challenge[hidden]{display:none!important}
+#living-markers{position:absolute;inset:0;pointer-events:none;z-index:25}
+#living-ui{position:fixed;inset:0;z-index:28;pointer-events:none;font-family:system-ui,sans-serif}
+#living-ui button{touch-action:manipulation;cursor:pointer}
+.living-point{position:absolute;transform:translate(-50%,-50%);background:none;border:0;width:44px;height:44px;display:grid;place-items:center;padding:0;pointer-events:auto;color:#d7f5e9}
+.living-point i{display:block;width:15px;height:15px;border-radius:50%;background:#8fe4d6;border:2px solid #ddfff6;box-shadow:0 0 0 11px #68e2c72a,0 0 20px #78e6cc80}
+.living-point.awake i{background:#efc77b;box-shadow:0 0 0 13px #ecc88238,0 0 28px #eec174c2}
+.living-point.rift i{background:#160d24;border:3px solid #af7acf;box-shadow:0 0 0 13px #72439455,0 0 25px #ad68cf}
+.living-point.restored i{background:#f2ce91;border-color:#fff2ce}
+.living-point.lumen{width:36px;height:36px}
+.living-point.lumen i{width:7px;height:7px;background:#ffe1a9;border:0;box-shadow:0 0 10px 4px #d7ad696e}
+.living-point span{position:absolute;top:43px;left:50%;transform:translateX(-50%);color:#e6f4ed;font-size:10px;white-space:nowrap;text-shadow:0 1px 6px #000,0 0 8px #000}
+#living-pulse{position:fixed;left:12px;bottom:calc(257px + env(safe-area-inset-bottom,0px));z-index:28;pointer-events:auto;border:1px solid #efcb8075;border-radius:20px;padding:10px 12px;min-height:40px;background:#132c37eb;color:#f1d69c;font-size:11px;font-weight:750;box-shadow:0 7px 18px #0006}
+#living-info{position:fixed;z-index:29;bottom:calc(83px + env(safe-area-inset-bottom,0px));left:12px;max-width:min(52vw,230px);padding:9px 11px;background:#0a2330f3;border:1px solid #88d9cb70;border-radius:12px;line-height:1.45;color:#cfece7;font-size:11px;box-shadow:0 6px 27px #0008;pointer-events:none}
+#living-actions{position:fixed;right:10px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:29;width:104px;display:flex;flex-direction:column;gap:7px;pointer-events:auto}
+#living-actions button{width:100%;border:1px solid #8ed5c777;color:#e6f3ea;background:#103441f5;border-radius:12px;min-height:42px;padding:7px 5px;font-size:10px;font-weight:700}
+#living-actions #living-spend{background:#d5ad6a;color:#0c1b25;border-color:#f4d79a}
+#living-actions #living-close{align-self:flex-end;width:40px;height:37px;min-height:37px;border-radius:50%;font-size:18px}
+#living-actions button:disabled,#living-pulse:disabled{opacity:.46}
+#living-challenge{position:fixed;left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:33;pointer-events:auto;border:1px solid #e4c28194;background:#0a2333fb;border-radius:17px;padding:15px 13px;box-shadow:0 18px 48px #000c;text-align:center}
+#living-challenge strong{font-size:12px;color:#e9cc91}
+#living-symbols{min-height:38px;font-size:23px;color:#f2e1b9;letter-spacing:.17em;margin-top:14px}
+#living-answers{display:flex;gap:7px;justify-content:center;padding:10px 0}
+#living-answers button{background:#183f4c;color:#ebfff6;border:1px solid #7dcac080;border-radius:12px;width:50px;min-height:47px;font-size:20px}
+#living-cancel{border:0;background:transparent;color:#aac3c2;padding:8px}
+#living-status{position:fixed;z-index:27;bottom:calc(156px + env(safe-area-inset-bottom,0px));left:12px;max-width:58vw;background:#0b2735d9;border-radius:10px;color:#c5e1d9;padding:8px 10px;font-size:10px;line-height:1.35;pointer-events:none}
+#living-status:empty{display:none}
+body.living-selected #live-readout,body.living-selected #live-scan,body.living-selected #quiet-collect{display:none!important}
+body.live-gps.living-selected .field-card,body.live-gps.living-selected .journal-card{pointer-events:none}
+body.perspective-ready #living-markers{display:none!important}
+body.perspective-on #living-markers{display:none!important}
+body.perspective-ready #living-ui{z-index:30}
+@media(max-width:350px){#living-info{max-width:49vw;font-size:10px}#living-actions{width:94px}#living-pulse{bottom:calc(238px + env(safe-area-inset-bottom,0px))}}
+@media(prefers-reduced-motion:reduce){.living-point i{transition:none}}
+
+/* Rifts darken a geographic area rather than paint new permanent nodes. */
+.living-haze{position:absolute;transform:translate(-50%,-50%);pointer-events:none;border-radius:50%;
+ background:radial-gradient(circle,rgba(16,10,28,.53),rgba(49,23,72,.28) 54%,rgba(72,30,90,.09) 75%,transparent 98%);
+ box-shadow:inset 0 0 30px rgba(34,11,45,.2);}
+.living-point.corrupted i{background:#797487;border-color:#b8adcc;box-shadow:0 0 11px #70568875,0 0 0 11px #28223947}
+#living-status{display:none!important}
