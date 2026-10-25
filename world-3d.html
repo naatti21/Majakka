@@ -51,7 +51,7 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#061
 <div id="message">Preparing the 3D world…</div>
 <div id="hint">Use two fingers to rotate and tilt · Experimental 3D</div>
 <div id="pitch"><div id="tilt-slide" role="slider" tabindex="0" aria-label="Tilt map with one finger" aria-orientation="vertical" aria-valuemin="18" aria-valuemax="80" aria-valuenow="66">↕<small>TILT</small></div><button id="steeper" type="button" title="Look toward horizon" aria-label="Tilt towards horizon">⇧</button><button id="flatter" type="button" title="Look from above" aria-label="Tilt towards overhead">⇩</button><button id="north" type="button" title="Face north" aria-label="Rotate north">N</button></div>
-<script src="./scene-geometry.js?v=041"></script>
+<script src="./scene-geometry.js?v=041"></script><script src="./aerial-links.js?v=060"></script>
 <script type="module">
 const reply=(type,payload={})=>parent.postMessage({source:'majakka-3d',type,...payload},location.origin);
 const box=document.getElementById('message'),shown=(text)=>{box.textContent=text;box.hidden=false;};
@@ -146,11 +146,26 @@ function drawPhysicalWorld(points){
  map.on('click','majakka-lumen-hit',e=>{if(mode==='live'){const id=e.features?.[0]?.properties?.id;if(id)reply('live-lumen',{id});}});
  physicsLayersReady=true;
 }
+let aerialLayersReady=false;
+function drawAerialLinks(pairs){
+ const A=globalThis.MajakkaAerialLinks;if(!A)return;
+ const geo=A.build(pairs);
+ for(const name of ['halo','core'])addPhysicsSource('majakka-aerial-'+name,geo[name]);
+ if(aerialLayersReady)return;
+ map.addLayer({id:'majakka-aerial-glow',type:'fill-extrusion',source:'majakka-aerial-halo',
+  paint:{'fill-extrusion-color':['get','color'],'fill-extrusion-base':['get','base'],
+    'fill-extrusion-height':['get','height'],'fill-extrusion-opacity':.26,
+    'fill-extrusion-vertical-gradient':true}});
+ map.addLayer({id:'majakka-aerial-core',type:'fill-extrusion',source:'majakka-aerial-core',
+  paint:{'fill-extrusion-color':['get','color'],'fill-extrusion-base':['get','base'],
+    'fill-extrusion-height':['get','height'],'fill-extrusion-opacity':.70}});
+ aerialLayersReady=true;
+}
 function showWorld(){
  if(!map||!ready)return;
  document.getElementById('hint').textContent=mode==='live'?'VIRTUAL NODES · personal preview only':'Drag ↕ to tilt · two fingers to rotate';
  clearMarkers();
- const fieldFeatures=[],lines=[],points=[],haze=[];
+ const fieldFeatures=[],lines=[],points=[],haze=[],arcPairs=[];
  if(mode==='demo'){
   for(const n of nodes)points.push({...n,kind:(world?.awake||[]).includes(n.id)?'awake':'quiet'});
   points.push({id:'rift',name:'Interference',lat:61.4966,lng:23.7646,kind:world?.riftClear?'restored':'rift'});
@@ -158,7 +173,7 @@ function showWorld(){
     geometry:{type:'Polygon',coordinates:[[...nodes.map(n=>[n.lng,n.lat]),[nodes[0].lng,nodes[0].lat]]]},properties:{}});
   for(const [a,b] of (world?.edges||[])){
    const x=nodes.find(n=>n.id===a),y=nodes.find(n=>n.id===b);
-   if(x&&y)lines.push({type:'Feature',geometry:{type:'LineString',coordinates:[[x.lng,x.lat],[y.lng,y.lat]]},properties:{}});
+   if(x&&y)arcPairs.push([x,y]);
   }
  }else if(living?.projection){
   const live=living.projection;
@@ -173,12 +188,13 @@ function showWorld(){
   if(live.field&&live.nodes.length===3)fieldFeatures.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...live.nodes.map(n=>[n.lng,n.lat]),[live.nodes[0].lng,live.nodes[0].lat]]]},properties:{}});
   for(const [a,b] of live.edges){
     const x=live.nodes.find(n=>n.id===a),y=live.nodes.find(n=>n.id===b);
-    if(x&&y)lines.push({type:'Feature',geometry:{type:'LineString',coordinates:[[x.lng,x.lat],[y.lng,y.lat]]},properties:{}});
+    if(x&&y)arcPairs.push([x,y]);
   }
  }else if(lastFix){
   points.push({id:'player',name:'You',...lastFix,kind:'player'});
  }
  drawPhysicalWorld(points);
+ drawAerialLinks(arcPairs);
  updateGeoJSON('majakka-haze',haze,'haze');
  updateGeoJSON('majakka-field',fieldFeatures,'field');
  updateGeoJSON('majakka-threads',lines,'line');

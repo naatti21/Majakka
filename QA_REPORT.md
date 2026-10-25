@@ -107,3 +107,13 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - Existing 3D and 2D basemap implementations unchanged. LIVE and optional 3D still require mobile real-device verification.
 - Two optional choices per interaction: spend Lumen or perform a short memory-sequence decoding. Diverse minigame types and complete audiovisual feedback remain a separate quality milestone.
 - Avoid walking toward random virtual positions: this is an interface/gameplay trial only; there is no safe-place validation or public-node database.
+
+
+## v0.6.0 — Multi-day field and elevated-link iteration
+
+- Prior user Android test: 3D scene and pillars work; v0.5 gameplay rated boring, repeated memory mechanic and flat linkage.
+- New deterministic coarse Web Mercator zones, locally persisted progress keyed by salted cell fingerprints (not raw GPS); no route history or background tracking.
+- Explicit choose-to-weave mechanics, 90-second wall-clock world pulse cooldown, three challenge styles, harmonized event sound and optional vibration.
+- 3D beacons connect via geo-anchored arch segments with nonzero base and height (3D fill extrusions), no 3D ground connection lines. 2D retains curved path fallback.
+- Aggregate-only location-free per-day field diary and Memory copy/erase controls.
+- Pure logical/geographic and source syntax checked; **external WebGL/MapLibre layer validation and Android live trial remain untested**. If a device cannot render 3D arcs it must still be able to return to 2D.

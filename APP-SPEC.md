@@ -71,3 +71,8 @@ Optional 3D node effects use meter-based GeoJSON geometry and native map extrusi
 - Rift: two contributions across separate pulse cycles; one reward and permanently clear within the trial. Pulses dim nodes visually while unresolved but do not delete previous successes.
 - Resource economy: six collectible preview spark points per session (requires actual proximity), pre-existing scans and movement echoes; shared device-local daily ceiling of 12 earned Lumen including milestones. No geo info stored with aggregate counts.
 - Milestone counters are local-only. No authoritative anti-cheat or actual multiplayer until backend and privacy audit.
+
+
+### v0.6 multi-day field contract
+
+Stable virtual-node fields repeat in Web Mercator zoom-14 cells; distinct neighborhoods yield distinct locally saved state. Saved region entries are SHA-256 salted, keyed by coarse location, not raw coordinates, but are still sensitive location-derived fingerprints. Local-only, erase through Memory. No contact with a Majakka central game backend, no background GPS, no navigation to unverified virtual node spots. Contributing when far is possible; never tell players to enter private/unsafe places. User chooses each node link, and each link rises from the beacon in an arcing, soft and organic 3D ribbon. Use brief shared-key ambient event cues, opt-in audio, optional haptics and multiple challenge modalities. A 90-second wall-clock cooldown gates world pulses for test integrity, not real server security. Metrics are aggregate counts only and copyable for user/Work review. Continue only after multi-day real-world user evaluation.

@@ -30,9 +30,15 @@ test('bad GPS accuracy cannot produce strong near signal',()=>{
  assert.equal(C.near(n,n,180),false);
  assert.equal(C.contribute(s,{target:n.id,method:'lumen',player:n,accuracy:180,lumen:10,world:w}).cost,3);
 });
-test('three awakened nodes close a triangle once and reward only once',()=>{
+test('three awakened nodes still need deliberate links to close a living circuit',()=>{
  const w=C.positions(home),s=C.blank();
  for(const n of w.nodes)assert.equal(C.contribute(s,{target:n.id,method:'decode',player:n,accuracy:8,lumen:0,world:w}).ok,true);
+ assert.equal(C.pulse(s).opened,false);
+ assert.equal(C.projection(s,w).edges.length,0);
+ assert.equal(C.weave(s,'echo-0','echo-1',{method:'lumen',lumen:1}).cost,1);
+ assert.equal(C.weave(s,'echo-0','echo-1',{method:'decode'}).ok,false);
+ assert.equal(C.weave(s,'echo-1','echo-2',{method:'decode'}).ok,true);
+ assert.equal(C.weave(s,'echo-0','echo-2',{method:'decode'}).ok,true);
  const p=C.pulse(s);assert.equal(p.opened,true);assert.equal(p.reward,3);
  const render=C.projection(s,w);assert.equal(render.edges.length,3);assert.equal(render.field,true);
  assert.equal(C.pulse(s).reward,0);
@@ -58,4 +64,22 @@ test('safe unrecognized targets never change progress',()=>{
  assert.equal(C.contribute(s,{target:'not-a-real-node',method:'lumen',world:w,lumen:100}).ok,false);
  assert.equal(C.collect(s,'missing',home,5,w).ok,false);
  assert.deepEqual(s,C.blank());
+});
+
+test('nearby sessions reopen the same stable map cell, distant visits use another',()=>{
+ const a=C.region(home),b=C.region({lat:home.lat+.0001,lng:home.lng+.0001});
+ assert.equal(a.id,b.id);assert.deepEqual(C.positions(a.center),C.positions(b.center));
+ const distant=C.region({lat:home.lat+.025,lng:home.lng});
+ assert.notEqual(a.id,distant.id);
+ assert.ok(C.meters(home,a.center)<1000);
+});
+test('weaving disallows locked endpoints, duplicate links and invalid IDs',()=>{
+ const s=C.blank(),w=C.positions(home);
+ assert.equal(C.weave(s,'echo-0','echo-1',{method:'decode'}).ok,false);
+ for(const n of w.nodes)C.contribute(s,{target:n.id,method:'decode',player:n,accuracy:3,lumen:0,world:w});
+ C.pulse(s);
+ assert.equal(C.weave(s,'echo-0','echo-0',{method:'decode'}).ok,false);
+ assert.equal(C.weave(s,'echo-0','echo-2',{method:'lumen',lumen:0}).ok,false);
+ assert.equal(C.weave(s,'echo-0','echo-2',{method:'decode'}).ok,true);
+ assert.equal(C.weave(s,'echo-2','echo-0',{method:'decode'}).ok,false);
 });

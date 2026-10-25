@@ -21,12 +21,12 @@
   if(!anchor&&next.accuracy<=65)anchor=next;
   if(L.canRewardMove(anchor,next,now,rewardAt,moveRewards)){
     const gain=globalThis.MajakkaLiving?.award?.(1,'movement')??Math.min(1,C.MAX_LUMEN-state.lumen);
-    if(gain){if(!globalThis.MajakkaLiving){state.lumen+=gain;save();render();}moveRewards+=1;rewardAt=now;tell('Movement resonance · ✧ +1 Lumen');}
+    if(gain){if(!globalThis.MajakkaLiving){state.lumen+=gain;save();render();}moveRewards+=1;rewardAt=now;globalThis.MajakkaFeedback?.play('collect');tell('Movement resonance · ✧ +1 Lumen');}
     anchor=next;
   }
   if(typeof map!=='undefined'&&map&&typeof map.easeTo==='function'&&mapReady){
     const center=map.getCenter(),meters=L.distance({lat:center.lat,lng:center.lng},next);
-    if(follow&&(meters>80||!prev))map.easeTo({center:[next.lng,next.lat],zoom:Math.max(map.getZoom(),15),duration:prev?650:850});
+    if(follow&&!prev)map.easeTo({center:[next.lng,next.lat],zoom:Math.max(map.getZoom(),15),duration:850});
   }
   label('LIVE FIELD · '+Math.max(1,Math.ceil((L.DURATION_MS-(now-started))/60000))+' MIN',
     'Accuracy ~'+Math.round(next.accuracy)+' m · '+(next.accuracy<=65?'Signal clear':'Location uncertain; move rewards paused')+'. '+(moveRewards?moveRewards+' travel echoes.':'Move naturally or scan where you are.'));
@@ -41,7 +41,7 @@
   document.body.classList.remove('live-gps');window.dispatchEvent(new Event('majakka:livestop'));btn.textContent='◎ LIVE';btn.setAttribute('aria-pressed','false');btn.setAttribute('aria-label','Start optional 12 minute location trial');
   const legend=byId('map-legend-text');if(legend)legend.textContent=originalLegend||'SAMPLE NODES · DEMO';
   const title=document.querySelector('.map-bar h2');if(title&&originalTitle)title.innerHTML=originalTitle;
-  if(typeof map!=='undefined'&&map&&mapReady){map.jumpTo({center:[23.7623,61.4984],zoom:14.5});if(typeof drawWorld==='function')drawWorld();}
+  if(typeof map!=='undefined'&&map&&mapReady&&typeof drawWorld==='function')drawWorld();
   tell(reason);
  }
  function start(){
@@ -69,7 +69,7 @@
   scanAt=now;scans++;
   const gain=globalThis.MajakkaLiving?.award?.(1,'scan')??Math.min(1,C.MAX_LUMEN-state.lumen);if(gain&&!globalThis.MajakkaLiving){state.lumen+=gain;save();render();}
   dot.classList.remove('sweeping');void dot.offsetWidth;dot.classList.add('sweeping');
-  if(navigator.vibrate)navigator.vibrate(25);
+  globalThis.MajakkaFeedback?.play('collect');
   tell(gain?'Local resonance gathered · ✧ +1 Lumen':'Scan complete. No more charge available in this trial today.');
  });
  document.addEventListener('visibilitychange',()=>{if(active&&document.hidden)stop('Location paused when Majakka went into the background.');});
