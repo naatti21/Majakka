@@ -5,7 +5,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
  'use strict';
  const rad=Math.PI/180,earth=6371000;
- const COST_NEAR=2,COST_FAR=3,NODE_TARGET=2,RIFT_TARGET=2,MAX_CYCLES=200,REMOTE_SETTLE_MS=20*60*60*1000;
+ const COST_NEAR=2,COST_FAR=3,NODE_TARGET=2,RIFT_TARGET=2,MAX_CYCLES=200,REMOTE_SETTLE_MS=20*60*60*1000,NODE_COUNT=12;
  const names=['Stillwater','Wanderlight','Hollow Chord','North Echo','Driftglass','Old Current','Low Tide','Amber Thread','Rainlight','Long Shadow','Blue Hour','Afterglow'];
  function hash32(text){let h=2166136261>>>0;for(const char of text){h=Math.imul(h^char.charCodeAt(0),16777619)>>>0;}return h>>>0;}
  function rng(seed){let n=seed>>>0;return ()=>{n=(n+0x6D2B79F5)>>>0;let t=Math.imul(n^(n>>>15),1|n);t^=t+Math.imul(t^(t>>>7),61|t);return ((t^(t>>>14))>>>0)/4294967296;};}
@@ -38,6 +38,18 @@
    const north=Math.cos(bearing)*radius,east=Math.sin(bearing)*radius;
    return {...addMeters(origin,north,east),id:'echo-'+i,name:names[(hash32(cell.id+':name')+i*3)%names.length],kind:'node',level:0};
   });
+  // Keep the original three deterministic nodes intact for existing saved progress.
+  // Add nine stable beacons with varied distances and bearings; enforce a spatial gap.
+  for(let i=3;i<NODE_COUNT;i++){
+   let candidate=null;
+   for(let attempt=0;attempt<70;attempt++){
+    const theta=angle+(i-3)*2.399963+random()*.8;
+    const radius=220+random()*900;
+    candidate=addMeters(origin,Math.cos(theta)*radius,Math.sin(theta)*radius);
+    if(nodes.every(n=>meters(n,candidate)>=135))break;
+   }
+   nodes.push({...candidate,id:'echo-'+i,name:names[(hash32(cell.id+':new-name')+i*5)%names.length],kind:'node',level:0});
+  }
   const riftBearing=angle+Math.PI*.53,riftDistance=230+random()*180;
   const rift={...addMeters(origin,Math.cos(riftBearing)*riftDistance,Math.sin(riftBearing)*riftDistance),id:'veil',name:'Interference Veil',kind:'rift'};
   const lumen=Array.from({length:6},(_,i)=>{
@@ -62,7 +74,19 @@
   }
   return lights;
  }
- function blank(){return {cycle:0,nodes:[0,0,0],pending:[0,0,0],lastNodeCycle:[-1,-1,-1],rift:0,riftPending:false,riftLastCycle:-1,riftClear:false,field:false,interference:0,visited:[],claimed:[],feedback:[],pulseBonus:false,links:[],lastPulseAt:0,remoteAt:[0,0,0]};}
+ /* Cosmetic field particles follow the player's current position. They cannot be tapped
+    or mined in place; movement tracking alone produces spendable Lumen. */
+ function energyField(player){
+  if(!player||![player.lat,player.lng].every(Number.isFinite))return [];
+  const lights=[];
+  for(let i=0;i<18;i++){
+   const angle=(i*2.399963)+(hash32('lumen:'+i)%11)*.13;
+   const dist=35+((i*53)%355);
+   lights.push({...addMeters(player,Math.cos(angle)*dist,Math.sin(angle)*dist),id:'glimmer-'+i,kind:'lumen'});
+  }
+  return lights;
+ }
+ function blank(){return {cycle:0,nodes:Array(NODE_COUNT).fill(0),pending:Array(NODE_COUNT).fill(0),lastNodeCycle:Array(NODE_COUNT).fill(-1),rift:0,riftPending:false,riftLastCycle:-1,riftClear:false,field:false,interference:0,visited:[],claimed:[],feedback:[],pulseBonus:false,links:[],lastPulseAt:0,remoteAt:Array(NODE_COUNT).fill(0)};}
  function near(player,point,accuracy=0){return !!player&&accuracy<=90&&meters(player,point)<=85;}
  function contribute(s,{target,method,player,accuracy,lumen,world,now=Date.now()}){
   if(!world||!['lumen','decode'].includes(method))return {ok:false,reason:'Unknown signal'};
@@ -79,7 +103,7 @@
   if(s.nodes[i]>=NODE_TARGET)return {ok:false,reason:'This node is awake. Its light is yours to explore.'};
   if(s.pending[i]||s.lastNodeCycle[i]===s.cycle)return {ok:false,reason:'The signal needs the next world pulse'};
   const close=near(player,pos,accuracy),cost=method==='lumen'?(close?COST_NEAR:COST_FAR):0;
-  s.remoteAt??=[0,0,0];
+  s.remoteAt??=Array(NODE_COUNT).fill(0);
   if(!close){
    if(s.nodes[i]+s.pending[i]>=NODE_TARGET)return {ok:false,reason:'Only a close resonance can complete this signal right now'};
    if(s.remoteAt[i]&&now-s.remoteAt[i]<REMOTE_SETTLE_MS)
@@ -95,20 +119,30 @@
  function weave(s,from,to,{lumen=0,method='lumen'}={}){
   if(!['lumen','decode'].includes(method))return {ok:false,reason:'Unknown link signal'};
   const a=Number(from.replace('echo-','')),b=Number(to.replace('echo-',''));
-  if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||a>2||b<0||b>2||a===b)return {ok:false,reason:'Choose two different nodes'};
+  if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||a>=NODE_COUNT||b<0||b>=NODE_COUNT||a===b)return {ok:false,reason:'Choose two different nodes'};
   if(s.nodes[a]<NODE_TARGET||s.nodes[b]<NODE_TARGET)return {ok:false,reason:'Awaken both nodes before joining their light'};
-  const key=[a,b].sort().join('-');s.links??=[];
+  const key=[a,b].sort((a,b)=>a-b).join('-');s.links??=[];
   if(s.links.includes(key))return {ok:false,reason:'These lights are already connected'};
   const cost=method==='lumen'?1:0;
   if(lumen<cost)return {ok:false,reason:'Need one Lumen, or decode the connection'};
   s.links.push(key);
   return {ok:true,cost,key,reason:'A living thread joins the lights'};
  }
+ function triangles(state){
+  const awake=new Set(state.nodes.map((x,i)=>x>=NODE_TARGET?i:null).filter(x=>x!==null));
+  const edges=new Set((state.links||[]).filter(x=>/^\d+-\d+$/.test(x)));
+  const found=[];
+  for(let i=0;i<NODE_COUNT;i++)for(let j=i+1;j<NODE_COUNT;j++)for(let k=j+1;k<NODE_COUNT;k++){
+   if(!awake.has(i)||!awake.has(j)||!awake.has(k))continue;
+   if(edges.has(i+'-'+j)&&edges.has(i+'-'+k)&&edges.has(j+'-'+k))found.push([i,j,k]);
+  }
+  return found;
+ }
  function pulse(s){
   if(s.cycle>=MAX_CYCLES)return {ok:false,reason:'Preview has reached its final world pulse'};
   s.cycle++;
   let awakened=0;
-  for(let i=0;i<3;i++){
+  for(let i=0;i<NODE_COUNT;i++){
    if(s.pending[i]){
     const before=s.nodes[i];s.nodes[i]=Math.min(NODE_TARGET,s.nodes[i]+s.pending[i]);
     if(before<NODE_TARGET&&s.nodes[i]===NODE_TARGET)awakened++;
@@ -122,7 +156,7 @@
   }
   if(!s.riftClear)s.interference=Math.min(3,s.interference+1);
   else s.interference=0;
-  const opened=!s.field&&s.nodes.every(n=>n>=NODE_TARGET)&&Array.isArray(s.links)&&s.links.length===3;
+  const opened=!s.field&&triangles(s).length>0;
   if(opened)s.field=true;
   return {ok:true,opened,cleared,awakened,reward:(cleared?3:0)+(opened?3:0),reason:opened?'The first living field awakened.':cleared?'Interference restored. The light returns.':'The world breathes. New signals settle.'};
  }
@@ -136,7 +170,7 @@
   return {nodes:w.nodes.map((n,i)=>({...n,kind:s.nodes[i]>=NODE_TARGET?'awake':(!s.riftClear&&s.interference>0&&meters(n,w.rift)<160?'corrupted':'trial'),strength:s.nodes[i]})),
    rift:{...w.rift,kind:s.riftClear?'restored':'rift'},lumen:w.lumen.filter(x=>!s.claimed.includes(x.id)),
    edges:(s.links||[]).map(link=>link.split('-').map(i=>w.nodes[Number(i)]?.id)).filter(pair=>pair.length===2&&pair.every(Boolean)),
-   field:s.field,interference:s.interference,cycle:s.cycle,outer:surrounding(w.origin)};
+   field:s.field,fields:triangles(s).map(ids=>ids.map(i=>w.nodes[i].id)),interference:s.interference,cycle:s.cycle,outer:surrounding(w.origin)};
  }
- return {COST_NEAR,COST_FAR,NODE_TARGET,RIFT_TARGET,MAX_CYCLES,REMOTE_SETTLE_MS,blank,positions,region,surrounding,addMeters,meters,near,contribute,weave,pulse,collect,projection};
+ return {COST_NEAR,COST_FAR,NODE_TARGET,RIFT_TARGET,MAX_CYCLES,REMOTE_SETTLE_MS,NODE_COUNT,triangles,blank,positions,region,surrounding,energyField,addMeters,meters,near,contribute,weave,pulse,collect,projection};
 });

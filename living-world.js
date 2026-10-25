@@ -15,18 +15,18 @@ function sanitize(input){
  const s=L.blank();if(!input||typeof input!=='object')return s;
  const clamp=(x,lo,hi)=>Number.isFinite(Number(x))?Math.max(lo,Math.min(hi,Math.floor(Number(x)))):lo;
  s.cycle=clamp(input.cycle,0,L.MAX_CYCLES);
- s.nodes=[0,1,2].map(i=>clamp(input.nodes?.[i],0,2));
- s.pending=[0,1,2].map(i=>clamp(input.pending?.[i],0,2));
- s.lastNodeCycle=[0,1,2].map(i=>clamp(input.lastNodeCycle?.[i],-1,L.MAX_CYCLES));
+ s.nodes=Array.from({length:L.NODE_COUNT},(_,i)=>clamp(input.nodes?.[i],0,2));
+ s.pending=Array.from({length:L.NODE_COUNT},(_,i)=>clamp(input.pending?.[i],0,2));
+ s.lastNodeCycle=Array.from({length:L.NODE_COUNT},(_,i)=>clamp(input.lastNodeCycle?.[i],-1,L.MAX_CYCLES));
  s.rift=clamp(input.rift,0,2);s.riftPending=input.riftPending===true;
  s.riftLastCycle=clamp(input.riftLastCycle,-1,L.MAX_CYCLES);
  s.riftClear=input.riftClear===true;s.field=input.field===true;
  s.interference=clamp(input.interference,0,3);
  s.claimed=Array.isArray(input.claimed)?input.claimed.filter(x=>/^spark-[0-5]$/.test(x)).slice(0,6):[];
- s.visited=Array.isArray(input.visited)?input.visited.filter(x=>/^echo-[0-2]$/.test(x)).slice(0,3):[];
- s.links=Array.isArray(input.links)?[...new Set(input.links.filter(x=>['0-1','0-2','1-2'].includes(x)))]:[];
+ s.visited=Array.isArray(input.visited)?input.visited.filter(x=>/^echo-(?:[0-9]|1[01])$/.test(x)).slice(0,L.NODE_COUNT):[];
+ s.links=Array.isArray(input.links)?[...new Set(input.links.filter(x=>/^\d+-\d+$/.test(x)&&x.split('-').every(v=>Number(v)>=0&&Number(v)<L.NODE_COUNT)))]:[];
  s.lastPulseAt=Math.min(Date.now(),Math.max(0,Number(input.lastPulseAt)||0));
- s.remoteAt=[0,1,2].map(i=>Math.max(0,Math.min(Date.now(),Number(input.remoteAt?.[i])||0)));
+ s.remoteAt=Array.from({length:L.NODE_COUNT},(_,i)=>Math.max(0,Math.min(Date.now(),Number(input.remoteAt?.[i])||0)));
  return s;
 }
 function saveProgress(){
@@ -64,7 +64,7 @@ try{
   counters.fields=Math.max(0,Math.min(99999,Number(saved.fields)||0));
   counters.veils=Math.max(0,Math.min(99999,Number(saved.veils)||0));
   if(saved.day===counters.day){
-   counters.earned=Math.max(0,Math.min(12,Number(saved.earned)||0));
+   counters.earned=Math.max(0,Math.min(36,Number(saved.earned)||0));
    counters.fieldPaid=Boolean(saved.fieldPaid);counters.veilPaid=Boolean(saved.veilPaid);
   }
  }
@@ -76,7 +76,7 @@ function award(amount,type='spark'){
  if(type==='field'&&counters.fieldPaid||type==='veil'&&counters.veilPaid)return 0;
  if(type==='field')counters.fieldPaid=true;
  if(type==='veil')counters.veilPaid=true;
- const granted=Math.max(0,Math.min(amount,12-counters.earned,C.MAX_LUMEN-state.lumen));
+ const granted=Math.max(0,Math.min(amount,36-counters.earned,C.MAX_LUMEN-state.lumen));
  counters.earned+=granted;state.lumen+=granted;
  saveCounters();if(granted){save();render();}
  return granted;
@@ -114,14 +114,16 @@ function renderMap(){
  if(!world||!isActive()||document.body.classList.contains('perspective-ready')){layer.replaceChildren();return;}
  if(typeof map==='undefined'||!map||!mapReady)return;
  const data=L.projection(progress,world);
- const items=[...data.nodes,data.rift,...data.lumen,...(data.outer||[])];
+ const items=[...data.nodes,data.rift,...(data.outer||[])];
+ const glimmers=L.energyField(position);
  layer.replaceChildren();
- if(data.edges?.length){
+ if(data.edges?.length||data.fields?.length){
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('class','living-curves');svg.setAttribute('viewBox','0 0 '+innerWidth+' '+innerHeight);
   svg.setAttribute('width','100%');svg.setAttribute('height','100%');
-  if(data.field&&data.nodes.length===3){
-    const ps=data.nodes.map(n=>map.project([n.lng,n.lat]));
+  for(const trio of data.fields||[]){
+    const ps=trio.map(id=>data.nodes.find(n=>n.id===id)).filter(Boolean).map(n=>map.project([n.lng,n.lat]));
+    if(ps.length!==3)continue;
     const polygon=document.createElementNS('http://www.w3.org/2000/svg','polygon');
     polygon.setAttribute('class','living-harmonic-area');
     polygon.setAttribute('points',ps.map(p=>p.x+','+p.y).join(' '));svg.appendChild(polygon);
@@ -151,6 +153,13 @@ function renderMap(){
   haze.style.width=radius*2+'px';haze.style.height=radius*2+'px';
   layer.appendChild(haze);
  }
+ for(const sparkle of glimmers){
+  const p=map.project([sparkle.lng,sparkle.lat]);
+  if(p.x<0||p.y<0||p.x>innerWidth||p.y>innerHeight)continue;
+  const el=document.createElement('i');el.className='living-glimmer';
+  el.style.left=p.x+'px';el.style.top=p.y+'px';
+  layer.appendChild(el);
+ }
  for(const p of items){
   const pt=map.project([p.lng,p.lat]);
   if(pt.x< -55||pt.x>innerWidth+55||pt.y< -55||pt.y>innerHeight+55)continue;
@@ -162,7 +171,7 @@ function renderMap(){
   if(p.kind==='distant'){
    b.disabled=true;
    b.title='An undiscovered region. This light is not a verified real-world point of interest.';
-  }else b.addEventListener('click',()=>p.kind==='lumen'?collect(p.id):choose(p.id));
+  }else b.addEventListener('click',()=>choose(p.id));
   layer.appendChild(b);
  }
 }
@@ -207,13 +216,13 @@ function connect(method){
  const out=L.weave(progress,chosen,linkTarget,{method,lumen:state.lumen});
  if(!out.ok){message(out.reason);return;}
  state.lumen-=out.cost;save();render();saveProgress();metric('threads');linkTarget=null;linkTargets.hidden=true;
- redraw();updateUI();emit();fb('weave');message(out.reason+'. '+progress.links.length+'/3 links joined.');
+ redraw();updateUI();emit();fb('weave');message(out.reason+'. '+progress.links.length+' links joined.');
 }
 function updateUI(){
  if(!world||!isActive()){info.hidden=actions.hidden=true;return;}
  const awake=progress.nodes.filter(n=>n>=L.NODE_TARGET).length;
  by('living-objective').textContent=progress.field?'HARMONY RESTORED · '+(progress.links||[]).length+' living threads':
-  'LOCAL FIELD · '+awake+'/3 awake · '+(progress.links||[]).length+'/3 threads · '+(progress.riftClear?'veil clear':'veil '+progress.rift+'/2');
+  'LOCAL FIELD · '+awake+'/'+L.NODE_COUNT+' awake · '+(progress.links||[]).length+' threads · '+(progress.riftClear?'veil clear':'veil '+progress.rift+'/2');
  const p=current();
  info.hidden=actions.hidden=!p;
  if(p){
@@ -254,12 +263,7 @@ function apply(method){
  state.lumen-=result.cost;save();render();saveProgress();metric('nodeSignals');updateUI();redraw();emit();positive('attune');message(result.reason);
 }
 function collect(id){
- if(!world||!position)return;
- const result=L.collect(progress,id,position,accuracy,world);
- if(!result.ok){message(result.reason);return;}
- const gain=award(result.reward,'spark');saveProgress();metric('sparks');
- redraw();updateUI();emit();positive('collect');
- message(gain?'✧ Lumen gathered · +'+gain:'Sonde full · signal retained');
+ message('Lumen appears around you and gathers automatically as you move.');
 }
 function nextPulse(){
  if(!world)return;
@@ -268,7 +272,7 @@ function nextPulse(){
  const r=L.pulse(progress);
  if(!r.ok){message(r.reason);return;}
  progress.lastPulseAt=now;saveProgress();metric('pulses');
- const gain=(r.cleared?award(3,'veil'):0)+(r.opened?award(3,'field'):0);
+ const gain=0; // LIVE energy comes only from motion.
  if(r.cleared){counters.veils++;metric('veils');}
  if(r.opened){counters.fields++;metric('fields');}
  if(r.cleared||r.opened)saveCounters();
@@ -411,7 +415,7 @@ window.addEventListener('majakka:livingselect',e=>choose(e.detail?.id));
 window.addEventListener('majakka:livingcollect',e=>collect(e.detail?.id));
 window.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
 globalThis.MajakkaLiving={
- snapshot:()=>world&&isActive()?{projection:L.projection(progress,world),position:position?{...position}:null}:null,
+ snapshot:()=>world&&isActive()?{projection:{...L.projection(progress,world),lumen:L.energyField(position)},position:position?{...position}:null}:null,
  eraseFields,
  award,
  select:choose,collect,restore:()=>{close();resetWorld();}

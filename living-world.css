@@ -116,3 +116,6 @@ body.journal-open #living-report{display:block}
 .living-pattern-reference{font-size:12px;letter-spacing:.06em;color:#e1c38e;padding:5px 0}
 @media(max-width:370px){#living-answers .living-rhythm-alternative{min-width:90px;padding:0 5px}}
 @media(prefers-reduced-motion:reduce){.living-rhythm-marker{transition:none!important}}
+
+/* Larger world: link selection must scroll rather than cover the whole map. */
+#living-link-targets{max-height:40vh;overflow-y:auto}

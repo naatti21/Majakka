@@ -128,3 +128,14 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - New pure regional distribution/cooldown tests, JS parser checks and scripted UI smoke tests scheduled; physical Android feel and map rendering **not yet verified**.
 
 **Validated in Code Mode before commit:** 15/15 pure spatial/progression tests passed including multi-cell deterministic scatter, eight neighboring silhouettes and remote cooldown/bypass behavior. Silent rhythm UI mock passed five checks: visual rhythm built with clear button labels, successful three taps with sound off, progress persisted, no raw coordinate strings in stored data, animation frame cancelled on completion. New 3D and 2D rendering on actual Android **not yet tested**.
+
+
+## v0.7.0 — Field feedback: node density and omnidirectional Lumen
+
+- Increased private-region node count 3 → 12 with stable seeds, separation constraint, preservation of first three legacy node identities/positions.
+- Multi-node triangle detection and local field polygons; migration pads stored progress arrays and accepts additional link IDs.
+- Added motion-only 70m Lumen accumulator; no scanning, tapping or milestone payout. GPS noise / high speeds / jumps filtered approximately, with no persisted route history.
+- Ambient glimmers in both map modes and simpler visible 3D overviews; neighboring-region silhouettes retained.
+- New node-graph/movement pure tests; actual GPS outdoors, 3D WebGL rendering and battery test **still unverified on Android**.
+
+**Validated before the v0.7.0 commit:** 18/18 updated pure graph/walking tests passed (including legacy-region behavior, spaced nodes, off-road route turns, false stillness and vehicle-speed rejection), plus 17/17 script/source/integration invariants. **Not claimed:** an actual GPS walking trial, realistic battery profile or production-grade GPS anti-spoof protection. Current PWA still requires foreground LIVE and shuts GPS off when hidden.

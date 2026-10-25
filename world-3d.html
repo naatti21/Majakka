@@ -129,9 +129,6 @@ function drawPhysicalWorld(points){
  map.addLayer({id:'majakka-physical-hit',type:'circle',source:'majakka-physical-targets',
   paint:{'circle-radius':22,'circle-color':'#ffffff','circle-opacity':.01,
          'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
- map.addLayer({id:'majakka-lumen-hit',type:'circle',source:'majakka-physical-lumens',
-  paint:{'circle-radius':16,'circle-color':'#ffffff','circle-opacity':.01,
-         'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
  map.on('click','majakka-physical-hit',e=>{
   const id=e.features?.[0]?.properties?.id;
   if(!id||id==='player'||id.startsWith('ambient-'))return;
@@ -143,7 +140,7 @@ function drawPhysicalWorld(points){
   if(id==='rift')reply('rift-select');
   else if(nodes.some(n=>n.id===id))reply('node-select',{id});
  });
- map.on('click','majakka-lumen-hit',e=>{if(mode==='live'){const id=e.features?.[0]?.properties?.id;if(id)reply('live-lumen',{id});}});
+ // Ambient glimmers cannot be collected by tapping.
  physicsLayersReady=true;
 }
 let aerialLayersReady=false;
@@ -186,8 +183,12 @@ function showWorld(){
    haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
   }
   if(lastFix)points.push({id:'player',name:'You',...lastFix,kind:'player'});
-  if(live.field&&live.nodes.length===3)fieldFeatures.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...live.nodes.map(n=>[n.lng,n.lat]),[live.nodes[0].lng,live.nodes[0].lat]]]},properties:{}});
-  for(const [a,b] of live.edges){
+  for(const ids of (live.fields||[]).slice(0,18)){
+   const vertices=ids.map(id=>live.nodes.find(n=>n.id===id)).filter(Boolean);
+   if(vertices.length!==3)continue;
+   fieldFeatures.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...vertices.map(n=>[n.lng,n.lat]),[vertices[0].lng,vertices[0].lat]]]},properties:{}});
+  }
+  for(const [a,b] of live.edges.slice(0,24)){
     const x=live.nodes.find(n=>n.id===a),y=live.nodes.find(n=>n.id===b);
     if(x&&y)arcPairs.push([x,y]);
   }
@@ -231,7 +232,7 @@ function receive(data){
 function centerLive(){
  if(!map||!ready||!lastFix)return;
  firstLiveCenter=true;
- map.easeTo({center:[lastFix.lng,lastFix.lat],zoom:Math.max(15,map.getZoom()),duration:700});
+ map.easeTo({center:[lastFix.lng,lastFix.lat],zoom:14.2,duration:700});
 }
 addEventListener('message',e=>{
  if(e.origin!==location.origin||e.source!==parent||e.data?.source!=='majakka-parent')return;

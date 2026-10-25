@@ -4,7 +4,7 @@
  'use strict';
  const KEY='majakka-field-test-notes-v1';
  const today=()=>new Date().toLocaleDateString('sv-SE');
- const events=['liveSessions','minutes','nodeSignals','threads','pulses','fields','veils','sparks','decodes','decodeMisses'];
+ const events=['liveSessions','minutes','nodeSignals','threads','pulses','fields','veils','sparks','walkLumen','decodes','decodeMisses'];
  let diary={};
  try{const obj=JSON.parse(localStorage.getItem(KEY)||'{}');if(obj&&typeof obj==='object'&&!Array.isArray(obj))diary=obj;}catch{}
  let started=0;
