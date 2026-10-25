@@ -72,3 +72,8 @@ Run `node --test tests/live-core.test.mjs` for the pure GPS distance and reward 
 ## v0.3.2 — Real map reliability fix
 
 MapLibre now loads before application initialization (`defer` instead of an asynchronous race). If the primary CDN fails, the client tries a separate script CDN. OpenFreeMap Fiord is preferred; if a map style does not become ready, OpenFreeMap Liberty is tried. A visible map-loading/error indicator offers a retry rather than silently leaving the fictitious Tampere fallback. The optional LIVE trial will recenter to the real GPS position when the map finishes loading, including if GPS became available first. The map-center control follows the live position in LIVE mode and returns to the Tampere sample scene only in DEMO mode. No coordinates are persisted or sent to a Majakka backend. The map tile provider receives the visible map region; this remains a third-party network dependency. Note: rendering requires WebGL and live map tiles; offline fallback is explicitly not a geographically accurate street map.
+
+
+## v0.3.3 — Foreground GPS map interaction fixes
+
+Live map now centers on the first accepted GPS position **once per opted-in session**, with no automatic following after that. Dragging before the first fix cancels even initial centering; tap the existing target (⌖) to explicitly recenter. Stopping LIVE does not jump the map back to Tampere: the target restores the demonstration view. Starting LIVE resets Harmony/Memory to World, and showing either panel later temporarily hides overlapping GPS readout/Scan controls. GPS info is shortened for a small screen. This fixes issues reported during the first real Android test.

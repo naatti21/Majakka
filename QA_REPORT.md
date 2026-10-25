@@ -46,3 +46,13 @@
 - Added mapready handshake to the live GPS session and recenter handler that respects LIVE vs DEMO.
 - Manual source inspection: no server-side GPS store added; existing domain and rift rules unchanged.
 - **Physical Android, external tile/CDN reachability, and Page load: not independently verified from the build environment.** The user must test on the GitHub Pages URL.
+
+
+## v0.3.3 — Android field feedback (25 October 2026)
+
+- User confirms actual real map and LIVE GPS positioning work on Android (screenshot with approx. 4 m accuracy).
+- User reports unexpected map recenters and Harmony panel overlapping the live scan/readout.
+- Removed the recurring onFix follow behavior, the stale map-load jump handler, and mapready repeated recenter. The LIVE user gesture permits **one initial center** only; manual touch before first fix cancels it. The existing recenter button is the only way to recenter afterward.
+- LIVE now programmatically selects World navigation when opened, so the Harmony panel no longer remains selected. When Harmony or Memory is opened intentionally, the GPS status and scan button are hidden until returning to World.
+- Live readout is smaller, the map stays at the currently viewed geography on STOP, and the sample Tampere node recenter is explicit.
+- JS syntax and patch contracts checked; actual Android after this fix remains **NOT TESTED**.
