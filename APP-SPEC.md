@@ -51,3 +51,8 @@
 ### v0.3.1 — Live Field test gate (25 Oct 2026)
 
 Optional browser geolocation only, 12-minute foreground session with manual stop. No saved track, no real generated POIs, no multiplayer or shared contributions, and Tampere demo nodes hidden during live mode. At most two scan and three conservative movement Lumen rewards per session, subject to accuracy, cooldown and speed gates. Requires secure context, permission and live map tile delivery. Browser E2E and actual Android field test remain open. Keep future real POI safety and privacy architecture separate from this test.
+
+
+### v0.4.0 3D prototype contract
+
+2D raster remains the dependable default and can be restored instantly. Opt-in 3D uses tilted/rotating vector tiles with optional terrain and building extrusions, simulated node depth and colored harmony fields. Any third-party failure restores 2D without deleting state. LIVE mode contains only temporary preview lights around user location until safe real public nodes and shared state are designed and implemented. User-facing copy must not claim true live multiplayer.

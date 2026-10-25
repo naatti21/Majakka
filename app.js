@@ -82,7 +82,7 @@ function bind(){
  $('advance-pulse').addEventListener('click',()=>{const r=C.pulse(state);save();render();if(r.fieldOpen){tone([0,2,4]);notify('THE FIRST CHORD — a resonance field has awakened.');}else notify(r.newEdges?`✧ ${r.newEdges} threads joined in the delayed pulse.`:r.changed?'A quiet world pulse has passed. Light is settling.':'A quiet world pulse. Nothing was lost.');});
  $('listen').addEventListener('click',()=>{const n=selected();tone([n.note,n.note+2,n.note+4]);notify(state.sound?`Listening to ${n.name}.`: 'Sound is muted. Tap ♩ at the top to hear this echo.');});
  $('sound').addEventListener('click',()=>{state.sound=!state.sound;save();render();if(state.sound)tone([0,2,4]);});
- $('recenter').addEventListener('click',()=>{if(globalThis.MajakkaLive?.isActive()){globalThis.MajakkaLive.recenter();return;}if(map&&mapReady)map.flyTo({center:[23.7623,61.4984],zoom:14.5,essential:true});notify('Centered on the Tampere demo area.');});
+ $('recenter').addEventListener('click',()=>{if(globalThis.MajakkaPerspective?.isActive()){globalThis.MajakkaPerspective.recenter();return;}if(globalThis.MajakkaLive?.isActive()){globalThis.MajakkaLive.recenter();return;}if(map&&mapReady)map.flyTo({center:[23.7623,61.4984],zoom:14.5,essential:true});notify('Centered on the Tampere demo area.');});
  $('reset').addEventListener('click',()=>{if(!confirm('Reset only First Light v0.2 progress on this device?'))return;state=C.blank();save();feedback('');render();notify('First Light demo reset.');});
  window.addEventListener('resize',()=>drawWorld());
  window.addEventListener('load',()=>{if(!map&&globalThis.maplibregl)startMap();});

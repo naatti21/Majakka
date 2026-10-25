@@ -17,7 +17,7 @@
  function redraw(){if(!active||!fix){dot.hidden=true;return;}const p=mapPoint(fix);if(!p){dot.hidden=true;return;}dot.style.left=p.x+'px';dot.style.top=p.y+'px';dot.hidden=false;}
  function onFix(position){if(!active)return;const next=L.validFix(position.coords,position.timestamp);if(!next){label('LOW SIGNAL','Waiting for a valid position.');return;}
   const now=Date.now();if(now-next.time>45000){label('STALE POSITION','Waiting for a fresh GPS fix.');return;}
-  gotFix=true;const prev=fix;fix=next;
+  gotFix=true;const prev=fix;fix=next;window.dispatchEvent(new CustomEvent('majakka:livefix',{detail:{lat:next.lat,lng:next.lng,accuracy:next.accuracy}}));
   if(!anchor&&next.accuracy<=65)anchor=next;
   if(L.canRewardMove(anchor,next,now,rewardAt,moveRewards)){
     const gain=Math.min(1,C.MAX_LUMEN-state.lumen);if(gain){state.lumen+=gain;save();render();moveRewards+=1;rewardAt=now;tell('Movement resonance · ✧ +1 Lumen');}
@@ -32,12 +32,12 @@
   redraw();
  }
  function recenterLive(){if(!active||!fix){tell('Waiting for a live position.');return;}follow=true;if(typeof map!=='undefined'&&map&&mapReady){map.flyTo({center:[fix.lng,fix.lat],zoom:Math.max(15,map.getZoom()),essential:true});redraw();}else tell('Location acquired; waiting for the street map.');}
- globalThis.MajakkaLive={isActive:()=>active,recenter:recenterLive};
+ globalThis.MajakkaLive={isActive:()=>active,recenter:recenterLive,getFix:()=>fix?{lat:fix.lat,lng:fix.lng}:null};
  window.addEventListener('majakka:mapready',()=>{if(active&&fix)recenterLive();});
  function stop(reason='Location trial ended. No route saved.'){
   if(id!==null&&navigator.geolocation)navigator.geolocation.clearWatch(id);
   id=null;clearTimeout(expiry);expiry=null;active=false;gotFix=false;fix=null;anchor=null;dot.hidden=true;scan.hidden=true;panel.hidden=true;
-  document.body.classList.remove('live-gps');btn.textContent='◎ LIVE';btn.setAttribute('aria-pressed','false');btn.setAttribute('aria-label','Start optional 12 minute location trial');
+  document.body.classList.remove('live-gps');window.dispatchEvent(new Event('majakka:livestop'));btn.textContent='◎ LIVE';btn.setAttribute('aria-pressed','false');btn.setAttribute('aria-label','Start optional 12 minute location trial');
   const legend=byId('map-legend-text');if(legend)legend.textContent=originalLegend||'SAMPLE NODES · DEMO';
   const title=document.querySelector('.map-bar h2');if(title&&originalTitle)title.innerHTML=originalTitle;
   if(typeof map!=='undefined'&&map&&mapReady){map.jumpTo({center:[23.7623,61.4984],zoom:14.5});if(typeof drawWorld==='function')drawWorld();}
@@ -49,7 +49,7 @@
   started=Date.now();gotFix=false;rewardAt=-Infinity;scanAt=null;scans=0;moveRewards=0;fix=null;anchor=null;follow=true;
   originalLegend=byId('map-legend-text')?.textContent||'';originalTitle=document.querySelector('.map-bar h2')?.innerHTML||'';
   active=true;btn.textContent='■ STOP';btn.setAttribute('aria-pressed','true');btn.setAttribute('aria-label','Stop live location');panel.hidden=false;scan.hidden=false;
-  document.body.classList.remove('node-open','interference-open','field-open','journal-open');document.body.classList.add('live-gps');
+  document.body.classList.remove('node-open','interference-open','field-open','journal-open');document.body.classList.add('live-gps');window.dispatchEvent(new Event('majakka:livestart'));
   byId('hud-node-info')?.setAttribute('hidden','');byId('hud-node-actions')?.setAttribute('hidden','');byId('hud-rift-info')?.setAttribute('hidden','');byId('hud-rift-actions')?.setAttribute('hidden','');
   const legend=byId('map-legend-text');if(legend)legend.textContent='LIVE MAP · PERSONAL TRIAL · NO SHARED NODES';
   const title=document.querySelector('.map-bar h2');if(title)title.textContent='Your local field';

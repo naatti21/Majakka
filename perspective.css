@@ -1,0 +1,30 @@
+/* MAJAKKA — opt-in perspective mode, foreground-only visual trial. */
+#perspective-toggle{
+ position:fixed;z-index:31;left:14px;top:calc(201px + env(safe-area-inset-top,0px));
+ min-width:58px;height:42px;border:1px solid #80e2d281;border-radius:22px;
+ background:rgba(9,32,46,.92);backdrop-filter:blur(12px);
+ color:#cff8ed;font:700 12px/1 system-ui,sans-serif;letter-spacing:.11em;
+ box-shadow:0 6px 23px #0007;cursor:pointer
+}
+#perspective-toggle[aria-pressed=true]{color:#0a1b26;background:#eac27d;border-color:#f6d8a3}
+#perspective-notice{
+ position:fixed;z-index:34;left:12px;bottom:calc(158px + env(safe-area-inset-bottom,0px));
+ max-width:min(77vw,335px);padding:10px 12px;border:1px solid #82cec471;
+ border-radius:13px;background:#092435f5;color:#d4f1ed;font-size:11px;line-height:1.4;
+ pointer-events:none;box-shadow:0 12px 35px #0008
+}
+#perspective-notice[hidden]{display:none!important}
+#perspective-frame{
+ position:absolute;inset:0;width:100%;height:100%;z-index:8;border:0;
+ background:#06131e;transition:opacity .4s;pointer-events:auto
+}
+body.perspective-on:not(.perspective-ready) #perspective-frame{opacity:0;pointer-events:none}
+body.perspective-ready #perspective-frame{opacity:1}
+body.perspective-ready #world-overlay,body.perspective-ready .map-ambient,
+body.perspective-ready .fallback-geography{display:none!important}
+body.perspective-ready #real-map{visibility:hidden}
+body.perspective-ready .map-legend{display:none!important}
+body.perspective-ready .map-credit{display:none!important}
+body.perspective-ready .map-bar{pointer-events:none}
+@media(max-width:350px){#perspective-toggle{top:calc(208px + env(safe-area-inset-top,0px));left:10px;min-width:51px}}
+@media(prefers-reduced-motion:reduce){#perspective-frame{transition:none}}

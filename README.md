@@ -94,3 +94,10 @@ Map boot starts **before** IndexedDB initialization. The PWA shell changes to ne
 ## v0.3.6 — Nocturne visual pass (25 Oct 2026)
 
 A self-contained `nocturne.css` applies Majakka's original dark, desaturated identity to the still-working OSM raster map. The heavy pink motorway and green forest colors are suppressed by a grayscale treatment. Demo nodes gain light-footprints, a soft vertical light column, and a lifted core through CSS-only **2.5D** layering; restored nodes are warmer and interference areas violet. This is inspired by general game-lighting principles, **not a reproduction of Baseline or Ingress**. Existing raster map code, GPS location tracking, Lumen, game state and persistence remain unchanged. Map labels necessarily share the same filter as raster tiles. A configurable vector map style would later give precise control over road, park and water colors. **Android appearance and performance after update await phone QA.**
+
+
+## v0.4.0 — Optional Perspective Trial
+
+A left-side **3D** button opens an experimental, isolated MapLibre GL JS v6.15 perspective map with tilt and rotation, using OpenFreeMap Fiord, optional Mapterhorn terrain, soft extruded buildings (when the vector source allows), and Majakka's original glowing 3D-inspired node markers. Tap **2D** to return immediately to the working locally rendered raster map. A failed/slow 3D module automatically returns to 2D after 24 seconds; the original 2D map engine is never unloaded. 3D WebGL and remote CDN/vector/DEM services require network support.
+
+Existing Tampere sample nodes, links, and harmony field are projected into the 3D test scene. In LIVE, nearby beams and Lumen glints are **temporary visual fixtures**, NOT actual public POIs or persistent multiplayer content. GPS goes only into memory in a same-origin frame and is never stored as a trail. Source-attribution appears through the 3D map provider's controls. Browser and device tests of 3D are still open.

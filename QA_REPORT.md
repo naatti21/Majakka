@@ -80,3 +80,11 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - CSS declarations/blocks have balanced braces; references and script order checked.
 - No new third-party scripts, fonts or tile providers; OSM copyright attribution retained.
 - **No Android screenshot or on-device FPS measurement yet.** Check zoomed-in road legibility, labels, live GPS marker, muted forest/highway palette and halo contrast outdoors.
+
+
+## v0.4.0 — Perspective 3D test
+
+- Added isolated `world-3d.html`, `perspective.js` and `perspective.css`. Only HTML/script links, GPS-to-frame in-memory event hooks, recenter delegation and service worker cache version change in existing code.
+- 2D raster engine and gameplay core unchanged. No new backend, real POI dataset, or saved GPS positions.
+- Standalone 3D module and controller parsed successfully; 2D/3D switching and error/timeout fallback code inspected.
+- Real Android rendering, two-finger rotate/tilt, 3D data/terrain availability and performance **NOT YET TESTED**. 3D mode is explicitly opt-in for that reason.

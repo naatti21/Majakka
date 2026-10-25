@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07141f">
+<title>Majakka — Perspective Trial</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;color:#d9efed}
+*{box-sizing:border-box}
+html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#06121d}
+#scene{position:absolute;inset:0}
+#scene:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(2,10,23,.30) 100%)}
+.maplibregl-control-container .maplibregl-ctrl-attrib{background:#081927d9;color:#abc8c5;font-size:9px}
+.maplibregl-control-container .maplibregl-ctrl-attrib a{color:#c6e3dc}
+#message{position:absolute;z-index:15;top:45%;left:50%;width:min(290px,80%);transform:translate(-50%,-50%);padding:15px;border:1px solid #71c8c35a;border-radius:13px;background:#071c2df2;font-size:12px;text-align:center;line-height:1.5}
+#message[hidden]{display:none}
+#pitch{position:absolute;z-index:12;right:9px;bottom:calc(156px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:7px}
+#pitch button{border:1px solid #92d9cf66;background:#0b2737e8;color:#ebf4ef;width:40px;height:40px;border-radius:50%;font-size:18px;box-shadow:0 5px 14px #0007}
+#hint{position:absolute;z-index:10;left:12px;top:calc(275px + env(safe-area-inset-top,0px));background:#081b29c9;color:#b9dbd8;padding:6px 9px;border-radius:9px;font-size:10px;pointer-events:none}
+#hint[hidden]{display:none}
+.beacon{position:relative;width:78px;height:92px;cursor:pointer;transform:translate(-50%,-10%);pointer-events:auto}
+.beacon .ground{position:absolute;bottom:3px;left:4px;width:70px;height:25px;border-radius:50%;border:1px solid #78dacf88;background:radial-gradient(ellipse,#57c8bd66,transparent 70%);box-shadow:0 0 28px #69dccc64;transform:rotateX(58deg)}
+.beacon .beam{position:absolute;bottom:15px;left:26px;width:26px;height:55px;background:linear-gradient(to top,#6cddd47a,#6cddd426 60%,transparent);filter:blur(5px);clip-path:polygon(34% 0,66% 0,100% 100%,0 100%)}
+.beacon .orb{position:absolute;bottom:48px;left:31px;width:16px;height:16px;border-radius:50%;background:#9cf7df;border:2px solid #f0fff8;box-shadow:0 0 10px 4px #60f7dc,0 0 25px 8px #49c9c775;animation:float 4s ease-in-out infinite}
+.beacon .tag{position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e0f2ea;text-shadow:0 2px 6px #000,0 0 10px #000}
+.beacon.awake .ground{background:radial-gradient(ellipse,#f9c17a66,transparent 70%);border-color:#f4c783}
+.beacon.awake .beam{background:linear-gradient(to top,#f4c47b8c,#ebbf7630 60%,transparent)}
+.beacon.awake .orb{background:#fbdca2;box-shadow:0 0 10px 4px #f4cb8a,0 0 27px 10px #e6b36b77}
+.beacon.temporary .tag{color:#afdfd8;font-size:9px}
+.beacon.rift .ground{border-color:#b478d8;background:radial-gradient(ellipse,#9a4dc166,transparent)}
+.beacon.rift .beam{background:linear-gradient(to top,#8339af8c,#813ab326,transparent)}
+.beacon.rift .orb{background:#1e0c36;border-color:#b18adc;box-shadow:0 0 0 7px #64259542,0 0 21px #b67ee7}
+.beacon.player{width:48px;height:56px;transform:translate(-50%,-6%)}
+.beacon.player .orb{left:16px;bottom:20px;background:#35bfc4}
+.beacon.player .ground{left:-5px;bottom:5px;width:55px}
+.beacon.player .beam{bottom:13px;left:14px;height:29px;width:20px}
+.beacon.player .tag{display:none}
+ .lumen-speck{width:7px;height:7px;border-radius:50%;background:#f4dfac;box-shadow:0 0 7px 2px #ecc88e,0 0 20px 4px #e1a55a77;cursor:pointer;animation:glow 3s ease-in-out infinite}
+.lumen-speck:after{content:"";position:absolute;inset:-10px;border:1px solid #e4bc7a38;border-radius:50%}
+@keyframes float{50%{transform:translateY(-8px)}}@keyframes glow{50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.beacon .orb,.lumen-speck{animation:none}}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div id="message">Preparing the 3D world…</div>
+<div id="hint">Use two fingers to rotate and tilt · Experimental 3D</div>
+<div id="pitch"><button id="steeper" type="button" title="Look toward horizon" aria-label="Tilt towards horizon">⇧</button><button id="flatter" type="button" title="Look from above" aria-label="Tilt towards overhead">⇩</button><button id="north" type="button" title="Face north" aria-label="Rotate north">N</button></div>
+<script type="module">
+const reply=(type,payload={})=>parent.postMessage({source:'majakka-3d',type,...payload},location.origin);
+const box=document.getElementById('message'),shown=(text)=>{box.textContent=text;box.hidden=false;};
+const hide=()=>{box.hidden=true;};
+const nodes=[
+ {id:'koski',name:'River Current',lat:61.50010,lng:23.76470},
+ {id:'square',name:'Quiet Square',lat:61.49772,lng:23.76018},
+ {id:'harbor',name:'Southern Lantern',lat:61.49422,lng:23.76218}
+];
+let map=null,lib=null,world=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false;
+const makeMarker=(point,{kind='node',awake=false,temporary=false,callback=()=>{}}={})=>{
+ const el=document.createElement('div');
+ el.className='beacon'+(awake?' awake':'')+(temporary?' temporary':'')+(kind==='rift'?' rift':'')+(kind==='player'?' player':'');
+ el.innerHTML='<span class="ground"></span><span class="beam"></span><span class="orb"></span><span class="tag"></span>';
+ el.querySelector('.tag').textContent=point.name||'';
+ el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-label',point.name||kind);
+ el.addEventListener('click',callback);
+ el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();callback();}});
+ const marker=new lib.Marker({element:el,anchor:'bottom',pitchAlignment:'viewport',rotationAlignment:'viewport'})
+    .setLngLat([point.lng,point.lat]).addTo(map);
+ markers.push(marker);return marker;
+};
+function clearMarkers(){for(const m of markers)m.remove();markers=[];}
+function updateGeoJSON(id,features,type){
+ const source=map.getSource(id);
+ if(source)source.setData({type:'FeatureCollection',features});
+ else{
+  map.addSource(id,{type:'geojson',data:{type:'FeatureCollection',features}});
+  if(type==='field'){
+   map.addLayer({id:id+'-fill',type:'fill',source:id,paint:{'fill-color':'#bb9559','fill-opacity':.19}});
+   map.addLayer({id:id+'-outline',type:'line',source:id,paint:{'line-color':'#dfbd7c','line-width':2.5,'line-opacity':.78}});
+  }else map.addLayer({id:id+'-line',type:'line',source:id,paint:{'line-color':'#c4a670','line-width':2.5,'line-opacity':.8,'line-blur':1}});
+ }
+}
+function showWorld(){
+ if(!map||!ready)return;
+ document.getElementById('hint').textContent=mode==='live'?'TEST LIGHTS · temporary, not real places':'Two fingers: tilt & rotate · Tap light to interact';
+ clearMarkers();
+ const features=[],lines=[];
+ if(mode==='demo'){
+  for(const n of nodes){
+   const awake=(world?.awake||[]).includes(n.id);
+   makeMarker(n,{awake,callback:()=>reply('node-select',{id:n.id})});
+  }
+  makeMarker({name:'Interference',lat:61.4966,lng:23.7646},{kind:'rift',awake:Boolean(world?.riftClear),callback:()=>reply('rift-select')});
+  if(world?.field){
+   features.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...nodes.map(n=>[n.lng,n.lat]),[nodes[0].lng,nodes[0].lat]]]},properties:{}});
+  }
+  for(const [a,b] of (world?.edges||[])){
+   const x=nodes.find(n=>n.id===a),y=nodes.find(n=>n.id===b);
+   if(x&&y)lines.push({type:'Feature',geometry:{type:'LineString',coordinates:[[x.lng,x.lat],[y.lng,y.lat]]},properties:{}});
+  }
+ }else if(lastFix){
+  makeMarker({name:'You',...lastFix},{kind:'player'});
+  // Temporary visual anchors for testing depth; not real public nodes or POIs.
+  const offsets=[[.0018,-.0018],[-.0017,.0019],[.0023,.0011]];
+  offsets.forEach(([dlat,dlng],i)=>{
+    makeMarker({name:'TEST LIGHT',lat:lastFix.lat+dlat,lng:lastFix.lng+dlng},{temporary:true,callback:()=>reply('trial-node')});
+  });
+  for(let i=0;i<7;i++){
+   const offset=(i+1)*2.399963,lat=lastFix.lat+Math.sin(offset)*.0011,lng=lastFix.lng+Math.cos(offset)*.0021;
+   const e=document.createElement('div');e.className='lumen-speck';e.title='Simulated Lumen · tap to Scan';
+   e.setAttribute('aria-label','Scan nearby trial light');e.addEventListener('click',()=>reply('scan'));
+   markers.push(new lib.Marker({element:e,anchor:'center'}).setLngLat([lng,lat]).addTo(map));
+  }
+ }
+ updateGeoJSON('majakka-field',features,'field');
+ updateGeoJSON('majakka-threads',lines,'line');
+}
+function receive(data){
+ if(data.type==='init'){
+  world=data.world||null;mode=data.mode==='live'?'live':'demo';
+  if(data.fix)lastFix=data.fix;
+  if(map&&ready){
+   if(data.center&&Array.isArray(data.center))map.jumpTo({center:data.center,zoom:Math.max(13,data.zoom||15)});
+   showWorld();if(mode==='live'&&lastFix&&!userMoved&&!firstLiveCenter)centerLive();
+  }
+ }else if(data.type==='mode'){
+  const previous=mode;mode=data.mode==='live'?'live':'demo';
+  if(mode==='live'&&previous!=='live')firstLiveCenter=false;
+  if(mode==='live'&&lastFix&&!userMoved&&!firstLiveCenter)centerLive();
+  if(map&&ready)showWorld();
+ }else if(data.type==='gps'){
+  if(!data.fix)return;
+  lastFix=data.fix;
+  if(mode==='live'&&map&&ready){
+   if(!firstLiveCenter&&!userMoved)centerLive();
+   showWorld();
+  }
+ }else if(data.type==='world'){world=data.world||{};if(ready&&mode==='demo')showWorld();}
+ else if(data.type==='recenter'){
+  if(!map||!ready)return;
+  if(mode==='live'&&lastFix)centerLive();
+  else map.flyTo({center:[23.7623,61.4984],zoom:15,pitch:66,duration:700,essential:true});
+ }
+}
+function centerLive(){
+ if(!map||!ready||!lastFix)return;
+ firstLiveCenter=true;
+ map.easeTo({center:[lastFix.lng,lastFix.lat],zoom:Math.max(15,map.getZoom()),duration:700});
+}
+addEventListener('message',e=>{
+ if(e.origin!==location.origin||e.source!==parent||e.data?.source!=='majakka-parent')return;
+ receive(e.data);
+});
+document.getElementById('steeper').addEventListener('click',()=>{if(map)map.easeTo({pitch:Math.min(80,map.getPitch()+12),duration:300});});
+document.getElementById('flatter').addEventListener('click',()=>{if(map)map.easeTo({pitch:Math.max(18,map.getPitch()-12),duration:300});});
+document.getElementById('north').addEventListener('click',()=>{if(map)map.easeTo({bearing:0,duration:500});});
+try {
+ shown('Loading 3D engine…');
+ try{lib=await import('https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');}
+ catch{lib=await import('https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs');}
+ if(typeof lib.supported==='function'&&!lib.supported())throw new Error('3D needs WebGL on this device');
+ shown('Loading 3D map and terrain…');
+ map=new lib.Map({
+  container:'scene',
+  style:'https://tiles.openfreemap.org/styles/fiord',
+  center:[23.7623,61.4984],zoom:15,pitch:66,bearing:-12,maxPitch:85,
+  dragRotate:true,attributionControl:{compact:true},renderWorldCopies:false,antialias:false,
+  maxZoom:18,minZoom:3
+ });
+ map.touchZoomRotate.enableRotation();
+ map.on('dragstart',()=>{userMoved=true;});
+ map.on('load',()=>{
+  ready=true;hide();reply('ready');showWorld();
+  // Enhancement only: loss of a terrain service must not blank the base map.
+  try{
+   if(typeof map.setSky==='function')map.setSky({'sky-color':'#07121d','horizon-color':'#203841','fog-color':'#12242e','sky-horizon-blend':.52,'horizon-fog-blend':.65});
+  }catch(e){console.warn('Sky unavailable',e);}
+  try{
+   map.addSource('majakka-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json',encoding:'terrarium',tileSize:512});
+   map.setTerrain({source:'majakka-dem',exaggeration:1});
+   terrainReady=true;
+  }catch(e){console.warn('Terrain unavailable, pitched map stays active',e);}
+  // Optional 3D building extrusions on OpenMapTiles vector data, if present.
+  try{
+   const style=map.getStyle(),sourceId=Object.keys(style.sources).find(k=>style.sources[k].type==='vector');
+   if(sourceId)map.addLayer({id:'majakka-buildings',type:'fill-extrusion',source:sourceId,'source-layer':'building',minzoom:14,
+    paint:{'fill-extrusion-color':'#1a3941','fill-extrusion-height':['coalesce',['get','render_height'],['get','height'],8],'fill-extrusion-opacity':.38}});
+  }catch(e){console.warn('Building extrusion unavailable',e);}
+ });
+ map.on('error',e=>{console.warn('MapLibre 3D:',e?.error||e);});
+ map.on('remove',()=>{ready=false;});
+}catch(error){
+ shown('3D is unavailable on this connection or device. Returning to 2D.');
+ reply('error',{message:String(error?.message||error).slice(0,160)});
+}
+</script>
+</body>
+</html>
