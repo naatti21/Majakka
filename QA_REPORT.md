@@ -37,3 +37,12 @@
 - Browser harness was attempted but blocked by the testing environment (`ERR_BLOCKED_BY_ADMINISTRATOR`) before page load: **browser E2E NOT VERIFIED**.
 - Actual Android GPS permission, map tiles, Pages deployment and phone ergonomics: **NOT RUN** at authoring time.
 - Privacy caveat: viewed-area tile requests still go to map provider. GPS positions are RAM-only; no tracking in the background.
+
+
+## v0.3.2 — Map readiness repair
+
+- Identified a deterministic script-order race: asynchronous MapLibre loader combined with asynchronous IndexedDB restore could call startMap before the library loaded and miss window.load.
+- Switched MapLibre script to defer, added alternate CDN recovery, Fiord→Liberty style timeout and retry control.
+- Added mapready handshake to the live GPS session and recenter handler that respects LIVE vs DEMO.
+- Manual source inspection: no server-side GPS store added; existing domain and rift rules unchanged.
+- **Physical Android, external tile/CDN reachability, and Page load: not independently verified from the build environment.** The user must test on the GitHub Pages URL.

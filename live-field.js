@@ -31,6 +31,9 @@
     'Accuracy ~'+Math.round(next.accuracy)+' m · '+(next.accuracy<=65?'Signal clear':'Location uncertain; move rewards paused')+'. '+(moveRewards?moveRewards+' travel echoes.':'Move naturally or scan where you are.'));
   redraw();
  }
+ function recenterLive(){if(!active||!fix){tell('Waiting for a live position.');return;}follow=true;if(typeof map!=='undefined'&&map&&mapReady){map.flyTo({center:[fix.lng,fix.lat],zoom:Math.max(15,map.getZoom()),essential:true});redraw();}else tell('Location acquired; waiting for the street map.');}
+ globalThis.MajakkaLive={isActive:()=>active,recenter:recenterLive};
+ window.addEventListener('majakka:mapready',()=>{if(active&&fix)recenterLive();});
  function stop(reason='Location trial ended. No route saved.'){
   if(id!==null&&navigator.geolocation)navigator.geolocation.clearWatch(id);
   id=null;clearTimeout(expiry);expiry=null;active=false;gotFix=false;fix=null;anchor=null;dot.hidden=true;scan.hidden=true;panel.hidden=true;

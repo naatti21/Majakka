@@ -4,6 +4,10 @@ const C=globalThis.MajakkaCore;
 const $=id=>document.getElementById(id);
 const nodes=C.NODES;
 let state=C.blank(),db=null,map=null,mapReady=false,audioContext=null,toastTimer=0;
+let mapEngineLoading=false,mapEngineFallbackUsed=false,mapStyleTimer=null;
+const mapStyleCandidates=['https://tiles.openfreemap.org/styles/fiord','https://tiles.openfreemap.org/styles/liberty'];
+function showMapStatus(message,retry=false){const status=$('map-load-status');if(!status)return;status.replaceChildren(document.createTextNode(message));status.hidden=false;if(retry){const btn=document.createElement('button');btn.type='button';btn.textContent='Retry map';btn.addEventListener('click',()=>{mapEngineFallbackUsed=false;startMap();});status.appendChild(btn);}}
+function clearMapStatus(){const status=$('map-load-status');if(status)status.hidden=true;}
 const fmt=n=>String(n).padStart(2,'0');
 const lookup=id=>nodes.find(n=>n.id===id);
 const selected=()=>lookup(state.selected)||nodes[0];
@@ -79,20 +83,55 @@ function bind(){
  $('advance-pulse').addEventListener('click',()=>{const r=C.pulse(state);save();render();if(r.fieldOpen){tone([0,2,4]);notify('THE FIRST CHORD — a resonance field has awakened.');}else notify(r.newEdges?`✧ ${r.newEdges} threads joined in the delayed pulse.`:r.changed?'A quiet world pulse has passed. Light is settling.':'A quiet world pulse. Nothing was lost.');});
  $('listen').addEventListener('click',()=>{const n=selected();tone([n.note,n.note+2,n.note+4]);notify(state.sound?`Listening to ${n.name}.`: 'Sound is muted. Tap ♩ at the top to hear this echo.');});
  $('sound').addEventListener('click',()=>{state.sound=!state.sound;save();render();if(state.sound)tone([0,2,4]);});
- $('recenter').addEventListener('click',()=>{if(map&&mapReady)map.flyTo({center:[23.7623,61.4984],zoom:14.5,essential:true});notify('Centered on the Tampere demo area.');});
+ $('recenter').addEventListener('click',()=>{if(globalThis.MajakkaLive?.isActive()){globalThis.MajakkaLive.recenter();return;}if(map&&mapReady)map.flyTo({center:[23.7623,61.4984],zoom:14.5,essential:true});notify('Centered on the Tampere demo area.');});
  $('reset').addEventListener('click',()=>{if(!confirm('Reset only First Light v0.2 progress on this device?'))return;state=C.blank();save();feedback('');render();notify('First Light demo reset.');});
  window.addEventListener('resize',()=>drawWorld());
  window.addEventListener('load',()=>{if(!map&&globalThis.maplibregl)startMap();});
 }
 function startMap(){
- if(!globalThis.maplibregl){$('map-legend-text').textContent='OFFLINE DEMO MAP · NO GPS';$('map-credit').style.display='none';return;}
- try{
-  map=new maplibregl.Map({container:'real-map',style:'https://tiles.openfreemap.org/styles/fiord',center:[23.7623,61.4984],zoom:14.5,minZoom:12,maxZoom:17,attributionControl:true,dragRotate:false,pitchWithRotate:false,renderWorldCopies:false});
-  map.touchZoomRotate.disableRotation();
-  map.on('load',()=>{mapReady=true;$('map-credit').style.display='block';$('real-map').style.opacity='1';$('map-legend-text').textContent='REAL MAP · DEMO NODES · NO GPS';drawWorld();});
-  map.on('move',()=>{if(mapReady)drawWorld();});
-  map.on('error',e=>{if(!mapReady)console.warn('Map background unavailable',e?.error||e);});
- }catch(e){console.warn('Using offline fallback',e);map=null;}
+ if(map||mapEngineLoading)return;
+ if(!globalThis.maplibregl){
+  showMapStatus('Loading map engine…');
+  if(mapEngineFallbackUsed){showMapStatus('Map engine unavailable. Check your connection and retry.',true);return;}
+  mapEngineFallbackUsed=true;mapEngineLoading=true;
+  const script=document.createElement('script');
+  script.src='https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.js';
+  script.onload=()=>{mapEngineLoading=false;startMap();};
+  script.onerror=()=>{mapEngineLoading=false;showMapStatus('Map engine could not load. Check your connection.',true);};
+  document.head.appendChild(script);return;
+ }
+ if(typeof maplibregl.supported==='function'&&!maplibregl.supported()){
+  showMapStatus('This device cannot run the interactive map (WebGL unavailable).',true);return;
+ }
+ function launchStyle(index){
+  clearTimeout(mapStyleTimer);
+  if(map){map.remove();map=null;mapReady=false;}
+  if(index>=mapStyleCandidates.length){
+   showMapStatus('The street map could not load. Check your connection and tap Retry map.',true);return;
+  }
+  showMapStatus(index?'Retrying with alternative map style…':'Loading streets, paths and water…');
+  try{
+   map=new maplibregl.Map({
+    container:'real-map',style:mapStyleCandidates[index],center:[23.7623,61.4984],
+    zoom:14.5,minZoom:3,maxZoom:19,attributionControl:true,
+    dragRotate:false,pitchWithRotate:false,renderWorldCopies:false
+   });
+   map.touchZoomRotate.disableRotation();
+   const candidate=map;
+   mapStyleTimer=setTimeout(()=>{if(!mapReady&&map===candidate)launchStyle(index+1);},14000);
+   map.on('load',()=>{
+    if(map!==candidate)return;
+    clearTimeout(mapStyleTimer);mapReady=true;
+    $('map-credit').style.display='block';$('real-map').style.opacity='1';
+    $('map-legend-text').textContent='REAL MAP · DEMO NODES · NO GPS';
+    clearMapStatus();map.resize();drawWorld();
+    window.dispatchEvent(new Event('majakka:mapready'));
+   });
+   map.on('move',()=>{if(mapReady)drawWorld();});
+   map.on('error',error=>console.warn('Map tile/style error:',error?.error||error));
+  }catch(e){console.warn('Map start failed:',e);launchStyle(index+1);}
+ }
+ launchStyle(0);
 }
 async function init(){await restore();bind();render();startMap();if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW unavailable',e));}
 init();

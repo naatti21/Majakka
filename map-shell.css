@@ -39,3 +39,10 @@ body.node-open #quiet-collect,body.field-open #quiet-collect,body.journal-open #
 @media(min-width:760px){.signal-card,.field-card,.journal-card{left:auto!important;right:20px!important;bottom:94px!important;width:min(390px,calc(100vw - 40px))!important;border-radius:20px!important;border-bottom:1px solid #a2d3cb46!important}.map-bottom-nav{max-width:410px;left:50%;transform:translateX(-50%);border-radius:18px 18px 0 0}.map-legend{bottom:25px}.map-credit{bottom:19px!important}#quiet-collect{bottom:100px}}
 @media(max-width:355px){.signal-card,.field-card{padding:14px 12px 9px!important}.signal-actions>button{font-size:10px!important}.brand{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.signal-card,.field-card,.journal-card{transition:none!important}}
+
+/* Map reliability HUD; feedback never blocks the center of the game map. */
+#map-load-status{position:fixed;left:12px;top:calc(140px + env(safe-area-inset-top,0px));z-index:15;max-width:min(63vw,255px);color:#c9ece8;background:#092333ea;border:1px solid #77bab86a;border-radius:12px;padding:10px 12px;box-shadow:0 6px 28px #0008;font-size:11px;line-height:1.5;backdrop-filter:blur(12px)}
+#map-load-status[hidden]{display:none!important}
+#map-load-status button{display:block;margin-top:7px;padding:7px 12px;background:#1d4b56;color:#eff9f5;border:1px solid #8bd3ca77;border-radius:8px;min-height:34px;font-size:11px}
+body.live-gps .fallback-geography{display:none!important}
+body.live-gps #real-map{background:#081824}
