@@ -46,3 +46,9 @@ body.node-open #quiet-collect,body.field-open #quiet-collect,body.journal-open #
 #map-load-status button{display:block;margin-top:7px;padding:7px 12px;background:#1d4b56;color:#eff9f5;border:1px solid #8bd3ca77;border-radius:8px;min-height:34px;font-size:11px}
 body.live-gps .fallback-geography{display:none!important}
 body.live-gps #real-map{background:#081824}
+
+/* v0.3.5 — local raster renderer. Only viewport tiles, no WebGL or external JS. */
+#real-map.raster-map{touch-action:none;user-select:none;-webkit-user-select:none;background:#0b1b27;cursor:grab}
+#real-map.raster-map:active{cursor:grabbing}
+.raster-surface{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.raster-tile{position:absolute;width:256px;height:256px;max-width:none;pointer-events:none;user-select:none;-webkit-user-drag:none;filter:invert(.88) hue-rotate(180deg) saturate(.65) brightness(.72) contrast(1.22)}

@@ -4,9 +4,9 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111b"><meta name="description" content="Majakka First Light — a world waiting to resonate. Interactive local-only prototype.">
 <link rel="icon" type="image/svg+xml" href="./assets/mark.svg"><link rel="manifest" href="./manifest.webmanifest">
-<link rel="stylesheet" href="./styles.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.10.0/dist/maplibre-gl.css">
-<link rel="stylesheet" href="./map-shell.css"><link rel="stylesheet" href="./map-hud-v0.3.css"><link rel="stylesheet" href="./live-field.css">
+<link rel="stylesheet" href="./styles.css?v=035">
+
+<link rel="stylesheet" href="./map-shell.css?v=035"><link rel="stylesheet" href="./map-hud-v0.3.css?v=035"><link rel="stylesheet" href="./live-field.css?v=035">
 <title>MAJAKKA — First Light</title>
 </head>
 <body>
@@ -26,12 +26,12 @@
    <svg viewBox="0 0 400 550" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#12445a"/><stop offset="1" stop-color="#0b283e"/></linearGradient></defs><rect width="400" height="550" fill="#0b1a26"/><path d="M245 -30 Q170 105 225 200 T175 405 Q155 477 106 590" fill="none" stroke="url(#river)" stroke-width="62"/><g fill="none" stroke="#456271" stroke-width="1.2" opacity=".4"><path d="M-50 90L450 340M-30 130L445 385M-20 220L450 480M-20 335L400 90M0 425L375 200M15 550L310 -40M350 -30L40 580M415 100L-50 350"/></g><g font-size="10" fill="#718c99" letter-spacing="2"><text x="30" y="100">FINLAYSON</text><text x="252" y="210">KOSKIPUISTO</text><text x="40" y="335">KESKUSTORI</text><text x="218" y="460">LAUKONTORI</text></g></svg>
   </div>
   <div id="real-map" aria-label="Interactive real geographic map"></div>
-  <div id="map-load-status" class="map-load-status" role="status" aria-live="polite">Loading geographic map…</div>
+  <div id="map-load-status" class="map-load-status" role="status" aria-live="polite">Loading real street map…</div>
   <div id="world-overlay" class="world-overlay"><svg id="field-layer" aria-hidden="true"></svg><div id="world-markers"></div></div>
   <div class="map-ambient" aria-hidden="true"></div>
   <div class="map-legend"><span class="ping">✦</span> <span id="map-legend-text">SAMPLE NODES · NO GPS</span></div>
   <div class="map-right"><button id="recenter" class="map-button" type="button" aria-label="Recenter map">⌖</button></div>
-  <div id="map-credit" class="map-credit"><a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a> · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap</a></div>
+  <div id="map-credit" class="map-credit"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div>
  </div>
  <div class="movement-bar"><div><span class="eyebrow">YOUR SONDE</span><div class="sonde-status"><span class="sonde-led"></span><span id="sonde-status">Distant echo</span></div></div><button id="demo-walk" class="thin-button" type="button">Walk to selected node <span>↗</span></button></div>
 </section>
@@ -46,7 +46,7 @@
 </main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.10.0/dist/maplibre-gl.js" defer></script>
-<script src="./core.js" defer></script><script src="./app.js" defer></script><script src="./map-shell.js" defer></script><script src="./rift-core.js" defer></script><script src="./map-hud-v0.3.js" defer></script><script src="./live-core.js" defer></script><script src="./live-field.js" defer></script>
+<script src="./raster-map.js?v=035" defer></script>
+<script src="./core.js?v=035" defer></script><script src="./app.js?v=035" defer></script><script src="./map-shell.js?v=035" defer></script><script src="./rift-core.js?v=035" defer></script><script src="./map-hud-v0.3.js?v=035" defer></script><script src="./live-core.js?v=035" defer></script><script src="./live-field.js?v=035" defer></script>
 </body>
 </html>

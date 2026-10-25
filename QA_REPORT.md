@@ -61,3 +61,13 @@
 ## v0.3.4 — Emergency Android map regression rollback
 
 User reported total map failure after v0.3.3. Restored live-field.js and live-field.css from the last confirmed Android working commit (900db89), rather than stacking more speculative changes. Bumped PWA cache version to v0.3.4. GitHub source checks possible, Android retest remains open. Known old UX issues (GPS recenter, sheet overlap) are temporarily present; fix separately only after loading is confirmed.
+
+
+## v0.3.5 — Blank map after rollback
+
+- Screenshot (user, Android): live positioning works, but street map remains black with `Loading geographic map…`; versioned JS text suggested a stale mixed PWA shell was possible.
+- Removed asynchronous CDN dependency (MapLibre + map style) from the map boot path; local raster renderer added with tile load/error events, pan and pinch zoom.
+- Map starts before async IndexedDB restore. All first-party script and stylesheet URLs have fresh build query versions.
+- New service worker caches only own app shell network-first, preserving local game state; external tile requests are never intercepted/prefetched.
+- Geographic projection round-trip checked with five cross-world coordinate samples.
+- **Remote tile delivery and real Android device after this patch remain unverified**. The test plan is to check streets and swipe/pinch, then GPS recenter. Tile provider failures are visible after 12 seconds.

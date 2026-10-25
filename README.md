@@ -82,3 +82,10 @@ Live map now centers on the first accepted GPS position **once per opted-in sess
 ## v0.3.4 — restore last field-verified map configuration
 
 The previous GPS/HUD modification was rolled back after the user reported the map stopped loading. Restored live-field.js and live-field.css exactly from v0.3.2 (commit 900db89). All other v0.3.2 files remain in place. Service-worker cache version bumped to force a new app-shell installation. The previous recurring follow and Harmony overlap are known open issues; real-world map loading takes priority. **Phone retest required.**
+
+
+## v0.3.5 — Street map boot repair
+
+After the Android map showed **Loading geographic map…** indefinitely, the map implementation was replaced with a self-contained first-party raster map renderer (`raster-map.js`) using *only on-screen* OpenStreetMap Standard raster tiles. Map JS and WebGL are no longer loaded from external CDNs. The map provides drag, pinch/scroll zoom, projection for node overlays, panning, and map events for LIVE GPS. Tiles are requested directly by the browser; they follow the normal HTTP cache and are not preloaded or included in PWA cache. This is a temporary low-volume testing approach, not yet a scale-ready basemap contract.
+
+Map boot starts **before** IndexedDB initialization. The PWA shell changes to network-first for HTML/CSS/JS, and the HTML references local assets using a new build query to avoid previous service-worker cached files from mixing old and new versions. Device GPS track handling and live cooldown logic remain untouched. The map has a tile-load error after 12 seconds rather than an infinite loading label. Any future production map provider will need explicit licensing and capacity review.

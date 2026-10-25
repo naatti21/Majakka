@@ -4,8 +4,7 @@ const C=globalThis.MajakkaCore;
 const $=id=>document.getElementById(id);
 const nodes=C.NODES;
 let state=C.blank(),db=null,map=null,mapReady=false,audioContext=null,toastTimer=0;
-let mapEngineLoading=false,mapEngineFallbackUsed=false,mapStyleTimer=null;
-const mapStyleCandidates=['https://tiles.openfreemap.org/styles/fiord','https://tiles.openfreemap.org/styles/liberty'];
+
 function showMapStatus(message,retry=false){const status=$('map-load-status');if(!status)return;status.replaceChildren(document.createTextNode(message));status.hidden=false;if(retry){const btn=document.createElement('button');btn.type='button';btn.textContent='Retry map';btn.addEventListener('click',()=>{mapEngineFallbackUsed=false;startMap();});status.appendChild(btn);}}
 function clearMapStatus(){const status=$('map-load-status');if(status)status.hidden=true;}
 const fmt=n=>String(n).padStart(2,'0');
@@ -89,49 +88,26 @@ function bind(){
  window.addEventListener('load',()=>{if(!map&&globalThis.maplibregl)startMap();});
 }
 function startMap(){
- if(map||mapEngineLoading)return;
- if(!globalThis.maplibregl){
-  showMapStatus('Loading map engine…');
-  if(mapEngineFallbackUsed){showMapStatus('Map engine unavailable. Check your connection and retry.',true);return;}
-  mapEngineFallbackUsed=true;mapEngineLoading=true;
-  const script=document.createElement('script');
-  script.src='https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.js';
-  script.onload=()=>{mapEngineLoading=false;startMap();};
-  script.onerror=()=>{mapEngineLoading=false;showMapStatus('Map engine could not load. Check your connection.',true);};
-  document.head.appendChild(script);return;
- }
- if(typeof maplibregl.supported==='function'&&!maplibregl.supported()){
-  showMapStatus('This device cannot run the interactive map (WebGL unavailable).',true);return;
- }
- function launchStyle(index){
-  clearTimeout(mapStyleTimer);
-  if(map){map.remove();map=null;mapReady=false;}
-  if(index>=mapStyleCandidates.length){
-   showMapStatus('The street map could not load. Check your connection and tap Retry map.',true);return;
-  }
-  showMapStatus(index?'Retrying with alternative map style…':'Loading streets, paths and water…');
-  try{
-   map=new maplibregl.Map({
-    container:'real-map',style:mapStyleCandidates[index],center:[23.7623,61.4984],
-    zoom:14.5,minZoom:3,maxZoom:19,attributionControl:true,
-    dragRotate:false,pitchWithRotate:false,renderWorldCopies:false
-   });
-   map.touchZoomRotate.disableRotation();
-   const candidate=map;
-   mapStyleTimer=setTimeout(()=>{if(!mapReady&&map===candidate)launchStyle(index+1);},14000);
-   map.on('load',()=>{
-    if(map!==candidate)return;
-    clearTimeout(mapStyleTimer);mapReady=true;
-    $('map-credit').style.display='block';$('real-map').style.opacity='1';
-    $('map-legend-text').textContent='REAL MAP · DEMO NODES · NO GPS';
-    clearMapStatus();map.resize();drawWorld();
-    window.dispatchEvent(new Event('majakka:mapready'));
-   });
-   map.on('move',()=>{if(mapReady)drawWorld();});
-   map.on('error',error=>console.warn('Map tile/style error:',error?.error||error));
-  }catch(e){console.warn('Map start failed:',e);launchStyle(index+1);}
- }
- launchStyle(0);
+ // Map starts immediately. It never waits for IndexedDB or external JS libraries.
+ if(map){map.remove();map=null;}
+ mapReady=false;
+ if(!globalThis.MajakkaRaster?.Map){showMapStatus('Local map engine did not load. Try refreshing.',true);return;}
+ showMapStatus('Loading real street map…');
+ try{
+  map=new MajakkaRaster.Map({container:'real-map',center:[23.7623,61.4984],zoom:15,minZoom:3,maxZoom:19});
+  const candidate=map;
+  map.on('load',()=>{
+   if(candidate!==map)return;
+   mapReady=true;
+   $('map-credit').style.display='block';
+   $('real-map').style.opacity='1';
+   $('map-legend-text').textContent='OPENSTREETMAP · DEMO NODES';
+   clearMapStatus();map.resize();drawWorld();
+   window.dispatchEvent(new Event('majakka:mapready'));
+  });
+  map.on('move',()=>{if(mapReady)drawWorld();});
+  map.on('error',e=>{if(!mapReady){console.warn('Street map tile failure',e);showMapStatus('Street tiles unavailable. Check connection, then retry.',true);}});
+ }catch(e){console.warn('Map initialization error',e);showMapStatus('Map could not initialize: tap Retry map.',true);}
 }
-async function init(){await restore();bind();render();startMap();if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW unavailable',e));}
+async function init(){startMap();await restore();bind();render();if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW unavailable',e));}
 init();
