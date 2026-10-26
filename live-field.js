@@ -30,8 +30,8 @@ function onFix(loc){
  if(followFirst&&!mapWasMoved&&typeof map!=='undefined'&&map&&mapReady){
   followFirst=false;map.flyTo({center:[p.lng,p.lat],zoom:Math.max(14,map.getZoom()),essential:true});
  }
- btn.textContent='◉ Position on';btn.setAttribute('aria-label','Pause my location updates');btn.setAttribute('aria-pressed','true');
- status('YOUR POSITION · '+Math.round(p.accuracy)+' m','Interact with any mapped node from here. Walking is optional.');
+ btn.textContent='◉ GPS '+Math.round(p.accuracy)+'m';btn.setAttribute('aria-label','Position accuracy '+Math.round(p.accuracy)+' metres. Pause location updates');btn.setAttribute('aria-pressed','true');
+ readout.hidden=true;
  draw();
 }
 function pause(silent=false){
