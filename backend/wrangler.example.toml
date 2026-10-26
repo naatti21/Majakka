@@ -1,0 +1,18 @@
+# COPY to backend/wrangler.toml ONLY when creating a dedicated Majakka D1 database.
+# This example has NO valid production binding and is intentionally undeployable as-is.
+name = "majakka-echo-alpha"
+main = "worker.mjs"
+compatibility_date = "2026-10-26"
+
+[vars]
+ALLOWED_ORIGIN = "https://naatti21.github.io"
+MUTATIONS_ENABLED = "false"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "majakka-echo-alpha"
+database_id = "REPLACE_WITH_DEDICATED_MAJAKKA_D1_UUID"
+migrations_dir = "migrations"
+
+# SIGNING_SECRET must be set using: npx wrangler secret put SIGNING_SECRET
+# It must NOT be committed to GitHub or embedded in PWA HTML.
