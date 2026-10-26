@@ -213,13 +213,17 @@ function drawAerialLinks(pairs){
  aerialLayersReady=true;
 }
 
+let lastPersonalPointsSignature=null,lastPersonalPoseSignature=null,lastAppliedArrowPose=null,lastWorldGeometrySignature=null;
 /* v0.8 personal field: GPU sparks and meter-scaled collection/arrow. */
 function renderPersonal(){
  if(!map||!ready)return;
  const fc=features=>({type:'FeatureCollection',features});
  const update=(id,features)=>{const src=map.getSource(id),data=fc(features);if(src)src.setData(data);else map.addSource(id,{type:'geojson',data});};
  const features=(personal?.points||[]).filter(p=>typeof p.id==='string').map(p=>({type:'Feature',properties:{id:p.id,size:p.size||'dust'},geometry:{type:'Point',coordinates:[p.lng,p.lat]}}));
- update('personal-sparks',features);
+ const signature=features.map(f=>f.properties.id).join('|');
+ if(signature!==lastPersonalPointsSignature||!map.getSource('personal-sparks')){
+  update('personal-sparks',features);lastPersonalPointsSignature=signature;
+ }
  if(!map.getLayer('personal-sparks-glow')){
   map.addLayer({id:'personal-sparks-glow',type:'circle',source:'personal-sparks',paint:{'circle-color':'#dbc69b','circle-radius':['match',['get','size'],'heart',4,'glow',2.6,1.2],'circle-opacity':.13,'circle-blur':.85}});
   map.addLayer({id:'personal-sparks-points',type:'circle',source:'personal-sparks',paint:{'circle-color':'#f4ddb2','circle-radius':['match',['get','size'],'heart',2.1,'glow',1.2,.7],'circle-opacity':['match',['get','size'],'heart',.88,'glow',.67,.44],'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
@@ -229,7 +233,11 @@ function renderPersonal(){
   map.on('click','personal-sparks-hit',e=>{const id=e.features?.[0]?.properties?.id;if(id)reply('lumen-claim',{id});});
  }
  const fix=personal?.fix,geom=globalThis.MajakkaSceneGeometry;
- update('personal-radius',fix&&geom?[{type:'Feature',properties:{},geometry:geom.circle(fix,personal.range||30)}]:[]);
+ const poseSignature=fix?[fix.lat.toFixed(6),fix.lng.toFixed(6),map.getBearing().toFixed(2),personal.range].join(':'):'none';
+ if(poseSignature!==lastPersonalPoseSignature||!map.getSource('personal-radius')){
+  update('personal-radius',fix&&geom?[{type:'Feature',properties:{},geometry:geom.circle(fix,personal.range||30)}]:[]);
+  lastPersonalPoseSignature=poseSignature;
+ }
  if(!map.getLayer('personal-radius-fill')){
   map.addLayer({id:'personal-radius-fill',type:'fill',source:'personal-radius',paint:{'fill-color':'#67e2ce','fill-opacity':.06}});
   map.addLayer({id:'personal-radius-edge',type:'line',source:'personal-radius',paint:{'line-color':'#a4f6e1','line-width':1.3,'line-opacity':.7}});
@@ -241,7 +249,7 @@ function renderPersonal(){
   const vertex=(f,s)=>[fix.lng+(f*dx+s*dy)/scale,fix.lat+(f*dy-s*dx)/111320];
   arrow.push({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[vertex(18,0),vertex(-2,9),vertex(-2,4),vertex(-12,4),vertex(-12,-4),vertex(-2,-4),vertex(-2,-9),vertex(18,0)]]}});
  }
- update('personal-arrow',arrow);
+ if(poseSignature!==lastAppliedArrowPose||!map.getSource('personal-arrow')){update('personal-arrow',arrow);lastAppliedArrowPose=poseSignature;}
  if(!map.getLayer('personal-arrow-solid'))map.addLayer({id:'personal-arrow-solid',type:'fill-extrusion',source:'personal-arrow',paint:{'fill-extrusion-color':'#83f0d9','fill-extrusion-height':5,'fill-extrusion-base':0,'fill-extrusion-opacity':.97}});
 }
 
@@ -284,12 +292,20 @@ function showWorld(){
   points.push({id:'player',name:'You',...lastFix,kind:'player'});
  }
  if(atlas)points.push(...(atlas.real||[]),...(atlas.echoes||[]));
- drawPhysicalWorld(points);
+ const signature=JSON.stringify([
+  points.map(p=>[p.id,p.lat,p.lng,p.kind,p.sharedCharge??null,p.archetype||p.type||'']),
+  haze.map(h=>h.geometry.coordinates),fieldFeatures.map(f=>f.geometry.coordinates),
+  arcPairs.map(pair=>pair.map(n=>[n.id,n.lat,n.lng]))
+ ]);
+ if(signature!==lastWorldGeometrySignature){
+  drawPhysicalWorld(points);
   syncNodeTouches(points);
   drawAerialLinks(arcPairs);
- updateGeoJSON('majakka-haze',haze,'haze');
- updateGeoJSON('majakka-field',fieldFeatures,'field');
- updateGeoJSON('majakka-threads',lines,'line');
+  updateGeoJSON('majakka-haze',haze,'haze');
+  updateGeoJSON('majakka-field',fieldFeatures,'field');
+  updateGeoJSON('majakka-threads',lines,'line');
+  lastWorldGeometrySignature=signature;
+ }
  renderPersonal();
 }
 function receive(data){
