@@ -35,6 +35,7 @@
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
   const zoom=(typeof map!=='undefined'&&map?.getZoom)?map.getZoom():15;
   send('init',{center:[center.lng,center.lat],zoom,mode:currentMode(),fix:safeFix(),world:world()});
+  send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.()||null});
  }
  function disable(message){
   enabled=false;ready=false;clearTimeout(loadingTimer);loadingTimer=0;
@@ -96,6 +97,7 @@
  });
  window.addEventListener('majakka:livestart',()=>{if(ready)send('mode',{mode:'live'});});
  window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('mode',{mode:'demo'});});
+ window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.()||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
  // Sync after game actions without modifying the core game's pure rules.
