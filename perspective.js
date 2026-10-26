@@ -63,7 +63,7 @@
   frame=document.createElement('iframe');frame.id='perspective-frame';frame.title='Majakka 3D perspective trial';
   frame.setAttribute('allow','fullscreen');
   // Same-origin iframe, no extra location permission. GPS supplied ephemerally by parent.
-  frame.src='./world-3d.html?v=081';
+  frame.src='./world-3d.html?v=103';
   viewport.appendChild(frame);
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
