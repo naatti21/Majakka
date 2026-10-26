@@ -4,7 +4,7 @@
  const $=id=>document.getElementById(id);
  const viewport=$('map-viewport');
  if(!viewport)return;
- let enabled=false,frame=null,ready=false,loadingTimer=0,lastFix=null,enteredAt=0;
+ let enabled=false,frame=null,ready=false,loadingTimer=0,lastFix=null,enteredAt=0,cameraCenter=null;
  const btn=document.createElement('button');
  btn.type='button';btn.id='perspective-toggle';btn.textContent='3D';
  btn.setAttribute('aria-label','Try 3D perspective map; switch back to 2D anytime');
@@ -18,7 +18,7 @@
   if(!enabled||!frame?.contentWindow)return;
   frame.contentWindow.postMessage({source:'majakka-parent',type,...other},location.origin);
  }
- function currentMode(){return globalThis.MajakkaLive?.isActive()?'live':'demo';}
+ function currentMode(){return 'live';} // 2D/3D are views of one world, not game modes.
  function safeFix(){
   const data=globalThis.MajakkaLive?.getFix?.()||lastFix;
   if(!data)return null;
@@ -31,18 +31,27 @@
   try{riftClear=JSON.parse(localStorage.getItem('majakka-rift-local-v1')||'null')?.cleared===true;}catch{}
   return {awake,edges:C.edges(state),field:state.field===true,riftClear,live:globalThis.MajakkaLiving?.snapshot?.()||null};
  }
+ function atlasSnapshot(){
+  const atlas=globalThis.MajakkaAtlas?.snapshot?.(cameraCenter);
+  if(!atlas)return null;
+  return {...atlas,echoes:(atlas.echoes||[]).map(e=>({...e,sharedCharge:(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(e.id):globalThis.MajakkaSoloWorld?.get?.(e.id))?.charge??null}))};
+ }
  function initial(){
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
   const zoom=(typeof map!=='undefined'&&map?.getZoom)?map.getZoom():15;
   send('init',{center:[center.lng,center.lat],zoom,mode:currentMode(),fix:safeFix(),world:world()});
+  send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
+  send('atlas',{atlas:atlasSnapshot()});
  }
  function disable(message){
-  enabled=false;ready=false;clearTimeout(loadingTimer);loadingTimer=0;
+  const lastCamera=cameraCenter;
+  enabled=false;ready=false;cameraCenter=null;clearTimeout(loadingTimer);loadingTimer=0;
   document.body.classList.remove('perspective-on','perspective-ready');
   frame?.remove();frame=null;
   btn.textContent='3D';btn.setAttribute('aria-pressed','false');
   btn.setAttribute('aria-label','Try 3D perspective map; switch back to 2D anytime');
   if(message){status(message);setTimeout(()=>{if(!enabled)clearStatus();},5300);}else clearStatus();
+  if(typeof map!=='undefined'&&map?.jumpTo&&lastCamera)map.jumpTo({center:[lastCamera.lng,lastCamera.lat]});
   if(typeof map!=='undefined'&&map?.resize)map.resize();
  }
  function enable(){
@@ -54,12 +63,12 @@
   frame=document.createElement('iframe');frame.id='perspective-frame';frame.title='Majakka 3D perspective trial';
   frame.setAttribute('allow','fullscreen');
   // Same-origin iframe, no extra location permission. GPS supplied ephemerally by parent.
-  frame.src='./world-3d.html?v=070';
+  frame.src='./world-3d.html?v=081';
   viewport.appendChild(frame);
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
  }
- globalThis.MajakkaPerspective={isActive:()=>enabled&&ready,recenter:()=>send('recenter')};
+ globalThis.MajakkaPerspective={isActive:()=>enabled&&ready,getCenter:()=>enabled&&ready&&cameraCenter?{...cameraCenter}:null,recenter:()=>send('recenter')};
  btn.addEventListener('click',()=>enabled?disable():enable());
  window.addEventListener('message',event=>{
   if(event.origin!==location.origin||!frame||event.source!==frame.contentWindow)return;
@@ -71,7 +80,12 @@
   }
   if(data.type==='error'){disable('3D unavailable on this device or connection. 2D remains available.');return;}
   if(!ready)return;
-  if(data.type==='node-select'){
+  if(data.type==='camera-center'){
+   const c=data.center;
+   if(Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
+    cameraCenter={lat:c[1],lng:c[0]};globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:atlasSnapshot()});
+   }
+  }else if(data.type==='node-select'){
    const id=data.id;
    if(currentMode()!=='demo'||!C.NODES.some(n=>n.id===id))return;
    const node=C.NODES.find(n=>n.id===id);
@@ -85,6 +99,8 @@
    window.dispatchEvent(new CustomEvent('majakka:livingselect',{detail:{id:data.type==='live-rift-select'?'veil':data.id}}));
   }else if(data.type==='live-lumen'){
    window.dispatchEvent(new CustomEvent('majakka:livingcollect',{detail:{id:data.id}}));
+  }else if(data.type==='atlas-select'){
+   window.dispatchEvent(new CustomEvent('majakka:atlasselect',{detail:{id:data.id}}));
   }else if(data.type==='trial-node'){
    if(typeof notify==='function')notify('This is a temporary visual test light, not a real public node.');
   }
@@ -94,8 +110,12 @@
   lastFix={lat:fix.lat,lng:fix.lng};
   if(ready)send('gps',{fix:lastFix});
  });
- window.addEventListener('majakka:livestart',()=>{if(ready)send('mode',{mode:'live'});});
- window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('mode',{mode:'demo'});});
+ // GPS permission never changes world mode.
+ window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('gps',{fix:null});});
+ window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
+ window.addEventListener('majakka:shared-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
+ window.addEventListener('majakka:solo-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
+ window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
  // Sync after game actions without modifying the core game's pure rules.

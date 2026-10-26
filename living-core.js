@@ -36,7 +36,7 @@
    const bearing=angle+i*(Math.PI*2/3)+(random()-.5)*.38;
    const radius=base+(random()-.5)*90;
    const north=Math.cos(bearing)*radius,east=Math.sin(bearing)*radius;
-   return {...addMeters(origin,north,east),id:'echo-'+i,name:names[(hash32(cell.id+':name')+i*3)%names.length],kind:'node',level:0};
+   return {...addMeters(origin,north,east),id:'echo-'+i,name:names[(hash32(cell.id+':name')+i*3)%names.length],kind:'node',level:0,archetype:['art','history','nature','culture'][i%4]};
   });
   // Keep the original three deterministic nodes intact for existing saved progress.
   // Add nine stable beacons with varied distances and bearings; enforce a spatial gap.
@@ -48,7 +48,7 @@
     candidate=addMeters(origin,Math.cos(theta)*radius,Math.sin(theta)*radius);
     if(nodes.every(n=>meters(n,candidate)>=135))break;
    }
-   nodes.push({...candidate,id:'echo-'+i,name:names[(hash32(cell.id+':new-name')+i*5)%names.length],kind:'node',level:0});
+   nodes.push({...candidate,id:'echo-'+i,name:names[(hash32(cell.id+':new-name')+i*5)%names.length],kind:'node',level:0,archetype:['art','history','nature','culture'][i%4]});
   }
   const riftBearing=angle+Math.PI*.53,riftDistance=230+random()*180;
   const rift={...addMeters(origin,Math.cos(riftBearing)*riftDistance,Math.sin(riftBearing)*riftDistance),id:'veil',name:'Interference Veil',kind:'rift'};
@@ -88,7 +88,7 @@
  }
  function blank(){return {cycle:0,nodes:Array(NODE_COUNT).fill(0),pending:Array(NODE_COUNT).fill(0),lastNodeCycle:Array(NODE_COUNT).fill(-1),rift:0,riftPending:false,riftLastCycle:-1,riftClear:false,field:false,interference:0,visited:[],claimed:[],feedback:[],pulseBonus:false,links:[],lastPulseAt:0,remoteAt:Array(NODE_COUNT).fill(0)};}
  function near(player,point,accuracy=0){return !!player&&accuracy<=90&&meters(player,point)<=85;}
- function contribute(s,{target,method,player,accuracy,lumen,world,now=Date.now()}){
+ function contribute(s,{target,method,player,accuracy,lumen,world,remote=false,now=Date.now()}){
   if(!world||!['lumen','decode'].includes(method))return {ok:false,reason:'Unknown signal'};
   const pos=target==='veil'?world.rift:world.nodes.find(n=>n.id===target);
   if(!pos)return {ok:false,reason:'Unknown light'};
@@ -102,7 +102,7 @@
   const i=world.nodes.indexOf(pos);
   if(s.nodes[i]>=NODE_TARGET)return {ok:false,reason:'This node is awake. Its light is yours to explore.'};
   if(s.pending[i]||s.lastNodeCycle[i]===s.cycle)return {ok:false,reason:'The signal needs the next world pulse'};
-  const close=near(player,pos,accuracy),cost=method==='lumen'?(close?COST_NEAR:COST_FAR):0;
+  const close=near(player,pos,accuracy)||remote===true,cost=method==='lumen'?(close?COST_NEAR:COST_FAR):0;
   s.remoteAt??=Array(NODE_COUNT).fill(0);
   if(!close){
    if(s.nodes[i]+s.pending[i]>=NODE_TARGET)return {ok:false,reason:'Only a close resonance can complete this signal right now'};

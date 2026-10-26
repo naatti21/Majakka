@@ -1,3 +1,74 @@
+# Majakka Solo Alpha v0.10.2 — current app (26 October 2026)
+
+Majakka is a **single-player, online-map Alpha**. It is intended to be deployed
+to the existing site from the repository's **main** branch. This is a prototype,
+not a production-ready shared multiplayer game.
+
+- GPS is optional and only anchors your avatar; you can play in any map region
+  remotely. No separate LIVE, DEMO or offline game mode.
+- Per-region virtual node progression, decode challenges, links and pulses run
+  locally in your browser. Fictional Auto Atlas Echoes can be awakened (0/2 → 2/2)
+  with 2 Lumen per action; both charge and wallet persist on this device.
+- Collect Lumen via GPS movement when allowed, or Channel Lumen from home.
+- 2D and 3D are views into the same solo map world. Real OSM places are
+  exploratory previews, not verified walking destinations.
+- The standalone Cloudflare multiplayer backend source is present but **not
+  configured or deployed**, and cannot block solo gameplay.
+- Online connection is required; no offline play mode or cached game shell.
+
+**Android browser, GPS accuracy, 3D performance and existing Pages hosting
+still require real-device verification.** See `ONE-WORLD-v0.9-QA.md`.
+
+The sections below retain earlier milestone notes for continuity.
+
+---
+
+# Majakka v0.10 — Shared Echo Alpha (draft, NOT deployed)
+
+**New milestone:** A separate, server-authoritative Echo node API and client bridge.
+Cloudflare Worker + dedicated D1 migration, signed anonymous pilot sessions,
+2-Lumen stationary channel, equal 2-Lumen remote/walking contribution,
+atomic action IDs, and server-confirmed shared resonance (0/2–2/2).
+Two browsers can affect the same Echo **after the isolated backend is deployed
+and explicitly enabled**; this is not live today.
+
+- **Frontend remains safe by default:** `<meta name="majakka-api" content="">`
+  disables server sync until a real HTTPS Worker is ready. Existing local game
+  still works online. No empty API address is guessed or hardcoded.
+- **Backend write lock:** `MUTATIONS_ENABLED = "false"` prevents public
+  anonymous write access while abuse prevention is unfinished.
+- Shared Echo state and wallet are **separate** from the existing local 12-node
+  progression; real POIs remain remote-only discovery previews.
+- GitHub CI runs all Node tests and checks Worker syntax on each change.
+- Setup and security: `backend/README.md`. Earlier single-world contract:
+  `ONE-WORLD-v0.9-SPEC.md`.
+
+The below sections document prior prototype iterations.
+
+---
+
+# MAJAKKA — One World v0.9 (draft branch, 26 October 2026)
+
+> **Current direction: one ONLINE world, not separate LIVE / DEMO / offline game modes.**
+> This is a **private local-progress implementation** on a public online map. Real shared multiplayer state is NOT deployed.
+
+### What v0.9 changes
+- **GPS is only a locator.** On a browser with prior location permission it may position the player automatically; otherwise use **⌖ Locate me**. Refusing or pausing GPS does not prevent node interaction. GPS stops when the PWA is hidden and stores no route.
+- **Couch and walkers have identical node powers:** any visible virtual signal can be decoded or attuned remotely with the same Lumen cost and same resonance result, including harmony links. Map panning decides the current region, not player movement.
+- **Personal Lumen haze** appears over geography without requiring GPS. Nearby Lumen enters the player's 30 m radius on a valid position fix; the **✧ Channel Lumen** option offers stationary earning (2 Lumen with a 120s cooldown, subject to the existing daily limit).
+- **2D and 3D are two camera views of the same world.** The 3D camera and the 2D map can browse distant regions; switching views preserves the chosen geographic area. Auto Atlas stable Echo markers are browsable regardless of GPS.
+- **No offline gameplay mode:** the service worker is network-only, old Majakka app caches are cleared during activation, and the UI blocks interaction without connectivity. If map tiles fail, show a network/map error rather than a simulated offline geography.
+
+### Not yet implemented
+- **True multiplayer synchronization:** no backend for other players' attunements, contributions, node ownership, authoritative world pulses or anti-abuse. Until built, two browsers do not see each other's progress; do not call the client-only state a released live shared world.
+- Worldwide POIs are still an optional low-volume OSM Overpass preview; the stable fictional Echo distribution works worldwide. Extra Auto Atlas preview markers are not yet part of the current 12-node resonance game loop.
+- No production-grade account identity, rewards ledger, server-resolved shared node actions, audited walking safety, or background position tracking.
+- Android GPS, mobile 3D, network recoverability and performance have not been field verified.
+
+See `ONE-WORLD-v0.9-SPEC.md` for the actual shared-world backend requirements. The remainder of this README records the **earlier prototype milestones** for historical reference and is not an active gameplay manual.
+
+---
+
 # MAJAKKA — First Light v0.2
 
 > Restore the Light. Reconnect the World.

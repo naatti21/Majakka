@@ -22,3 +22,22 @@ body.live-gps .map-legend{bottom:calc(152px + env(safe-area-inset-bottom,0px));m
 body.live-gps .map-legend{display:none!important}
 body.live-gps .map-credit{bottom:calc(160px + env(safe-area-inset-bottom,0px))!important}
 body.live-gps .maplibregl-ctrl-bottom-right{bottom:calc(135px + env(safe-area-inset-bottom,0px))!important}
+
+/* v0.9: location is a tool, not a LIVE/DEMO mode. */
+#live-toggle{min-width:112px;letter-spacing:0;top:calc(218px + env(safe-area-inset-top,0px))}
+#live-toggle:disabled{opacity:.42}
+#live-readout{width:min(66vw,260px)}
+#world-channel{position:fixed;right:11px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:26;min-height:43px;border:1px solid #e9c88b94;border-radius:24px;padding:8px 12px;background:#2a3339ec;color:#f3d8a2;font:750 11px system-ui;box-shadow:0 6px 19px #0009}
+#world-channel:disabled{opacity:.4}
+body.living-selected #world-channel,body.journal-open #world-channel,body.field-open #world-channel{display:none!important}
+#world-offline{position:fixed;inset:0;z-index:200;background:rgba(3,13,22,.96);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:35px;gap:10px;text-align:center;color:#e2e9e8;font:13px/1.5 system-ui}
+#world-offline[hidden]{display:none!important}
+#world-offline strong{color:#f4d695;letter-spacing:.14em;font-size:14px}
+#world-offline span{max-width:330px}
+body.live-gps #map-intro{display:none!important}
+@media(max-width:370px){#live-toggle{top:calc(214px + env(safe-area-inset-top,0px));right:8px;min-width:102px;font-size:10px}#world-channel{right:8px;font-size:10px}}
+
+/* No fictional/offline fallback map or stale DEMO reset controls in the online world. */
+.fallback-geography,body:not(.live-gps) .fallback-geography{display:none!important}
+#reset,#demo-walk,#quiet-collect{display:none!important}
+body.live-gps .map-load-status{z-index:30}

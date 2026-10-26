@@ -11,12 +11,12 @@ class FakeElement {
  setPointerCapture(){}
  remove(){}
 }
-function withMap(fn){
+async function withMap(fn){
  const prior=globalThis.document;
  const root=new FakeElement();
  globalThis.document={getElementById:id=>id==='real-map'?root:null,createElement:()=>new FakeElement()};
  let map=null;
- try{map=new R.Map({container:'real-map',center:[23.7623,61.4984],zoom:15,minZoom:3,maxZoom:19});return fn(map,root);}
+ try{map=new R.Map({container:'real-map',center:[23.7623,61.4984],zoom:15,minZoom:3,maxZoom:19});await Promise.resolve();return await fn(map,root);}
  finally{map?.remove();globalThis.document=prior;}
 }
 test('Mercator round trips geographic coordinates across the world',()=>{
