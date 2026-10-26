@@ -134,9 +134,9 @@ function drawPhysicalWorld(points){
  map.on('click','majakka-physical-hit',e=>{
   const id=e.features?.[0]?.properties?.id;
   if(!id||id==='player'||id.startsWith('ambient-'))return;
+  if(id.startsWith('poi-')||id.startsWith('atlas-echo-')){reply('atlas-select',{id});return;}
   if(mode==='live'){
-   if(id.startsWith('poi-')||id.startsWith('atlas-echo-'))reply('atlas-select',{id});
-   else if(id==='veil')reply('live-rift-select');
+   if(id==='veil')reply('live-rift-select');
    else if(id.startsWith('echo-'))reply('live-node-select',{id});
    return;
   }
