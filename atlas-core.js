@@ -54,14 +54,14 @@ function place(center,rawCandidates=[]){
   }
  }
  // Global fixed lattice. Echoes are stable when the viewing circle moves.
- const cell=275,cos=Math.max(.18,Math.cos(center.lat*DEG)),metersPerLon=111320*cos;
- const x=center.lng*metersPerLon,y=center.lat*111320;
- const echoes=[];
- const gx0=Math.floor((x-RANGE-350)/cell),gx1=Math.ceil((x+RANGE+350)/cell);
- const gy0=Math.floor((y-RANGE-350)/cell),gy1=Math.ceil((y+RANGE+350)/cell);
+ const cell=275,R=6378137,phi=center.lat*DEG,x=R*center.lng*DEG,y=R*Math.log(Math.tan(Math.PI/4+phi/2));
+ const projectedRadius=RANGE/Math.max(.18,Math.cos(phi)),echoes=[];
+ const gx0=Math.floor((x-projectedRadius-350)/cell),gx1=Math.ceil((x+projectedRadius+350)/cell);
+ const gy0=Math.floor((y-projectedRadius-350)/cell),gy1=Math.ceil((y+projectedRadius+350)/cell);
  for(let gx=gx0;gx<=gx1;gx++)for(let gy=gy0;gy<=gy1;gy++){
   const h=hash('echo|'+gx+':'+gy),jx=((h&255)/255-.5)*55,jy=(((h>>>8)&255)/255-.5)*55;
-  const point={lat:((gy+.5)*cell+jy)/111320,lng:((gx+.5)*cell+jx)/metersPerLon};
+  const mx=(gx+.5)*cell+jx,my=(gy+.5)*cell+jy;
+  const point={lat:(2*Math.atan(Math.exp(my/R))-Math.PI/2)/DEG,lng:(mx/R)/DEG};
   if(!valid(point)||meters(center,point)>RANGE-40)continue;
   echoes.push({...point,id:'atlas-echo-'+gx+'-'+gy,name:'Unmapped Echo',kind:'atlas-echo',type:types[h%4],remoteOnly:true});
  }
