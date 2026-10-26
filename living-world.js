@@ -363,7 +363,7 @@ window.addEventListener('majakka:livefix',event=>{
 });
 function viewedPoint(){if(typeof map==='undefined'||!map?.getCenter||!mapReady)return null;const c=map.getCenter();return {lat:c.lat,lng:c.lng};}
  function refreshRegion(){
-  const c=viewedPoint();if(!c||!isActive()||switching)return;
+  const c=viewedPoint();if(document.body.classList.contains('place-first')||!c||!isActive()||switching)return;
   let cell;try{cell=L.region(c);}catch{return;}
   if(!world||cell.id!==activeRegion)void create(c);
   else{wrap.hidden=false;redraw();}
@@ -392,7 +392,7 @@ globalThis.MajakkaLiving={
   if(!Number.isSafeInteger(amount)||amount<=0||!isActive()||state.lumen<amount)return false;
   state.lumen-=amount;save();render();emit();return true;
  },
- navigate:point=>{if(!point||!isActive()||switching)return;try{if(!world||L.region(point).id!==activeRegion)void create(point);}catch{}},
+ navigate:point=>{if(document.body.classList.contains('place-first')||!point||!isActive()||switching)return;try{if(!world||L.region(point).id!==activeRegion)void create(point);}catch{}},
  select:choose,collect,restore:()=>{close();resetWorld();}
 };
 })();
