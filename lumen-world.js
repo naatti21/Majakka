@@ -13,10 +13,10 @@ const avatar=document.createElement('div');avatar.id='lumen-avatar';avatar.setAt
 avatar.innerHTML='<div class="lumen-radius"></div><div class="lumen-arrow">▲</div>';overlay.append(avatar);
 const style=document.createElement('style');style.textContent=`
 #personal-lumen{position:absolute;inset:0;pointer-events:none;z-index:12;overflow:hidden}
-.personal-spark{position:absolute;transform:translate(-50%,-50%);border-radius:50%;background:#f4d9a4;box-shadow:0 0 7px 3px #edc98e80,0 0 18px #cfb78955;opacity:.6;pointer-events:none}
-.personal-spark.dust{width:3px;height:3px;opacity:.35;box-shadow:0 0 9px 3px #e8d5b866}
-.personal-spark.glow{width:7px;height:7px;opacity:.65}
-.personal-spark.heart{width:12px;height:12px;background:#fff1c4;opacity:.8;box-shadow:0 0 15px 5px #efd49baa,0 0 33px 8px #d4b78755}
+.personal-spark{position:absolute;transform:translate(-50%,-50%);pointer-events:none;background:#d5c69d;box-shadow:0 0 3px #e0cf9c80;opacity:.55}
+.personal-spark.dust{width:1.5px;height:1.5px;border-radius:50%;opacity:.43}
+.personal-spark.glow{width:2.8px;height:2.8px;transform:translate(-50%,-50%) rotate(45deg);border-radius:1px;opacity:.7;box-shadow:0 0 5px #dec38a7d}
+.personal-spark.heart{width:4px;height:4.5px;background:#eed9a5;clip-path:polygon(50% 0,100% 65%,55% 100%,0 65%);opacity:.79;box-shadow:0 0 5px #e8c99099}
 #lumen-avatar{position:absolute;left:0;top:0;z-index:26;pointer-events:none;transform:translate(-50%,-50%)}
 #lumen-avatar[hidden],body:not(.live-gps) #lumen-avatar{display:none!important}
 .lumen-radius{position:absolute;left:50%;top:50%;width:var(--lumen-diameter,100px);height:var(--lumen-diameter,100px);transform:translate(-50%,-50%);border:1px solid #a3eee077;border-radius:50%;box-shadow:inset 0 0 16px #4fddc21e,0 0 19px #4fddc211;background:radial-gradient(circle,#81eed512,transparent 66%)}
