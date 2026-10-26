@@ -1,3 +1,27 @@
+# Majakka v0.10 — Shared Echo Alpha (draft, NOT deployed)
+
+**New milestone:** A separate, server-authoritative Echo node API and client bridge.
+Cloudflare Worker + dedicated D1 migration, signed anonymous pilot sessions,
+2-Lumen stationary channel, equal 2-Lumen remote/walking contribution,
+atomic action IDs, and server-confirmed shared resonance (0/2–2/2).
+Two browsers can affect the same Echo **after the isolated backend is deployed
+and explicitly enabled**; this is not live today.
+
+- **Frontend remains safe by default:** `<meta name="majakka-api" content="">`
+  disables server sync until a real HTTPS Worker is ready. Existing local game
+  still works online. No empty API address is guessed or hardcoded.
+- **Backend write lock:** `MUTATIONS_ENABLED = "false"` prevents public
+  anonymous write access while abuse prevention is unfinished.
+- Shared Echo state and wallet are **separate** from the existing local 12-node
+  progression; real POIs remain remote-only discovery previews.
+- GitHub CI runs all Node tests and checks Worker syntax on each change.
+- Setup and security: `backend/README.md`. Earlier single-world contract:
+  `ONE-WORLD-v0.9-SPEC.md`.
+
+The below sections document prior prototype iterations.
+
+---
+
 # MAJAKKA — One World v0.9 (draft branch, 26 October 2026)
 
 > **Current direction: one ONLINE world, not separate LIVE / DEMO / offline game modes.**
