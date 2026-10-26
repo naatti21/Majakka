@@ -63,7 +63,7 @@
   frame=document.createElement('iframe');frame.id='perspective-frame';frame.title='Majakka 3D perspective trial';
   frame.setAttribute('allow','fullscreen');
   // Same-origin iframe, no extra location permission. GPS supplied ephemerally by parent.
-  frame.src='./world-3d.html?v=103';
+  frame.src='./world-3d.html?v=104';
   viewport.appendChild(frame);
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
@@ -99,6 +99,8 @@
    window.dispatchEvent(new CustomEvent('majakka:livingselect',{detail:{id:data.type==='live-rift-select'?'veil':data.id}}));
   }else if(data.type==='live-lumen'){
    window.dispatchEvent(new CustomEvent('majakka:livingcollect',{detail:{id:data.id}}));
+  }else if(data.type==='lumen-claim'){
+   if(typeof data.id==='string')globalThis.MajakkaLumen?.claim?.(data.id);
   }else if(data.type==='atlas-select'){
    window.dispatchEvent(new CustomEvent('majakka:atlasselect',{detail:{id:data.id}}));
   }else if(data.type==='trial-node'){
