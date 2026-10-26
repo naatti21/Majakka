@@ -84,7 +84,7 @@ async function channel(env,id,op){
   db.prepare('SELECT balance, earned_today, earned_day, channel_at FROM players WHERE id=?').bind(id)
  ]);
  const operation=results[3].results?.[0],current=results[4].results?.[0];
- if(operation&&operation.player_id!==id)return json({error:'operation_collision'},409);
+ if(operation&&(operation.player_id!==id||operation.kind!=='channel'))return json({error:'operation_collision'},409);
  if(!operation)return json({error:'channel_cooldown_or_daily_cap',wallet:current},409);
  return json({ok:true,operationId:op,applied:Boolean(operation.applied),wallet:current});
 }
@@ -141,7 +141,7 @@ export default {
    return send(missing());
   }catch(error){
    console.error('Majakka API failed',error?.message||String(error));
-   return json({error:'server_error'},500);
+   return json({error:'server_error'},500,allowed);
   }
  }
 };
