@@ -75,8 +75,11 @@ function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[amenity~"^(library|arts_centre|theatre|community_centre)$"];'+
  ');out center 400;';}
 button.addEventListener('click',async()=>{
- if(!active()||queried||querying)return;
- if(!anchor){const c=center();if(!c)return;anchor=anchorOf(c);}
+ if(!active()||querying)return;
+ const c=center();if(!c)return;
+ const requestedAnchor=anchorOf(c);
+ if(!anchor||A.meters(anchor,requestedAnchor)>450){anchor=requestedAnchor;source=[];queried=false;button.textContent='✦ Find places';}
+ if(queried)return;
  if(Date.now()-lastRequest<120000){notifyUser('Place lookup cooldown. Try again after two minutes.');return;}
  lastRequest=Date.now();
  // Separate user click knowingly sends approximate current map region to a third party.
