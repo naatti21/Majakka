@@ -59,6 +59,8 @@ test('Landmark nodes are auto-discovered per fixed place cell with caching, neve
  assert.match(atlas,/majakka:camera-area/);
  assert.match(atlas,/majakka-place-catalog-cache-v1/);
  assert.match(atlas,/overpass\.private\.coffee/);
- assert.match(atlas,/real:anchor\?A\.landmarks\(c,source\):\[\],echoes:\[\]/);
+ assert.match(atlas,/const catalogue=new Map\(\)/);
+ assert.match(atlas,/catalogue\.values\(\)/);
+ assert.match(atlas,/for\(const p of eligible\)catalogue\.set\(p\.id,p\)/);
  assert.deepEqual(A.landmarks(at,[]),[]);
 });
