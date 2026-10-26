@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07141f">
-<title>Majakka — Perspective Trial</title>
+<meta name="theme-color" content="#04070a">
+<title>Majakka — Nocturne World</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
 <style>
 :root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;color:#d9efed}
 *{box-sizing:border-box}
-html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#06121d}
+html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#030609}
 #scene{position:absolute;inset:0}
-#scene:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(2,10,23,.30) 100%)}
+#scene:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 37%,rgba(0,4,8,.48) 100%)}
 .maplibregl-control-container .maplibregl-ctrl-attrib{background:#081927d9;color:#abc8c5;font-size:9px}
 .maplibregl-control-container .maplibregl-ctrl-attrib a{color:#c6e3dc}
 #message{position:absolute;z-index:15;top:45%;left:50%;width:min(290px,80%);transform:translate(-50%,-50%);padding:15px;border:1px solid #71c8c35a;border-radius:13px;background:#071c2df2;font-size:12px;text-align:center;line-height:1.5}
@@ -40,7 +40,7 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#061
 .beacon.player .ground{left:-5px;bottom:5px;width:55px}
 .beacon.player .beam{bottom:13px;left:14px;height:29px;width:20px}
 .beacon.player .tag{display:none}
- .lumen-speck{width:7px;height:7px;border-radius:50%;background:#f4dfac;box-shadow:0 0 7px 2px #ecc88e,0 0 20px 4px #e1a55a77;cursor:pointer;animation:glow 3s ease-in-out infinite}
+ .lumen-speck{width:2px;height:2px;border-radius:50%;background:#f4dfac;box-shadow:0 0 7px 2px #ecc88e,0 0 20px 4px #e1a55a77;cursor:pointer;animation:glow 3s ease-in-out infinite}
 .lumen-speck:after{content:"";position:absolute;inset:-10px;border:1px solid #e4bc7a38;border-radius:50%}
 @keyframes float{50%{transform:translateY(-8px)}}@keyframes glow{50%{opacity:.45}}
 @media(prefers-reduced-motion:reduce){.beacon .orb,.lumen-speck{animation:none}}
@@ -51,7 +51,7 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#061
 <div id="message">Preparing the 3D world…</div>
 <div id="hint">Use two fingers to rotate and tilt · Experimental 3D</div>
 <div id="pitch"><div id="tilt-slide" role="slider" tabindex="0" aria-label="Tilt map with one finger" aria-orientation="vertical" aria-valuemin="18" aria-valuemax="80" aria-valuenow="66">↕<small>TILT</small></div><button id="steeper" type="button" title="Look toward horizon" aria-label="Tilt towards horizon">⇧</button><button id="flatter" type="button" title="Look from above" aria-label="Tilt towards overhead">⇩</button><button id="north" type="button" title="Face north" aria-label="Rotate north">N</button></div>
-<script src="./scene-geometry.js?v=041"></script><script src="./aerial-links.js?v=060"></script>
+<script src="./scene-geometry.js?v=103"></script><script src="./aerial-links.js?v=060"></script>
 <script type="module">
 const reply=(type,payload={})=>parent.postMessage({source:'majakka-3d',type,...payload},location.origin);
 const box=document.getElementById('message'),shown=(text)=>{box.textContent=text;box.hidden=false;};
@@ -61,6 +61,29 @@ const nodes=[
  {id:'square',name:'Quiet Square',lat:61.49772,lng:23.76018},
  {id:'harbor',name:'Southern Lantern',lat:61.49422,lng:23.76218}
 ];
+/* Palette transformation is applied to the REAL vector base map. It leaves playable
+   game geometry and road/label legibility intact, rather than adding a purple tint. */
+function applyNightPalette(){
+ const layers=map?.getStyle?.()?.layers||[];
+ for(const layer of layers){
+  if(layer.id.startsWith('majakka-')||layer.id.startsWith('personal-'))continue;
+  const id=(layer.id+' '+(layer['source-layer']||'')).toLowerCase();
+  const water=/water|ocean|lake|river|stream|canal/.test(id);
+  const path=/road|motorway|trunk|street|highway|bridge|tunnel|path|rail|transport/.test(id);
+  const park=/park|wood|forest|landcover|vegetation|grass|natural/.test(id);
+  const building=/building|structure/.test(id);
+  let key,color;
+  if(layer.type==='background'){key='background-color';color='#04080b';}
+  else if(layer.type==='fill'){key='fill-color';color=water?'#0b1b25':park?'#0b1918':building?'#142126':'#0b1115';}
+  else if(layer.type==='line'){key='line-color';color=water?'#25414b':path?'#33434a':'#24353b';}
+  else if(layer.type==='fill-extrusion'){key='fill-extrusion-color';color='#17242a';}
+  if(key){try{map.setPaintProperty(layer.id,key,color);}catch{}}
+  if(layer.type==='symbol'){
+   try{map.setPaintProperty(layer.id,'text-color','#92a5a9');map.setPaintProperty(layer.id,'text-halo-color','#050b0f');
+    map.setPaintProperty(layer.id,'text-halo-width',1.1);}catch{}
+  }
+ }
+}
 let map=null,lib=null,world=null,living=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false,personal=null,atlas=null;
 const makeMarker=(point,{kind='node',awake=false,temporary=false,callback=()=>{}}={})=>{
  const el=document.createElement('div');
@@ -102,31 +125,31 @@ function drawPhysicalWorld(points){
  if(physicsLayersReady)return;
  const getColor=['get','color'];
  map.addLayer({id:'majakka-ground',type:'fill',source:'majakka-physical-ground',
-  paint:{'fill-color':getColor,'fill-opacity':['match',['get','part'],'aura',.10,'footprint',.29,.1]}});
+  paint:{'fill-color':getColor,'fill-opacity':['match',['get','part'],'aura',.045,'footprint',.15,.05]}});
  map.addLayer({id:'majakka-ground-rim',type:'line',source:'majakka-physical-ground',
   filter:['==',['get','part'],'footprint'],
-  paint:{'line-color':getColor,'line-width':1.5,'line-opacity':.55}});
+  paint:{'line-color':getColor,'line-width':.9,'line-opacity':.32}});
  map.addLayer({id:'majakka-light-shell',type:'fill-extrusion',source:'majakka-physical-shafts',
   filter:['==',['get','part'],'light-shell'],
   paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],
-         'fill-extrusion-base':0,'fill-extrusion-opacity':.27}});
+         'fill-extrusion-base':0,'fill-extrusion-opacity':.06}});
  map.addLayer({id:'majakka-light-core',type:'fill-extrusion',source:'majakka-physical-shafts',
   filter:['==',['get','part'],'light-core'],
   paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],
-         'fill-extrusion-base':0,'fill-extrusion-opacity':.78}});
+         'fill-extrusion-base':0,'fill-extrusion-opacity':.24}});
  map.addLayer({id:'majakka-node-facets',type:'fill-extrusion',source:'majakka-physical-facets',
-  paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],'fill-extrusion-base':0,'fill-extrusion-opacity':.72}});
+  paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],'fill-extrusion-base':['coalesce',['get','base'],0],'fill-extrusion-opacity':.90}});
  map.addLayer({id:'majakka-core-glow',type:'circle',source:'majakka-physical-cores',
-  paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,3,15,13,18,25],
-         'circle-opacity':.42,'circle-blur':.9,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,1.5,15,5,18,9],
+         'circle-opacity':.18,'circle-blur':.88,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
  map.addLayer({id:'majakka-core-spark',type:'circle',source:'majakka-physical-cores',
-  paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,1,15,3,18,6],
+  paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,.8,15,1.6,18,3.5],
          'circle-opacity':.95,'circle-blur':.1,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
  map.addLayer({id:'majakka-lumen-glow',type:'circle',source:'majakka-physical-lumens',
-  paint:{'circle-color':'#f4d994','circle-radius':['interpolate',['linear'],['zoom'],12,3,15,9,18,14],
-         'circle-opacity':.7,'circle-blur':.72,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  paint:{'circle-color':'#dfc691','circle-radius':['match',['get','size'],'heart',3.8,'glow',2.4,1.4],
+         'circle-opacity':.16,'circle-blur':.72,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
  map.addLayer({id:'majakka-lumen-spark',type:'circle',source:'majakka-physical-lumens',
-  paint:{'circle-color':'#ffe9b6','circle-radius':2.5,'circle-opacity':.9}});
+  paint:{'circle-color':'#e6d4aa','circle-radius':['match',['get','size'],'heart',1.9,'glow',1.2,.7],'circle-opacity':.7}});
  // Transparent targets have stable 44px taps even though the physical beacons shrink toward the horizon.
  map.addLayer({id:'majakka-physical-hit',type:'circle',source:'majakka-physical-targets',
   paint:{'circle-radius':22,'circle-color':'#ffffff','circle-opacity':.01,
@@ -170,8 +193,8 @@ function renderPersonal(){
  const features=(personal?.points||[]).map(p=>({type:'Feature',properties:{size:p.size||'dust'},geometry:{type:'Point',coordinates:[p.lng,p.lat]}}));
  update('personal-sparks',features);
  if(!map.getLayer('personal-sparks-glow')){
-  map.addLayer({id:'personal-sparks-glow',type:'circle',source:'personal-sparks',paint:{'circle-color':'#ebc588','circle-radius':['match',['get','size'],'heart',16,'glow',9,5],'circle-opacity':.17,'circle-blur':.85}});
-  map.addLayer({id:'personal-sparks-points',type:'circle',source:'personal-sparks',paint:{'circle-color':'#f9dfaa','circle-radius':['match',['get','size'],'heart',6,'glow',3,1.5],'circle-opacity':['match',['get','size'],'heart',.94,'glow',.65,.30],'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  map.addLayer({id:'personal-sparks-glow',type:'circle',source:'personal-sparks',paint:{'circle-color':'#dbc69b','circle-radius':['match',['get','size'],'heart',4,'glow',2.6,1.2],'circle-opacity':.13,'circle-blur':.85}});
+  map.addLayer({id:'personal-sparks-points',type:'circle',source:'personal-sparks',paint:{'circle-color':'#f4ddb2','circle-radius':['match',['get','size'],'heart',2.1,'glow',1.2,.7],'circle-opacity':['match',['get','size'],'heart',.88,'glow',.67,.44],'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
  }
  const fix=personal?.fix,geom=globalThis.MajakkaSceneGeometry;
  update('personal-radius',fix&&geom?[{type:'Feature',properties:{},geometry:geom.circle(fix,personal.range||30)}]:[]);
@@ -192,7 +215,7 @@ function renderPersonal(){
 
 function showWorld(){
  if(!map||!ready)return;
- document.getElementById('hint').textContent='ONE WORLD · PROTOTYPE (NOT NETWORK-SYNCED)';
+ document.getElementById('hint').hidden=true;
  clearMarkers();
  const fieldFeatures=[],lines=[],points=[],haze=[],arcPairs=[];
  if(mode==='demo'){
@@ -326,10 +349,11 @@ try {
  map.on('moveend',()=>{if(ready){const c=map.getCenter();reply('camera-center',{center:[c.lng,c.lat]});}});
  map.on('rotate',()=>{if(ready&&mode==='live')renderPersonal();});
  map.on('load',()=>{
+  applyNightPalette();
   ready=true;try{showWorld();hide();reply('ready');}catch(error){console.warn('3D geometry unavailable',error);reply('error',{message:String(error?.message||error)});return;}
   // Enhancement only: loss of a terrain service must not blank the base map.
   try{
-   if(typeof map.setSky==='function')map.setSky({'sky-color':'#07121d','horizon-color':'#203841','fog-color':'#12242e','sky-horizon-blend':.52,'horizon-fog-blend':.65});
+   if(typeof map.setSky==='function')map.setSky({'sky-color':'#020509','horizon-color':'#0a1519','fog-color':'#071116','sky-horizon-blend':.52,'horizon-fog-blend':.65});
   }catch(e){console.warn('Sky unavailable',e);}
   try{
    map.addSource('majakka-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json',encoding:'terrarium',tileSize:512});
