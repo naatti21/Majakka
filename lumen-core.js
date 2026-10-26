@@ -51,9 +51,15 @@ function visibleField(center,seed,{zoom=15,width=390,height=700,pitch=0,max=240}
  while((r.x1-r.x0+1)*(r.y1-r.y0+1)>size&&step<8192){step*=2;r=range();}
  const points=[];
  for(let gx=r.x0;gx<=r.x1;gx++)for(let gy=r.y0;gy<=r.y1;gy++){
-  const bucket=hash(seed+'|bucket|'+step+'|'+gx+'|'+gy);
-  const fineX=gx*step+bucket%step;
-  const fineY=gy*step+((bucket>>>12)%step);
+  // Hierarchical global subsampling: every distant grain survives when zooming in.
+  // Each power-of-two parent selects exactly one child, recursively.
+  let fineX=gx,fineY=gy,level=step;
+  while(level>1){
+   const pick=hash(seed+'|lod|'+level+'|'+fineX+'|'+fineY);
+   fineX=fineX*2+(pick&1);
+   fineY=fineY*2+((pick>>>1)&1);
+   level/=2;
+  }
   const rnd=random(hash(seed+'|'+fineX+'|'+fineY));
   rnd(); // The first draw is the 1-vs-2 grain count in cells().
   const x=(fineX+.1+rnd()*.8)*CELL,y=(fineY+.1+rnd()*.8)*CELL;
