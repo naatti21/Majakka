@@ -423,7 +423,7 @@ function viewedPoint(){if(typeof map==='undefined'||!map?.getCenter||!mapReady)r
  let regionMap=null,attachAttempts=0;
  function attachRegionMap(){
   if(typeof map!=='undefined'&&map&&mapReady){
-    if(map!==regionMap){regionMap=map;map.on('moveend',refreshRegion);}
+    if(map!==regionMap){regionMap=map;let moveTimer=0;map.on('move',()=>{clearTimeout(moveTimer);moveTimer=setTimeout(refreshRegion,220);});}
     refreshRegion();
   }else if(attachAttempts++<35)setTimeout(attachRegionMap,400);
  }
@@ -436,6 +436,7 @@ globalThis.MajakkaLiving={
  snapshot:()=>world&&isActive()?{projection:{...L.projection(progress,world),lumen:L.energyField(position)},position:position?{...position}:null}:null,
  eraseFields,
  award,
+ navigate:point=>{if(!point||!isActive()||switching)return;try{if(!world||L.region(point).id!==activeRegion)void create(point);}catch{}},
  select:choose,collect,restore:()=>{close();resetWorld();}
 };
 })();
