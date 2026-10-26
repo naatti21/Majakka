@@ -4,7 +4,7 @@
  const $=id=>document.getElementById(id);
  const viewport=$('map-viewport');
  if(!viewport)return;
- let enabled=false,frame=null,ready=false,loadingTimer=0,lastFix=null,enteredAt=0;
+ let enabled=false,frame=null,ready=false,loadingTimer=0,lastFix=null,enteredAt=0,cameraCenter=null;
  const btn=document.createElement('button');
  btn.type='button';btn.id='perspective-toggle';btn.textContent='3D';
  btn.setAttribute('aria-label','Try 3D perspective map; switch back to 2D anytime');
@@ -35,10 +35,10 @@
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
   const zoom=(typeof map!=='undefined'&&map?.getZoom)?map.getZoom():15;
   send('init',{center:[center.lng,center.lat],zoom,mode:currentMode(),fix:safeFix(),world:world()});
-  send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.()||null});
+  send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
  }
  function disable(message){
-  enabled=false;ready=false;clearTimeout(loadingTimer);loadingTimer=0;
+  enabled=false;ready=false;cameraCenter=null;clearTimeout(loadingTimer);loadingTimer=0;
   document.body.classList.remove('perspective-on','perspective-ready');
   frame?.remove();frame=null;
   btn.textContent='3D';btn.setAttribute('aria-pressed','false');
@@ -72,7 +72,12 @@
   }
   if(data.type==='error'){disable('3D unavailable on this device or connection. 2D remains available.');return;}
   if(!ready)return;
-  if(data.type==='node-select'){
+  if(data.type==='camera-center'){
+   const c=data.center;
+   if(currentMode()==='live'&&Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
+    cameraCenter={lat:c[1],lng:c[0]};send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
+   }
+  }else if(data.type==='node-select'){
    const id=data.id;
    if(currentMode()!=='demo'||!C.NODES.some(n=>n.id===id))return;
    const node=C.NODES.find(n=>n.id===id);
@@ -96,8 +101,8 @@
   if(ready)send('gps',{fix:lastFix});
  });
  window.addEventListener('majakka:livestart',()=>{if(ready)send('mode',{mode:'live'});});
- window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('mode',{mode:'demo'});});
- window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.()||null});});
+ window.addEventListener('majakka:livestop',()=>{lastFix=null;cameraCenter=null;if(ready)send('mode',{mode:'demo'});});
+ window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
  // Sync after game actions without modifying the core game's pure rules.
