@@ -77,7 +77,8 @@ test('two separate OSM landmarks in one district permanently restore a chord and
 test('legacy procedural nodes are excluded from visible maps and 3D',()=>{
  const app=read('atlas-world.js'),scene=read('world-3d.html');
  assert.match(app,/echoes:\[\]/);
- assert.match(app,/A\.landmarks\(c,source\)/);
+ assert.match(app,/const catalogue=new Map\(\)/);
+ assert.match(app,/catalogue\.values\(\)/);
  assert.match(scene,/if\(atlas\)\{/);
  assert.match(scene,/points\.push\(\.\.\.\(atlas\.real\|\|\[\]\)\)/);
  assert.doesNotMatch(scene,/points\.push\(\.\.\.live\.nodes\)/);
