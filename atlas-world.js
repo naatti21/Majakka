@@ -12,10 +12,17 @@ info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=tru
 const sharedButton=document.createElement('button');sharedButton.type='button';sharedButton.id='atlas-shared-attune';sharedButton.hidden=true;
 sharedButton.textContent='✧ Send shared resonance · 2';
 sharedButton.addEventListener('click',async()=>{
- if(!selected||!globalThis.MajakkaSharedWorld?.enabled?.())return;
- sharedButton.disabled=true;sharedButton.textContent='Sending…';
- try{await globalThis.MajakkaSharedWorld.attune(selected);inspect(selected);}
- catch(e){notifyUser('Shared action not committed: '+(e?.body?.error||e?.message||'network error'));inspect(selected);}
+ if(!selected)return;
+ const remote=globalThis.MajakkaSharedWorld?.enabled?.();
+ sharedButton.disabled=true;sharedButton.textContent='Attuning…';
+ try{
+  if(remote)await globalThis.MajakkaSharedWorld.attune(selected);
+  else{
+   const result=globalThis.MajakkaSoloWorld?.attune(selected);
+   if(!result?.ok)notifyUser(result?.reason||'Solo Echo not ready');
+  }
+  inspect(selected);
+ }catch(e){notifyUser('Action not committed: '+(e?.body?.error||e?.message||'network error'));inspect(selected);}
  finally{sharedButton.disabled=false;}
 });
 info.appendChild(sharedButton);
@@ -62,13 +69,14 @@ function inspect(id){
  selected=p.id;info.hidden=false;
  info.querySelector('#atlas-title').textContent=p.name;
  info.querySelector('#atlas-meta').textContent=(p.type.toUpperCase()+' · '+(p.kind==='atlas-real'?'OSM place candidate':'FICTIONAL ECHO'));
- const shared=globalThis.MajakkaSharedWorld;
- const sharedRecord=p.kind==='atlas-echo'&&shared?.enabled?.()?shared.get(p.id):null;
- const charge=sharedRecord?sharedRecord.charge:null;
- info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified access. Remote discovery preview only; do not use as walking directions.':'A stable fictional Echo, not a walking destination.'+
-   (charge===null?(shared?.enabled?.()?' Waiting for the world server.':' Shared progression not yet connected.'):' Shared resonance '+charge+'/2 · verified on world server.');
- sharedButton.hidden=charge===null||charge>=2;
- sharedButton.disabled=false;sharedButton.textContent='✧ Send shared resonance · 2';
+ const shared=globalThis.MajakkaSharedWorld,network=shared?.enabled?.();
+ const record=p.kind==='atlas-echo'?(network?shared.get(p.id):globalThis.MajakkaSoloWorld?.get?.(p.id)):null;
+ const charge=record?record.charge:null;
+ info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified public place · remote discovery only, not walking directions.':
+  'Fictional Echo · '+(charge===null?'Loading node...':charge+'/2 resonance'+(charge>=2?' · awakened':'')+
+    (network?' · shared world':' · your solo world'))+'. Never a walking destination.';
+ sharedButton.hidden=p.kind!=='atlas-echo'||charge===null||charge>=2;
+ sharedButton.disabled=false;sharedButton.textContent='✧ Attune Echo · 2 Lumen';
 }
 function render(){
  if(!active()){layer.replaceChildren();return;}
@@ -82,7 +90,7 @@ function render(){
   const pt=map.project([p.lng,p.lat]);if(pt.x<-30||pt.y<-30||pt.x>w+30||pt.y>h+30)continue;
   const el=document.createElement('button');el.type='button';el.className='atlas-marker '+p.type+' '+p.kind;
   el.style.left=pt.x+'px';el.style.top=pt.y+'px';el.innerHTML='<i class="ring"></i><i class="body"></i>';
-  const sharedCharge=globalThis.MajakkaSharedWorld?.get?.(p.id)?.charge||0;
+  const sharedCharge=(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(p.id):globalThis.MajakkaSoloWorld?.get?.(p.id))?.charge||0;
   if(sharedCharge>=2)el.classList.add('awake');
   el.setAttribute('aria-label',(p.kind==='atlas-real'?'Public place candidate':'Fictional Echo')+': '+p.name+(sharedCharge>=2?', awake':'')+'. View details.');
   el.addEventListener('click',()=>inspect(p.id));frag.appendChild(el);
@@ -131,6 +139,7 @@ window.addEventListener('majakka:livingupdate',redraw);
 window.addEventListener('resize',redraw);
 window.addEventListener('majakka:atlasselect',e=>{if(active())inspect(e.detail?.id);});
 window.addEventListener('majakka:shared-update',()=>{render();if(selected)inspect(selected);send();});
+window.addEventListener('majakka:solo-update',()=>{render();if(selected)inspect(selected);send();});
 let loops=0;const attach=()=>{if(typeof map!=='undefined'&&map?.on)map.on('move',redraw);else if(loops++<30)setTimeout(attach,500);};attach();
 globalThis.MajakkaAtlas={snapshot,select:inspect};
 // Map startup may have completed before this deferred module attached.
