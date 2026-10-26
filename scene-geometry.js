@@ -23,14 +23,14 @@
  function build(points){
   const ground=[],shafts=[],cores=[],targets=[],lumens=[],facets=[];
   for(const p of points){
-   const kind=p.kind||'quiet',color=archetypes[p.type||p.archetype]||colors[kind]||colors.quiet;
+   const kind=p.kind||'quiet',color=p.sharedCharge>=2?colors.awake:(archetypes[p.type||p.archetype]||colors[kind]||colors.quiet);
    if(kind==='lumen'){
     lumens.push(dot(p.id,'lumen',p,color));
     continue;
    }
    const main=kind==='player',rift=kind==='rift',restored=kind==='restored',atlas=kind==='atlas-real'||kind==='atlas-echo';
    const radius=main?15:rift?38:atlas?kind==='atlas-echo'?12:25:kind==='trial'?21:kind==='distant'?13:27;
-   const tall=main?9:rift?40:restored?46:atlas?kind==='atlas-echo'?16:30:kind==='awake'?65:kind==='distant'?21:51;
+   const tall=main?9:rift?40:restored?46:p.sharedCharge>=2?60:atlas?kind==='atlas-echo'?16:30:kind==='awake'?65:kind==='distant'?21:51;
    ground.push(shape(p.id,'aura',p,radius,0,color));
    ground.push(shape(p.id,'footprint',p,radius*.43,0,color));
    shafts.push(shape(p.id,'light-shell',p,main?4.5:rift?8:9,tall,color));
