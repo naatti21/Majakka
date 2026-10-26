@@ -18,21 +18,16 @@
  function redraw(){if(!active||!fix){dot.hidden=true;return;}const p=mapPoint(fix);if(!p){dot.hidden=true;return;}dot.style.left=p.x+'px';dot.style.top=p.y+'px';dot.hidden=false;}
  function onFix(position){if(!active)return;const next=L.validFix(position.coords,position.timestamp);if(!next){label('LOW SIGNAL','Waiting for a valid position.');return;}
   const now=Date.now();if(now-next.time>45000){label('STALE POSITION','Waiting for a fresh GPS fix.');return;}
-  gotFix=true;const prev=fix;fix=next;window.dispatchEvent(new CustomEvent('majakka:livefix',{detail:{lat:next.lat,lng:next.lng,accuracy:next.accuracy}}));
-  const step=walking.feed(next);
+  gotFix=true;const prev=fix;fix=next;const step=walking.feed(next);
+  window.dispatchEvent(new CustomEvent('majakka:livefix',{detail:{lat:next.lat,lng:next.lng,accuracy:next.accuracy,movementAccepted:step.accepted}}));
   nextMeters=step.remaining;
-  if(step.gain>0){
-    const gained=globalThis.MajakkaLiving?.award?.(step.gain,'movement')??0;
-    if(gained){moveRewards+=gained;globalThis.MajakkaFeedback?.play('collect');
-      globalThis.MajakkaFieldMetrics?.count('walkLumen',gained);
-      tell('Movement ✧ +'+gained+' Lumen · all directions count');}
-  }
+  // Lumen now comes from the spatial personal field, not distance alone.
   if(typeof map!=='undefined'&&map&&typeof map.easeTo==='function'&&mapReady){
     const center=map.getCenter(),meters=L.distance({lat:center.lat,lng:center.lng},next);
     if(follow&&!prev)map.easeTo({center:[next.lng,next.lat],zoom:14,duration:850});
   }
   label('LIVE FIELD · '+Math.max(1,Math.ceil((L.DURATION_MS-(now-started))/60000))+' MIN',
-    'Accuracy ~'+Math.round(next.accuracy)+' m · '+(next.accuracy<=W.MAX_ACCURACY?'Movement tracking':'Low GPS precision; movement paused')+'. '+Math.ceil(nextMeters)+' m to next ✧ · '+moveRewards+' earned.');
+    'Accuracy ~'+Math.round(next.accuracy)+' m · '+(next.accuracy<=W.MAX_ACCURACY?'Movement tracking':'Low GPS precision; movement paused')+'. Gather Lumen within 30 m of your marker.');
   redraw();
  }
  function recenterLive(){if(!active||!fix){tell('Waiting for a live position.');return;}follow=true;if(typeof map!=='undefined'&&map&&mapReady){map.flyTo({center:[fix.lng,fix.lat],zoom:Math.max(15,map.getZoom()),essential:true});redraw();}else tell('Location acquired; waiting for the street map.');}
