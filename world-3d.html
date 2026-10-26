@@ -257,41 +257,10 @@ function showWorld(){
  if(!map||!ready)return;
  document.getElementById('hint').hidden=true;
  // Marker taps are reused, not destroyed on every world update.
+ // Landmark-only view. No synthetic node lattices, no camera-relative ghost beacons.
  const fieldFeatures=[],lines=[],points=[],haze=[],arcPairs=[];
- if(mode==='demo'){
-  for(const n of nodes)points.push({...n,kind:(world?.awake||[]).includes(n.id)?'awake':'quiet'});
-  points.push({id:'rift',name:'Interference',lat:61.4966,lng:23.7646,kind:world?.riftClear?'restored':'rift'});
-  if(world?.field)fieldFeatures.push({type:'Feature',
-    geometry:{type:'Polygon',coordinates:[[...nodes.map(n=>[n.lng,n.lat]),[nodes[0].lng,nodes[0].lat]]]},properties:{}});
-  for(const [a,b] of (world?.edges||[])){
-   const x=nodes.find(n=>n.id===a),y=nodes.find(n=>n.id===b);
-   if(x&&y)arcPairs.push([x,y]);
-  }
- }else if(living?.projection){
-  const live=living.projection;
-  points.push(...live.nodes);
-  points.push(live.rift);
-  // Unexplored-region silhouettes were decorative ghosts with no node actions.
-  // Do not render them as selectable-looking lights; all visible crystals are real game nodes.
-  // Auto Atlas nodes appear in both 2D and couch exploration modes.
-  if(live.interference>0&&live.rift.kind!=='restored'){
-   const G=globalThis.MajakkaSceneGeometry;
-   haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
-  }
-  if(lastFix&&!personal)points.push({id:'player',name:'You',...lastFix,kind:'player'});
-  for(const ids of (live.fields||[]).slice(0,18)){
-   const vertices=ids.map(id=>live.nodes.find(n=>n.id===id)).filter(Boolean);
-   if(vertices.length!==3)continue;
-   fieldFeatures.push({type:'Feature',geometry:{type:'Polygon',coordinates:[[...vertices.map(n=>[n.lng,n.lat]),[vertices[0].lng,vertices[0].lat]]]},properties:{}});
-  }
-  for(const [a,b] of live.edges.slice(0,24)){
-    const x=live.nodes.find(n=>n.id===a),y=live.nodes.find(n=>n.id===b);
-    if(x&&y)arcPairs.push([x,y]);
-  }
- }else if(lastFix){
-  points.push({id:'player',name:'You',...lastFix,kind:'player'});
- }
- if(atlas)points.push(...(atlas.real||[]),...(atlas.echoes||[]));
+ if(lastFix&&!personal)points.push({id:'player',name:'You',...lastFix,kind:'player'});
+ if(atlas)points.push(...(atlas.real||[]));
  const signature=JSON.stringify([
   points.map(p=>[p.id,p.lat,p.lng,p.kind,p.sharedCharge??null,p.archetype||p.type||'']),
   haze.map(h=>h.geometry.coordinates),fieldFeatures.map(f=>f.geometry.coordinates),
