@@ -5,6 +5,10 @@
 const A=globalThis.MajakkaAtlasCore,L=globalThis.MajakkaLivingCore,root=document.getElementById('world-overlay');
 if(!A||!L||!root)return;
 let running=true,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
+/* Sourced world POIs live independently of network calls or camera movement. */
+const catalogue=new Map();
+for(const p of globalThis.MajakkaPilotSites?.normalized?.()||[])catalogue.set(p.id,p);
+
 const layer=document.createElement('div');layer.id='atlas-markers';root.append(layer);
 const links=document.createElementNS('http://www.w3.org/2000/svg','svg');
 links.setAttribute('aria-hidden','true');links.setAttribute('class','landmark-threads');layer.append(links);
@@ -38,6 +42,23 @@ sharedButton.addEventListener('click',()=>{
  inspect(selected);
 });
 info.appendChild(sharedButton);
+/* The camera may start kilometers away from the closest sourced node, e.g.
+   when GPS recenters to Nokia. Offer a deliberate camera jump, NOT avatar teleport. */
+const nearest=document.createElement('button');
+nearest.type='button';nearest.id='atlas-nearest';nearest.hidden=true;
+nearest.setAttribute('aria-label','Show nearest mapped landmark');
+document.body.append(nearest);
+nearest.addEventListener('click',()=>{
+ const c=center(),local=snapshot(c)?.real||[];
+ if(!c||!local.length)return;
+ const p=local[0];
+ if(globalThis.MajakkaPerspective?.isActive?.()&&globalThis.MajakkaPerspective?.focus)
+  globalThis.MajakkaPerspective.focus({lat:p.lat,lng:p.lng});
+ else if(typeof map!=='undefined'&&map?.jumpTo)
+  map.jumpTo({center:[p.lng,p.lat],zoom:Math.max(14,map.getZoom?.()||14)});
+ if(typeof notify==='function')notify('Showing '+p.name+' · your GPS position has not changed.');
+});
+
 const css=document.createElement('style');css.textContent=`
 #atlas-markers{position:absolute;inset:0;z-index:24;pointer-events:none;overflow:hidden}
 .landmark-threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -58,6 +79,13 @@ const css=document.createElement('style');css.textContent=`
 #atlas-places{display:none;position:fixed;right:12px;top:calc(276px + env(safe-area-inset-top,0px));z-index:31;min-height:38px;border:1px solid #84ded175;border-radius:18px;padding:7px 11px;background:#123041ef;color:#d2faf0;font:700 10px system-ui}
 #atlas-places{display:block}
 #atlas-places:disabled{opacity:.5}
+#atlas-nearest{position:fixed;right:13px;top:calc(279px + env(safe-area-inset-top,0px));
+ z-index:27;border:1px solid #c7b47c88;background:#252c2af2;color:#eacfa4;
+ font:700 10px system-ui;min-height:37px;border-radius:19px;padding:6px 12px;max-width:180px;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#atlas-nearest[hidden],body.landmark-selected #atlas-nearest,body.field-open #atlas-nearest,
+body.journal-open #atlas-nearest{display:none!important}
+
 #atlas-inspect{position:fixed;left:12px;right:12px;bottom:calc(141px + env(safe-area-inset-bottom,0px));z-index:34;max-width:360px;background:#071c2cf5;border:1px solid #a0ddc888;border-radius:15px;padding:12px 42px 11px 13px;box-shadow:0 12px 35px #0009;font:11px/1.4 system-ui;color:#cee5e0}
 #atlas-inspect[hidden]{display:none!important}
 #atlas-inspect strong{display:block;font-size:13px;color:#f5deb0;line-height:1.4}
@@ -83,7 +111,14 @@ function anchorOf(p){
  return {lat:(2*Math.atan(Math.exp(fy/R))-Math.PI/2)*180/Math.PI,lng:fx/R*180/Math.PI};
 }
 function center(){const viewed=globalThis.MajakkaPerspective?.getCenter?.();if(viewed)return viewed;const c=typeof map!=='undefined'&&map?.getCenter?.();return c&&A.meters(c,c)===0?{lat:c.lat,lng:c.lng}:anchor||fix;}
-function snapshot(view=null){if(!active())return null;const c=anchor||center();return c?{real:anchor?A.landmarks(c,source):[],echoes:[],center:c,source:'fixed-landmarks',radius:1100}:null;}
+function snapshot(view=null){
+ if(!active())return null;
+ const c=view&&A.meters(view,view)===0?view:center();
+ if(!c)return null;
+ const real=[...catalogue.values()].filter(p=>A.meters(c,p)<30000)
+  .sort((a,b)=>A.meters(c,a)-A.meters(c,b)||a.id.localeCompare(b.id)).slice(0,80);
+ return {real,echoes:[],center:c,source:'sourced-landmark-catalogue',radius:30000};
+}
 function send(){window.dispatchEvent(new Event('majakka:atlasupdate'));}
 function inspect(id){
  const data=snapshot(),p=[...(data?.real||[]),...(data?.echoes||[])].find(x=>x.id===id);
@@ -128,6 +163,13 @@ function render(){
   seen.add(p.id);
  }
  for(const [id,el] of atlasElements)if(!seen.has(id)){el.remove();atlasElements.delete(id);}
+ const available=data.real||[];
+ nearest.hidden=seen.size>0||!available.length;
+ if(!nearest.hidden){
+  const c=center(),p=available[0],km=Math.round(A.meters(c,p)/100)/10;
+  nearest.textContent='↗ Nearest node · '+km+' km';
+  nearest.title='Move the map camera to '+p.name+' (no GPS teleport)';
+ }
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
 function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;document.body.classList.remove('landmark-selected');fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Discover landmarks';button.disabled=false;lastRequest=0;send();render();}
@@ -168,8 +210,15 @@ function query(c){
 function applySites(siteAnchor,sites,fromCache=false){
  if(!anchor||cacheId(anchor)!==cacheId(siteAnchor))return;
  source=sites.map(p=>({...p,atlasType:p.type,source:'osm'}));
+ const eligible=A.landmarks(siteAnchor,source);
+ for(const p of eligible)catalogue.set(p.id,p);
+ // Keep a bounded recently discovered catalogue; pilot sources are always reseeded.
+ if(catalogue.size>180){
+  const persistent=new Set((globalThis.MajakkaPilotSites?.normalized?.()||[]).map(p=>p.id));
+  for(const id of catalogue.keys())if(catalogue.size>150&&!persistent.has(id))catalogue.delete(id);
+ }
  queried=true;
- const count=A.landmarks(siteAnchor,source).length;
+ const count=eligible.length;
  button.textContent=count?'✦ '+count+' landmarks':'✦ No landmarks here';
  button.title=count?'Tap to refresh this area. Sites are fixed in the world.':'No suitable named sites in this region. Move the map or try another area.';
  render();send();
