@@ -49,17 +49,12 @@ jobs:
           test -s site/solo/sw.js
           printf 'Alpha files: '
           find site/solo -type f | wc -l
-      - name: Package optional Cloudflare Pages direct-upload ZIP
-        shell: bash
-        run: |
-          set -euo pipefail
-          (cd site/solo && zip -q -r "$GITHUB_WORKSPACE/majakka-solo-alpha.zip" .)
-          unzip -l majakka-solo-alpha.zip | grep 'index.html'
-      - name: Keep downloadable Solo Alpha ZIP
+      - name: Keep directly deployable Solo Alpha artifact
         uses: actions/upload-artifact@v4
         with:
           name: majakka-solo-alpha
-          path: majakka-solo-alpha.zip
+          path: site/solo/
+          if-no-files-found: error
           retention-days: 7
       - name: Configure Pages
         uses: actions/configure-pages@v5
