@@ -271,9 +271,9 @@ function showWorld(){
   const live=living.projection;
   points.push(...live.nodes);
   points.push(live.rift);
-  // v0.8: use personal field only; old position-following glimmers are retired.
-  points.push(...(live.outer||[]));
-  // Auto Atlas nodes appear in both LIVE and couch exploration modes.
+  // Unexplored-region silhouettes were decorative ghosts with no node actions.
+  // Do not render them as selectable-looking lights; all visible crystals are real game nodes.
+  // Auto Atlas nodes appear in both 2D and couch exploration modes.
   if(live.interference>0&&live.rift.kind!=='restored'){
    const G=globalThis.MajakkaSceneGeometry;
    haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
