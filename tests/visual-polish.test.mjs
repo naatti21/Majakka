@@ -24,7 +24,7 @@ test('Lumen size classes survive geometry and remain tiny in 2D and 3D',()=>{
  const q=G.build([{id:'grain',lat:61.5,lng:23.76,kind:'lumen',size:'heart'}]);
  assert.equal(q.lumens.length,1);
  assert.equal(q.lumens[0].properties.size,'heart');
- assert.match(file('lumen-world.js'),/personal-spark\.heart\{width:4px/);
+ assert.match(file('lumen-world.js'),/personal-spark\.heart::after\{width:4\.5px/);
  assert.match(file('world-3d.html'),/heart',2\.1/);
 });
 test('every ordinary node can bypass puzzles and the old phase slider is removed',()=>{
