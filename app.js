@@ -101,7 +101,7 @@ function startMap(){
    mapReady=true;
    $('map-credit').style.display='block';
    $('real-map').style.opacity='1';
-   $('map-legend-text').textContent='CONNECTED WORLD · LOCAL TEST STATE';
+   $('map-legend-text').textContent='LANDMARKS · LOCAL PROGRESS';
    clearMapStatus();map.resize();drawWorld();
    window.dispatchEvent(new Event('majakka:mapready'));
   });
