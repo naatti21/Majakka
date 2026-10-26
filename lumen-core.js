@@ -7,6 +7,11 @@ function merc(p){if(!valid(p))throw Error('Invalid position');const a=p.lat*PI/1
 function unmerc(x,y){return{lng:x/EARTH*180/PI,lat:(2*Math.atan(Math.exp(y/EARTH))-PI/2)*180/PI};}
 function hash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619)>>>0;return h>>>0;}
 function random(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=Math.imul(a^(a>>>15),1|a);t^=t+Math.imul(t^(t>>>7),61|t);return((t^(t>>>14))>>>0)/4294967296;};}
+function grainId(seed,gx,gy,index){
+ // The fixed worldwide field must not collide at two distant geographic cells.
+ return seed==='majakka-global-world-lumen-v1'?'lumen:'+gx+':'+gy+':'+index:
+  hash(seed+'|claim|'+gx+'|'+gy+'|'+index).toString(36);
+}
 function cells(center,personalSeed,radius=RANGE){
 const{x,y}=merc(center);if(typeof personalSeed!=='string'||personalSeed.length<16)throw Error('Missing personal seed');
 const scale=Math.max(.18,Math.cos(center.lat*PI/180));
@@ -17,7 +22,7 @@ for(let i=0;i<count;i++){
 const px=(gx+.1+r()*.8)*CELL,py=(gy+.1+r()*.8)*CELL;
 if(Math.hypot(px-x,py-y)>extent)continue;
 const roll=r(),size=roll<.72?'dust':roll<.95?'glow':'heart';
-out.push({...unmerc(px,py),id:hash(personalSeed+'|claim|'+gx+'|'+gy+'|'+i).toString(36),size,value:size==='heart'?3:size==='glow'?2:1,x:px,y:py});
+out.push({...unmerc(px,py),id:grainId(personalSeed,gx,gy,i),size,value:size==='heart'?3:size==='glow'?2:1,x:px,y:py});
 }}
 return out;
 }
@@ -55,7 +60,7 @@ function visibleField(center,seed,{zoom=15,width=390,height=700,pitch=0,max=240}
   const roll=rnd(),sizeName=roll<.72?'dust':roll<.95?'glow':'heart';
   const coords=unmerc(x,y);
   if(!valid(coords))continue;
-  points.push({...coords,id:hash(seed+'|claim|'+fineX+'|'+fineY+'|0').toString(36),
+  points.push({...coords,id:grainId(seed,fineX,fineY,0),
    x,y,size:sizeName,value:sizeName==='heart'?3:sizeName==='glow'?2:1});
  }
  return points;
