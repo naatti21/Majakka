@@ -28,16 +28,16 @@ sharedButton.addEventListener('click',async()=>{
 info.appendChild(sharedButton);
 const css=document.createElement('style');css.textContent=`
 #atlas-markers{position:absolute;inset:0;z-index:24;pointer-events:none;overflow:hidden}
-.atlas-marker{position:absolute;width:40px;height:48px;transform:translate(-50%,-63%);padding:0;border:0;background:transparent;color:#e9fff6;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 0 5px var(--aura))}
-.atlas-marker .ring{position:absolute;left:50%;bottom:2px;width:30px;height:13px;transform:translateX(-50%);border:1px solid var(--aura);border-radius:50%;background:radial-gradient(ellipse,var(--low),transparent 75%);box-shadow:0 0 16px var(--low)}
-.atlas-marker .body{position:absolute;left:11px;top:6px;width:18px;height:27px;background:linear-gradient(115deg,#f6fff6, var(--aura) 35%,#092432 88%);border:1px solid #ecfff8a1;clip-path:polygon(50% 0,95% 30%,78% 88%,50% 100%,22% 88%,5% 30%);box-shadow:inset 0 0 8px #fff9;transform-origin:50% 90%}
-.atlas-marker:before{content:"";position:absolute;left:8px;top:0;width:24px;height:30px;border:1px solid var(--aura);border-radius:48% 48% 45% 45%;opacity:.48;transform:rotate(20deg)}
+.atlas-marker{position:absolute;width:44px;height:44px;transform:translate(-50%,-60%);padding:0;border:0;background:transparent;color:#d5e8df;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 0 2px var(--aura))}
+.atlas-marker .ring{position:absolute;left:50%;bottom:6px;width:22px;height:9px;transform:translateX(-50%);border:1px solid var(--low);border-radius:50%;background:radial-gradient(ellipse,var(--low),transparent 75%);box-shadow:0 0 5px var(--low)}
+.atlas-marker .body{position:absolute;left:15px;top:12px;width:14px;height:18px;background:linear-gradient(115deg,#f6fff6, var(--aura) 35%,#092432 88%);border:1px solid #ecfff8a1;clip-path:polygon(50% 0,95% 30%,78% 88%,50% 100%,22% 88%,5% 30%);box-shadow:inset 0 0 3px #fff4;transform-origin:50% 90%}
+.atlas-marker:before{content:"";position:absolute;left:13px;top:8px;width:18px;height:22px;border:1px solid var(--aura);border-radius:48% 48% 45% 45%;opacity:.48;transform:rotate(20deg)}
 .atlas-marker.art{--aura:#c3a3f6;--low:#9067d06a}.atlas-marker.art .body{clip-path:polygon(50% 0,99% 50%,50% 100%,1% 50%);transform:rotate(18deg)}
 .atlas-marker.history{--aura:#f0bf83;--low:#ecb66f55}.atlas-marker.history .body{clip-path:polygon(50% 0,85% 12%,85% 80%,50% 100%,15% 80%,15% 12%);border-bottom:2px solid #eac491}
 .atlas-marker.nature{--aura:#8ce1b2;--low:#62c89a55}.atlas-marker.nature .body{clip-path:polygon(50% 0,72% 22%,100% 45%,74% 83%,50% 100%,26% 83%,0 45%,28% 22%);border-radius:40%}
 .atlas-marker.culture{--aura:#8edbe7;--low:#57bed365}.atlas-marker.culture .body{clip-path:polygon(50% 0,88% 18%,94% 76%,50% 100%,6% 76%,12% 18%)}
-.atlas-marker.atlas-echo{opacity:.58;filter:saturate(.7) drop-shadow(0 0 4px #538d93)}.atlas-marker.atlas-echo .body{height:20px;top:9px;background:linear-gradient(120deg,#86bbc5,#213c48);opacity:.85}
-.atlas-marker.atlas-echo.awake{opacity:1;filter:drop-shadow(0 0 9px #f6d99b)}
+.atlas-marker.atlas-echo{opacity:.72;filter:saturate(.62) drop-shadow(0 0 2px #538d93)}.atlas-marker.atlas-echo .body{height:15px;top:14px;background:linear-gradient(120deg,#86bbc5,#213c48);opacity:.85}
+.atlas-marker.atlas-echo.awake{opacity:1;filter:drop-shadow(0 0 5px #f6d99b)}
 .atlas-marker.atlas-echo.awake .body{background:linear-gradient(120deg,#fff0cc,#dbb36c,#594627);opacity:1}
 .atlas-marker:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:10px}
 #atlas-places{display:none;position:fixed;right:12px;top:calc(276px + env(safe-area-inset-top,0px));z-index:31;min-height:38px;border:1px solid #84ded175;border-radius:18px;padding:7px 11px;background:#123041ef;color:#d2faf0;font:700 10px system-ui}
