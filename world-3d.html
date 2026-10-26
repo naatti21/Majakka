@@ -178,7 +178,7 @@ function renderPersonal(){
  }
  const arrow=[];
  if(fix){
-  const a=(Number.isFinite(personal.heading)?personal.heading:map.getBearing())*Math.PI/180;
+  const a=map.getBearing()*Math.PI/180; // The arrow shows the 3D camera view direction.
   const dx=Math.sin(a),dy=Math.cos(a),scale=111320*Math.max(.15,Math.cos(fix.lat*Math.PI/180));
   const vertex=(f,s)=>[fix.lng+(f*dx+s*dy)/scale,fix.lat+(f*dy-s*dx)/111320];
   arrow.push({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[vertex(18,0),vertex(-2,9),vertex(-2,4),vertex(-12,4),vertex(-12,-4),vertex(-2,-4),vertex(-2,-9),vertex(18,0)]]}});
@@ -317,7 +317,7 @@ try {
  });
  map.touchZoomRotate.enableRotation();
  map.on('dragstart',()=>{userMoved=true;});
- map.on('rotate',()=>{if(ready&&mode==='live'&&personal?.heading==null)renderPersonal();});
+ map.on('rotate',()=>{if(ready&&mode==='live')renderPersonal();});
  map.on('load',()=>{
   ready=true;try{showWorld();hide();reply('ready');}catch(error){console.warn('3D geometry unavailable',error);reply('error',{message:String(error?.message||error)});return;}
   // Enhancement only: loss of a terrain service must not blank the base map.
