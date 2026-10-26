@@ -75,7 +75,7 @@
   if(!ready)return;
   if(data.type==='camera-center'){
    const c=data.center;
-   if(currentMode()==='live'&&Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
+   if(Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
     cameraCenter={lat:c[1],lng:c[0]};send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
    }
   }else if(data.type==='node-select'){
