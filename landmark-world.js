@@ -33,7 +33,12 @@ const status=document.createElement('div');status.id='landmark-mission';status.s
 status.textContent='YOUR MISSION · Discover a landmark to restore its light';document.body.append(status);
 const styles=document.createElement('style');styles.textContent=`
 body.place-first #living-ui,body.place-first #living-markers,
-body.place-first #living-pulse,body.place-first #living-objective{display:none!important}
+body.place-first #living-pulse,body.place-first #living-objective,
+body.place-first #world-markers,body.place-first #field-layer,body.place-first #hud-rift-markers,
+body.place-first #hud-node-info,body.place-first #hud-node-actions,
+body.place-first #hud-rift-actions,body.place-first #hud-rift-info,
+body.place-first #hud-world-pulse,body.place-first #hud-rhythm,
+body.place-first #map-intro{display:none!important}
 #landmark-mission{position:fixed;left:12px;right:84px;bottom:calc(164px + env(safe-area-inset-bottom,0px));
  z-index:24;max-width:295px;background:#06131adf;color:#e2d6ba;border:1px solid #8c8b6957;
  border-radius:12px;padding:8px 10px;font:650 10px/1.4 system-ui;pointer-events:none;
