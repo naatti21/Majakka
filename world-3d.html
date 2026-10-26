@@ -205,7 +205,7 @@ function showWorld(){
   const live=living.projection;
   points.push(...live.nodes);
   points.push(live.rift);
-  points.push(...live.lumen);
+  // v0.8: use personal field only; old position-following glimmers are retired.
   points.push(...(live.outer||[]));
   if(live.interference>0&&live.rift.kind!=='restored'){
    const G=globalThis.MajakkaSceneGeometry;
