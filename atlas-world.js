@@ -208,7 +208,7 @@ async function loadSites(force=false){
  }
  if(!force&&tried.has(key))return;
  if(!force&&autoCount>=8)return;
- if(Date.now()-lastRequest<(force?5000:17000))return;
+ if(Date.now()-lastRequest<(force?5000:17000)){scheduleSites(Math.max(1100,17000-(Date.now()-lastRequest)+350));return;}
  tried.add(key);if(!force)autoCount++;
  lastRequest=Date.now();querying=true;button.disabled=true;button.textContent='✦ Finding landmarks…';
  try{
@@ -222,7 +222,10 @@ async function loadSites(force=false){
    button.textContent='✦ Retry landmarks';
    notifyUser('Landmark lookup failed. Map sites are temporarily unavailable; try again or pan to another area.');
   }
- }finally{querying=false;button.disabled=false;}
+ }finally{querying=false;button.disabled=false;
+  const viewed=center(),wanted=viewed&&anchorOf(viewed);
+  if(wanted&&anchor&&cacheId(wanted)!==cacheId(anchor))scheduleSites(1200);
+ }
 }
 function scheduleSites(delay=1100){
  if(document.hidden||navigator.onLine===false||!active())return;
@@ -230,18 +233,19 @@ function scheduleSites(delay=1100){
  searchTimer=setTimeout(()=>{void loadSites(false);},delay);
 }
 button.addEventListener('click',()=>{clearTimeout(searchTimer);void loadSites(true);});
-window.addEventListener('online',()=>{running=true;render();send();});
+window.addEventListener('online',()=>{running=true;render();send();scheduleSites(1500);});
 window.addEventListener('majakka:livestop',()=>{fix=null;send();});
 window.addEventListener('majakka:livefix',onFix);
-window.addEventListener('majakka:mapready',()=>{render();send();});
+window.addEventListener('majakka:mapready',()=>{render();send();scheduleSites(800);});
 window.addEventListener('majakka:livingupdate',redraw);
 window.addEventListener('resize',redraw);
 window.addEventListener('majakka:atlasselect',e=>{if(active())inspect(e.detail?.id);});
 window.addEventListener('majakka:shared-update',()=>{render();if(selected)inspect(selected);send();});
 window.addEventListener('majakka:solo-update',()=>{render();if(selected)inspect(selected);send();});
 window.addEventListener('majakka:site-update',()=>{render();if(selected)inspect(selected);send();});
-let loops=0;const attach=()=>{if(typeof map!=='undefined'&&map?.on)map.on('move',redraw);else if(loops++<30)setTimeout(attach,500);};attach();
+window.addEventListener('majakka:camera-area',()=>scheduleSites(950));
+let loops=0;const attach=()=>{if(typeof map!=='undefined'&&map?.on){map.on('move',()=>{redraw();if(!globalThis.MajakkaPerspective?.isActive?.())scheduleSites(1200);});scheduleSites(800);}else if(loops++<30)setTimeout(attach,500);};attach();
 globalThis.MajakkaAtlas={snapshot,select:inspect};
 // Map startup may have completed before this deferred module attached.
-setTimeout(()=>{render();send();},650);
+setTimeout(()=>{render();send();scheduleSites(600);},650);
 })();
