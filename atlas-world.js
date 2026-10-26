@@ -4,7 +4,7 @@
 'use strict';
 const A=globalThis.MajakkaAtlasCore,L=globalThis.MajakkaLivingCore,root=document.getElementById('world-overlay');
 if(!A||!L||!root)return;
-let running=false,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
+let running=true,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
 const layer=document.createElement('div');layer.id='atlas-markers';root.append(layer);
 const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Find places';button.setAttribute('aria-label','Load public place candidates from OpenStreetMap. Sends the approximate active map area to Overpass API.');button.title='Optional: request public places near this area from the OpenStreetMap Overpass API';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
@@ -22,7 +22,7 @@ const css=document.createElement('style');css.textContent=`
 .atlas-marker.atlas-echo{opacity:.58;filter:saturate(.7) drop-shadow(0 0 4px #538d93)}.atlas-marker.atlas-echo .body{height:20px;top:9px;background:linear-gradient(120deg,#86bbc5,#213c48);opacity:.85}
 .atlas-marker:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:10px}
 #atlas-places{display:none;position:fixed;right:12px;top:calc(276px + env(safe-area-inset-top,0px));z-index:31;min-height:38px;border:1px solid #84ded175;border-radius:18px;padding:7px 11px;background:#123041ef;color:#d2faf0;font:700 10px system-ui}
-body.live-gps #atlas-places{display:block}
+#atlas-places{display:block}
 #atlas-places:disabled{opacity:.5}
 #atlas-inspect{position:fixed;left:12px;right:12px;bottom:calc(141px + env(safe-area-inset-bottom,0px));z-index:34;max-width:360px;background:#071c2cf5;border:1px solid #a0ddc888;border-radius:15px;padding:12px 42px 11px 13px;box-shadow:0 12px 35px #0009;font:11px/1.4 system-ui;color:#cee5e0}
 #atlas-inspect[hidden]{display:none!important}
@@ -30,12 +30,12 @@ body.live-gps #atlas-places{display:block}
 #atlas-inspect small{display:block;color:#92dacf;margin-top:4px}
 #atlas-inspect p{margin:5px 0 0;line-height:1.4}
 #atlas-close{position:absolute;right:7px;top:6px;border:0;background:#244452;color:#e4f5ef;border-radius:50%;width:32px;height:32px}
-body:not(.live-gps) #atlas-markers,body.perspective-on #atlas-markers{display:none!important}
+body.perspective-on #atlas-markers{display:none!important}
 body.journal-open #atlas-places,body.field-open #atlas-places,body.living-selected #atlas-places{display:none!important}
 @media(max-width:355px){#atlas-places{right:82px;top:calc(278px + env(safe-area-inset-top,0px))}}
 `;document.head.append(css);
 const notifyUser=s=>{if(typeof notify==='function')notify(s);};
-function active(){return running&&globalThis.MajakkaLive?.isActive()===true;}
+function active(){return running;}
 function anchorOf(p){return L.region(p).center;}
 function center(){const c=typeof map!=='undefined'&&map?.getCenter?.();return c&&A.meters(c,c)===0?{lat:c.lat,lng:c.lng}:anchor||fix;}
 function snapshot(view=null){if(!active())return null;const c=view&&A.meters(view,view)===0?view:center();return c?A.place(c,source):null;}
@@ -66,7 +66,7 @@ function render(){
  layer.replaceChildren(frag);
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
-function reset(){running=false;source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;layer.replaceChildren();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();}
+function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;layer.replaceChildren();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();render();}
 function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};const c=anchorOf(fix);if(!anchor||L.meters(c,anchor)>450){anchor=c;source=[];queried=false;button.textContent='✦ Find places';}render();send();}
 function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[tourism~"^(artwork|gallery|museum|viewpoint|attraction)$"];'+
@@ -75,7 +75,8 @@ function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[amenity~"^(library|arts_centre|theatre|community_centre)$"];'+
  ');out center 400;';}
 button.addEventListener('click',async()=>{
- if(!active()||!anchor||queried||querying)return;
+ if(!active()||queried||querying)return;
+ if(!anchor){const c=center();if(!c)return;anchor=anchorOf(c);}
  if(Date.now()-lastRequest<120000){notifyUser('Place lookup cooldown. Try again after two minutes.');return;}
  lastRequest=Date.now();
  // Separate user click knowingly sends approximate current map region to a third party.
@@ -98,7 +99,7 @@ button.addEventListener('click',async()=>{
 window.addEventListener('majakka:livestart',()=>{reset();running=true;send();});
 window.addEventListener('majakka:livestop',reset);
 window.addEventListener('majakka:livefix',onFix);
-window.addEventListener('majakka:mapready',redraw);
+window.addEventListener('majakka:mapready',()=>{render();send();});
 window.addEventListener('majakka:livingupdate',redraw);
 window.addEventListener('resize',redraw);
 window.addEventListener('majakka:atlasselect',e=>{if(active())inspect(e.detail?.id);});
