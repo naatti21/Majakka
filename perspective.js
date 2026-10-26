@@ -34,7 +34,7 @@
  function atlasSnapshot(){
   const atlas=globalThis.MajakkaAtlas?.snapshot?.(cameraCenter);
   if(!atlas)return null;
-  return {...atlas,echoes:(atlas.echoes||[]).map(e=>({...e,sharedCharge:globalThis.MajakkaSharedWorld?.get?.(e.id)?.charge??null}))};
+  return {...atlas,echoes:(atlas.echoes||[]).map(e=>({...e,sharedCharge:(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(e.id):globalThis.MajakkaSoloWorld?.get?.(e.id))?.charge??null}))};
  }
  function initial(){
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
@@ -114,6 +114,7 @@
  window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('gps',{fix:null});});
  window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
  window.addEventListener('majakka:shared-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
+ window.addEventListener('majakka:solo-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
  window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
