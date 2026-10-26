@@ -4,7 +4,7 @@
  const $=id=>document.getElementById(id);
  const viewport=$('map-viewport');
  if(!viewport)return;
- let enabled=false,frame=null,ready=false,loadingTimer=0,lastFix=null,enteredAt=0,cameraCenter=null;
+ let enabled=false,frame=null,ready=false,loadingTimer=0,lastFix=null,enteredAt=0,cameraCenter=null,cameraZoom=null;
  const btn=document.createElement('button');
  btn.type='button';btn.id='perspective-toggle';btn.textContent='3D';
  btn.setAttribute('aria-label','Try 3D perspective map; switch back to 2D anytime');
@@ -31,6 +31,13 @@
   try{riftClear=JSON.parse(localStorage.getItem('majakka-rift-local-v1')||'null')?.cleared===true;}catch{}
   return {awake,edges:C.edges(state),field:state.field===true,riftClear,live:globalThis.MajakkaLiving?.snapshot?.()||null};
  }
+ function lumenSnapshot(){
+  const center=cameraCenter||((typeof map!=='undefined'&&map?.getCenter)?map.getCenter():null);
+  return globalThis.MajakkaLumen?.snapshot?.(center,{
+   zoom:Number.isFinite(cameraZoom)?cameraZoom:(map?.getZoom?.()||15),
+   width:viewport.clientWidth,height:viewport.clientHeight,pitch:enabled?1:0
+  })||null;
+ }
  function atlasSnapshot(){
   const atlas=globalThis.MajakkaAtlas?.snapshot?.(cameraCenter);
   if(!atlas)return null;
@@ -45,12 +52,12 @@
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
   const zoom=(typeof map!=='undefined'&&map?.getZoom)?map.getZoom():15;
   send('init',{center:[center.lng,center.lat],zoom,mode:currentMode(),fix:safeFix(),world:world()});
-  send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
+  send('lumen',{personal:lumenSnapshot()});
   send('atlas',{atlas:atlasSnapshot()});
  }
  function disable(message){
   const lastCamera=cameraCenter;
-  enabled=false;ready=false;cameraCenter=null;clearTimeout(loadingTimer);loadingTimer=0;
+  enabled=false;ready=false;cameraCenter=null;cameraZoom=null;clearTimeout(loadingTimer);loadingTimer=0;
   document.body.classList.remove('perspective-on','perspective-ready');
   frame?.remove();frame=null;
   btn.textContent='3D';btn.setAttribute('aria-pressed','false');
@@ -68,7 +75,7 @@
   frame=document.createElement('iframe');frame.id='perspective-frame';frame.title='Majakka 3D perspective trial';
   frame.setAttribute('allow','fullscreen');
   // Same-origin iframe, no extra location permission. GPS supplied ephemerally by parent.
-  frame.src='./world-3d.html?v=106';
+  frame.src='./world-3d.html?v=112';
   viewport.appendChild(frame);
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
@@ -88,7 +95,8 @@
   if(data.type==='camera-center'){
    const c=data.center;
    if(Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
-    cameraCenter={lat:c[1],lng:c[0]};globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:atlasSnapshot()});
+    cameraCenter={lat:c[1],lng:c[0]};cameraZoom=Number.isFinite(data.zoom)?data.zoom:cameraZoom;
+    globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:lumenSnapshot()});send('atlas',{atlas:atlasSnapshot()});
    }
   }else if(data.type==='node-select'){
    const id=data.id;
@@ -122,7 +130,7 @@
  window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
  window.addEventListener('majakka:shared-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
  window.addEventListener('majakka:solo-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
- window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
+ window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:lumenSnapshot()});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
  // Sync after game actions without modifying the core game's pure rules.
