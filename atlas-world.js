@@ -11,19 +11,12 @@ const info=document.createElement('div');info.id='atlas-inspect';info.hidden=tru
 info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;});
 const sharedButton=document.createElement('button');sharedButton.type='button';sharedButton.id='atlas-shared-attune';sharedButton.hidden=true;
 sharedButton.textContent='✧ Send shared resonance · 2';
-sharedButton.addEventListener('click',async()=>{
+sharedButton.addEventListener('click',()=>{
  if(!selected)return;
- const remote=globalThis.MajakkaSharedWorld?.enabled?.();
- sharedButton.disabled=true;sharedButton.textContent='Attuning…';
- try{
-  if(remote)await globalThis.MajakkaSharedWorld.attune(selected);
-  else{
-   const result=globalThis.MajakkaSoloWorld?.attune(selected);
-   if(!result?.ok)notifyUser(result?.reason||'Solo Echo not ready');
-  }
-  inspect(selected);
- }catch(e){notifyUser('Action not committed: '+(e?.body?.error||e?.message||'network error'));inspect(selected);}
- finally{sharedButton.disabled=false;}
+ const site=snapshot()?.real?.find(p=>p.id===selected);
+ const result=globalThis.MajakkaSites?.attune?.(site);
+ if(!result?.ok)notifyUser(result?.reason||'Site is unavailable');
+ inspect(selected);
 });
 info.appendChild(sharedButton);
 const css=document.createElement('style');css.textContent=`
