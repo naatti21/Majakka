@@ -31,7 +31,7 @@ function normalize(raw){
  const t=raw.tags||{},pos=raw.center||raw.geometry?.coordinates&&{lng:raw.geometry.coordinates[0],lat:raw.geometry.coordinates[1]}||raw;
  if(!valid(pos)||dangerous(t))return null;
  const type=raw.atlasType||category(t);if(!types.includes(type))return null;
- const id=raw.id!=null?String(raw.id):String(raw.sourceId||'');
+ const id=raw.sourceId!=null?String(raw.sourceId):raw.id!=null?String(raw.id):'';
  if(!id)return null;
  const name=String(raw.name||t.name||t['name:en']||'Unknown place').trim().slice(0,90);
  return {id:'poi-'+(hash(String(raw.source||'osm')+':'+id)).toString(36),sourceId:id,source:raw.source||'osm',lat:pos.lat,lng:pos.lng,name:name||'Unnamed place',type,kind:'atlas-real',remoteOnly:true};
