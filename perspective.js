@@ -31,12 +31,17 @@
   try{riftClear=JSON.parse(localStorage.getItem('majakka-rift-local-v1')||'null')?.cleared===true;}catch{}
   return {awake,edges:C.edges(state),field:state.field===true,riftClear,live:globalThis.MajakkaLiving?.snapshot?.()||null};
  }
+ function atlasSnapshot(){
+  const atlas=globalThis.MajakkaAtlas?.snapshot?.(cameraCenter);
+  if(!atlas)return null;
+  return {...atlas,echoes:(atlas.echoes||[]).map(e=>({...e,sharedCharge:globalThis.MajakkaSharedWorld?.get?.(e.id)?.charge??null}))};
+ }
  function initial(){
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
   const zoom=(typeof map!=='undefined'&&map?.getZoom)?map.getZoom():15;
   send('init',{center:[center.lng,center.lat],zoom,mode:currentMode(),fix:safeFix(),world:world()});
   send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
-  send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
+  send('atlas',{atlas:atlasSnapshot()});
  }
  function disable(message){
   const lastCamera=cameraCenter;
@@ -78,7 +83,7 @@
   if(data.type==='camera-center'){
    const c=data.center;
    if(Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
-    cameraCenter={lat:c[1],lng:c[0]};globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
+    cameraCenter={lat:c[1],lng:c[0]};globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:atlasSnapshot()});
    }
   }else if(data.type==='node-select'){
    const id=data.id;
@@ -107,7 +112,8 @@
  });
  // GPS permission never changes world mode.
  window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('gps',{fix:null});});
- window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});});
+ window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
+ window.addEventListener('majakka:shared-update',()=>{if(ready)send('atlas',{atlas:atlasSnapshot()});});
  window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
