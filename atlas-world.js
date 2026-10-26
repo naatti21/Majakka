@@ -78,27 +78,37 @@ function inspect(id){
  sharedButton.hidden=p.kind!=='atlas-echo'||charge===null||charge>=2;
  sharedButton.disabled=false;sharedButton.textContent='✧ Attune Echo · 2 Lumen';
 }
+/* Stable live DOM markers: never replace touch targets every map frame. */
+const atlasElements=new Map();
+function clearAtlasElements(){for(const el of atlasElements.values())el.remove();atlasElements.clear();}
 function render(){
- if(!active()){layer.replaceChildren();return;}
+ if(!active()){clearAtlasElements();return;}
  if(typeof map==='undefined'||!map||!mapReady)return;
  const data=snapshot();if(!data)return;
  const liveNodes=globalThis.MajakkaLiving?.snapshot?.()?.projection?.nodes||[];
- const w=document.getElementById('map-viewport').clientWidth,h=document.getElementById('map-viewport').clientHeight;
- const frag=document.createDocumentFragment();
+ const viewport=document.getElementById('map-viewport'),w=viewport.clientWidth,h=viewport.clientHeight;
+ const seen=new Set();
  for(const p of [...data.real,...data.echoes]){
+  // An Echo near the bigger living crystal is represented by the playable living node.
   if(p.kind==='atlas-echo'&&liveNodes.some(n=>A.meters(n,p)<125))continue;
   const pt=map.project([p.lng,p.lat]);if(pt.x<-30||pt.y<-30||pt.x>w+30||pt.y>h+30)continue;
-  const el=document.createElement('button');el.type='button';el.className='atlas-marker '+p.type+' '+p.kind;
-  el.style.left=pt.x+'px';el.style.top=pt.y+'px';el.innerHTML='<i class="ring"></i><i class="body"></i>';
-  const sharedCharge=(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(p.id):globalThis.MajakkaSoloWorld?.get?.(p.id))?.charge||0;
-  if(sharedCharge>=2)el.classList.add('awake');
-  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Public place candidate':'Fictional Echo')+': '+p.name+(sharedCharge>=2?', awake':'')+'. View details.');
-  el.addEventListener('click',()=>inspect(p.id));frag.appendChild(el);
+  let el=atlasElements.get(p.id);
+  if(!el){
+   el=document.createElement('button');el.type='button';
+   el.innerHTML='<i class="ring"></i><i class="body"></i>';
+   el.addEventListener('click',event=>{event.stopPropagation();inspect(p.id);});
+   atlasElements.set(p.id,el);layer.appendChild(el);
+  }
+  const charge=(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(p.id):globalThis.MajakkaSoloWorld?.get?.(p.id))?.charge||0;
+  el.className='atlas-marker '+p.type+' '+p.kind+(charge>=2?' awake':'');
+  el.style.left=pt.x+'px';el.style.top=pt.y+'px';
+  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Explore unverified place':'Activate fictional Echo')+': '+p.name+(charge>=2?' · awake':''));
+  seen.add(p.id);
  }
- layer.replaceChildren(frag);
+ for(const [id,el] of atlasElements)if(!seen.has(id)){el.remove();atlasElements.delete(id);}
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
-function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;layer.replaceChildren();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();render();}
+function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();render();}
 function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};render();send();}
 function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[tourism~"^(artwork|gallery|museum|viewpoint|attraction)$"];'+
