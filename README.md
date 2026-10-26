@@ -1,3 +1,33 @@
+# Majakka v0.11.1 — Place-first Landmark Alpha (current, 26 October 2026)
+
+**Current test game:** sourced, sparse real-world landmark beacons only.
+Tap **Discover landmarks** to load named OpenStreetMap place candidates for the
+fixed nearby search region. A maximum of three named sites, at least 360 m apart,
+are shown; empty areas receive no fictional filler. Lumen grains remain separate.
+
+**Why interact?** Restore a named landmark for 2 Lumen, restore another within
+the same district, and awaken its persistent *First Chord*: glowing beacons,
+a visible connecting thread and up to 3 bonus Lumen. Open the **District** tab
+for the progress and the purpose of the action.
+
+**Important limits:** Site positions/IDs derive from stable OSM records, but
+candidate coverage depends on the queried area and data completeness. A full
+canonical global catalog does not exist yet. Progress remains on-device; no
+shared multiplayer service is live. This is remote-only digital interaction,
+not advice to visit, enter or navigate to a place. The public Overpass API is
+used for a very small voluntary pilot, not a scalable game backend.
+
+The retired procedural 12-node, rift and Echo systems remain in historical
+source for compatibility, but are hidden from the active map; existing saved
+data is retained. GPS remains optional; Lumen grains may be collected by tap.
+The inactive Cloudflare Echo backend is not connected to this new POI game.
+
+Design and QA details: `PLACE-FIRST-v0.11-SPEC.md`.
+
+The following text documents earlier iterations and is not the live product spec.
+
+---
+
 # Majakka Solo Alpha v0.10.2 — current app (26 October 2026)
 
 Majakka is a **single-player, online-map Alpha**. It is intended to be deployed
