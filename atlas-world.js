@@ -30,8 +30,8 @@ const css=document.createElement('style');css.textContent=`
 .atlas-marker.nature{--aura:#8ce1b2;--low:#62c89a55}.atlas-marker.nature .body{clip-path:polygon(50% 0,72% 22%,100% 45%,74% 83%,50% 100%,26% 83%,0 45%,28% 22%);border-radius:40%}
 .atlas-marker.culture{--aura:#8edbe7;--low:#57bed365}.atlas-marker.culture .body{clip-path:polygon(50% 0,88% 18%,94% 76%,50% 100%,6% 76%,12% 18%)}
 .atlas-marker.atlas-echo{opacity:.72;filter:saturate(.62) drop-shadow(0 0 2px #538d93)}.atlas-marker.atlas-echo .body{height:15px;top:14px;background:linear-gradient(120deg,#86bbc5,#213c48);opacity:.85}
-.atlas-marker.atlas-echo.awake{opacity:1;filter:drop-shadow(0 0 5px #f6d99b)}
-.atlas-marker.atlas-echo.awake .body{background:linear-gradient(120deg,#fff0cc,#dbb36c,#594627);opacity:1}
+.atlas-marker.awake{opacity:1;filter:drop-shadow(0 0 5px #f6d99b)}
+.atlas-marker.awake .body{background:linear-gradient(120deg,#fff0cc,#dbb36c,#594627);opacity:1}
 .atlas-marker:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:10px}
 #atlas-places{display:none;position:fixed;right:12px;top:calc(276px + env(safe-area-inset-top,0px));z-index:31;min-height:38px;border:1px solid #84ded175;border-radius:18px;padding:7px 11px;background:#123041ef;color:#d2faf0;font:700 10px system-ui}
 #atlas-places{display:block}
@@ -97,7 +97,7 @@ function render(){
   const restored=Boolean(globalThis.MajakkaSites?.get?.(p.id));
   el.className='atlas-marker '+p.type+' '+p.kind+(restored?' awake':'');
   el.style.left=pt.x+'px';el.style.top=pt.y+'px';
-  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Explore unverified place':'Activate fictional Echo')+': '+p.name+(restored?' · restored':''));
+  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Restore landmark':'Landmark')+': '+p.name+(restored?' · restored':''));
   seen.add(p.id);
  }
  for(const [id,el] of atlasElements)if(!seen.has(id)){el.remove();atlasElements.delete(id);}
@@ -145,6 +145,7 @@ window.addEventListener('resize',redraw);
 window.addEventListener('majakka:atlasselect',e=>{if(active())inspect(e.detail?.id);});
 window.addEventListener('majakka:shared-update',()=>{render();if(selected)inspect(selected);send();});
 window.addEventListener('majakka:solo-update',()=>{render();if(selected)inspect(selected);send();});
+window.addEventListener('majakka:site-update',()=>{render();if(selected)inspect(selected);send();});
 let loops=0;const attach=()=>{if(typeof map!=='undefined'&&map?.on)map.on('move',redraw);else if(loops++<30)setTimeout(attach,500);};attach();
 globalThis.MajakkaAtlas={snapshot,select:inspect};
 // Map startup may have completed before this deferred module attached.
