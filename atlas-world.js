@@ -4,7 +4,7 @@
 'use strict';
 const A=globalThis.MajakkaAtlasCore,L=globalThis.MajakkaLivingCore,root=document.getElementById('world-overlay');
 if(!A||!L||!root)return;
-let running=false,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null;
+let running=false,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
 const layer=document.createElement('div');layer.id='atlas-markers';root.append(layer);
 const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Find places';button.setAttribute('aria-label','Load public place candidates from OpenStreetMap. Sends the approximate active map area to Overpass API.');button.title='Optional: request public places near this area from the OpenStreetMap Overpass API';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
@@ -49,7 +49,7 @@ function inspect(id){
  info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified access. Remote discovery preview only; do not use as walking directions. Full node mechanics are not yet connected.':'A stable fictional signal that makes sparse regions worth exploring. Not a real-world destination.';
 }
 function render(){
- if(!active()||!window.mapReady&&typeof mapReady==='undefined'){layer.replaceChildren();return;}
+ if(!active()){layer.replaceChildren();return;}
  if(typeof map==='undefined'||!map||!mapReady)return;
  const data=snapshot();if(!data)return;
  const liveNodes=globalThis.MajakkaLiving?.snapshot?.()?.projection?.nodes||[];
@@ -66,7 +66,7 @@ function render(){
  layer.replaceChildren(frag);
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
-function reset(){running=false;source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;layer.replaceChildren();button.textContent='✦ Find places';button.disabled=false;send();}
+function reset(){running=false;source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;layer.replaceChildren();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();}
 function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};const c=anchorOf(fix);if(!anchor||L.meters(c,anchor)>450){anchor=c;source=[];queried=false;button.textContent='✦ Find places';}render();send();}
 function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[tourism~"^(artwork|gallery|museum|viewpoint|attraction)$"];'+
@@ -76,6 +76,8 @@ function query(c){return '[out:json][timeout:12];('+
  ');out center 400;';}
 button.addEventListener('click',async()=>{
  if(!active()||!anchor||queried||querying)return;
+ if(Date.now()-lastRequest<120000){notifyUser('Place lookup cooldown. Try again after two minutes.');return;}
+ lastRequest=Date.now();
  // Separate user click knowingly sends approximate current map region to a third party.
  querying=true;button.disabled=true;button.textContent='✦ Loading places';
  const thisAnchor={...anchor},controller=new AbortController();fetchAbort=controller;
@@ -86,7 +88,7 @@ button.addEventListener('click',async()=>{
   if(!response.ok)throw Error('Overpass '+response.status);
   const raw=await response.json();
   if(!active()||!anchor||L.meters(thisAnchor,anchor)>150)return;
-  source=(raw.elements||[]).slice(0,800).map(p=>({...p,lat:p.lat??p.center?.lat,lng:p.lon??p.center?.lon,center:p.center&&{lat:p.center.lat,lng:p.center.lon},source:'osm'}));
+  source=(raw.elements||[]).slice(0,800).map(p=>({...p,lat:p.lat??p.center?.lat,lng:p.lon??p.center?.lon,center:p.center&&{lat:p.center.lat,lng:p.center.lon},source:'osm',sourceId:String(p.type||'node')+'/'+String(p.id)}));
   queried=true;button.textContent='✦ Places loaded';render();send();
   notifyUser('Auto Atlas · '+(snapshot()?.real.length||0)+' public place candidates. Access unverified; remote preview.');
  }catch(e){
