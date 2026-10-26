@@ -1,0 +1,21 @@
+name: Majakka code checks
+on:
+  push:
+    branches: ["feature/personal-lumen-v0.8"]
+  pull_request:
+    branches: ["main"]
+permissions:
+  contents: read
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Parse and test pure game, atlas and shared API
+        run: node --test tests/*.test.mjs
+      - name: Parse shared Worker entrypoint
+        run: node --check backend/worker.mjs
