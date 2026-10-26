@@ -139,3 +139,11 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - New node-graph/movement pure tests; actual GPS outdoors, 3D WebGL rendering and battery test **still unverified on Android**.
 
 **Validated before the v0.7.0 commit:** 18/18 updated pure graph/walking tests passed (including legacy-region behavior, spaced nodes, off-road route turns, false stillness and vehicle-speed rejection), plus 17/17 script/source/integration invariants. **Not claimed:** an actual GPS walking trial, realistic battery profile or production-grade GPS anti-spoof protection. Current PWA still requires foreground LIVE and shuts GPS off when hidden.
+
+
+## Node Atlas v0.1 — conservative nomination policy (26 October 2026)
+
+- Added specification `docs/NODE-ATLAS-v0.1.md` and independent, pure `node-atlas-policy.js`, without changing the deployed map, GPS, node spawning, camera or game balance.
+- 10/10 model-invoked JavaScript checks on `tests/node-atlas-policy.test.mjs` passed: approval impossible at this stage, private/unsafe/school/emergency filtering, missing pedestrian evidence, park centroid rejection for further review, photograph rights and EXIF requirements, duplicate candidates, bad coordinates and unknown type handling.
+- Human/public safety, photo rights and local park rules **cannot** be proven automatically. A review-ready candidate is NOT an approved public anchor. No public OSM POI import, photo storage or moderation backend implemented yet.
+- Real-world geospatial overlay and licensing review required before any automatic POI display.
