@@ -36,3 +36,8 @@ body.living-selected #world-channel,body.journal-open #world-channel,body.field-
 #world-offline span{max-width:330px}
 body.live-gps #map-intro{display:none!important}
 @media(max-width:370px){#live-toggle{top:calc(214px + env(safe-area-inset-top,0px));right:8px;min-width:102px;font-size:10px}#world-channel{right:8px;font-size:10px}}
+
+/* No fictional/offline fallback map or stale DEMO reset controls in the online world. */
+.fallback-geography,body:not(.live-gps) .fallback-geography{display:none!important}
+#reset,#demo-walk,#quiet-collect{display:none!important}
+body.live-gps .map-load-status{z-index:30}
