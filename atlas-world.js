@@ -63,9 +63,10 @@ function inspect(id){
  info.querySelector('#atlas-title').textContent=p.name;
  info.querySelector('#atlas-meta').textContent=(p.type.toUpperCase()+' · '+(p.kind==='atlas-real'?'OSM place candidate':'FICTIONAL ECHO'));
  const shared=globalThis.MajakkaSharedWorld;
- const charge=p.kind==='atlas-echo'&&shared?.enabled?.()?shared.get(p.id)?.charge??0:null;
+ const sharedRecord=p.kind==='atlas-echo'&&shared?.enabled?.()?shared.get(p.id):null;
+ const charge=sharedRecord?sharedRecord.charge:null;
  info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified access. Remote discovery preview only; do not use as walking directions.':'A stable fictional Echo, not a walking destination.'+
-   (charge===null?' Shared progression not yet connected.':' Shared resonance '+charge+'/2 · verified on world server.');
+   (charge===null?(shared?.enabled?.()?' Waiting for the world server.':' Shared progression not yet connected.'):' Shared resonance '+charge+'/2 · verified on world server.');
  sharedButton.hidden=charge===null||charge>=2;
  sharedButton.disabled=false;sharedButton.textContent='✧ Send shared resonance · 2';
 }
