@@ -132,3 +132,54 @@ body.live-gps .living-point.lumen,body.live-gps .living-glimmer{display:none!imp
 .living-point.culture i{clip-path:polygon(50% 0,90% 16%,97% 76%,50% 100%,3% 76%,10% 16%);background:linear-gradient(120deg,#e1feff,#65b4c2,#18355b)}
 .living-point.awake i{filter:brightness(1.15) sepia(.15);box-shadow:0 0 0 12px #ecc6812c,0 0 25px 6px #f3d795b0}
 .living-point.trial::before,.living-point.awake::before{content:'';position:absolute;left:50%;top:12px;transform:translateX(-50%) rotateX(72deg);width:34px;height:34px;border-radius:50%;border:1px solid #9ce8d15c;box-shadow:0 0 11px #6dbba359;pointer-events:none}
+
+/* v0.10.3 — visual hierarchy: no pillar markers, smaller HUD, compact circuit decode */
+.living-point{width:44px;height:44px}
+.living-point.trial i,.living-point.awake i,.living-point.corrupted i{
+ width:14px;height:18px;border:1px solid #daf6e1bd;border-radius:1px;
+ transform:translateY(-3px);background:linear-gradient(135deg,#a4d5c7,#2b6870 64%,#112932);
+ box-shadow:0 0 0 5px #4caa9b10,0 0 10px #5fc6bb4d;
+ clip-path:polygon(50% 0,91% 27%,78% 84%,50% 100%,22% 84%,9% 27%);
+}
+.living-point.art i{clip-path:polygon(50% 0,100% 43%,55% 100%,0 57%);
+ background:linear-gradient(120deg,#c9c9cb,#567c88,#1b3641)}
+.living-point.history i{clip-path:polygon(19% 0,81% 0,100% 79%,50% 100%,0 79%);
+ background:linear-gradient(120deg,#efce91,#957b58,#23373b)}
+.living-point.nature i{clip-path:polygon(50% 0,78% 27%,100% 49%,76% 72%,50% 100%,24% 72%,0 49%,22% 27%);
+ background:linear-gradient(120deg,#cce4bd,#547f71,#1a3635)}
+.living-point.culture i{clip-path:polygon(50% 0,98% 16%,82% 90%,50% 100%,18% 90%,2% 16%);
+ background:linear-gradient(120deg,#b5d8dc,#5b92a0,#1b353f)}
+.living-point.awake i{filter:none;border-color:#f9e2ad;box-shadow:0 0 0 6px #d7b87f15,0 0 13px #e3c78e81}
+.living-point.trial::before,.living-point.awake::before{
+ top:18px;width:23px;height:23px;border-color:#65ab9d42;box-shadow:none;
+}
+#living-objective{
+ top:calc(318px + env(safe-area-inset-top,0px));max-width:220px;
+ border-color:#567a7770;background:#041018de;
+ font-size:9px;padding:5px 8px;line-height:1.3;
+}
+#living-pulse{background:#07191dde;color:#d4b981;border-color:#8b8b7060;box-shadow:none}
+#living-challenge{
+ bottom:calc(96px + env(safe-area-inset-bottom,0px));
+ left:18px;right:18px;max-width:370px;margin:auto;
+ padding:12px 13px 9px;border:1px solid #8a937d8c;
+ background:#071016f9;border-radius:16px;box-shadow:0 12px 34px #000d;
+}
+#living-challenge strong{font-size:12px;color:#e7d6b0}
+#living-symbols{margin-top:8px;min-height:64px;letter-spacing:normal}
+#living-answers{padding:3px 0 0}
+#living-answers .living-circuit-exit{font-size:10px;min-height:33px;border-radius:9px;
+ background:#102229;border:1px solid #667f7c66;color:#bdcdc7}
+.living-circuit{display:flex;justify-content:center;align-items:center;gap:6px;margin:3px 0 8px;
+ border-radius:13px;background:linear-gradient(90deg,#101f26,#0a141b,#101f26);padding:10px 5px}
+.living-circuit .circuit-port{color:#f3ca82;font:800 20px/1 system-ui;flex:0 0 20px;letter-spacing:0}
+.living-circuit .circuit-port.target{color:#95d4be}
+#living-challenge .circuit-tile{display:grid;place-items:center;width:51px;min-width:0;height:46px;
+ min-height:46px;border:1px solid #4d6b6a;border-radius:11px;background:#15282d;
+ color:#6b8884;font-size:29px;touch-action:manipulation;transition:background .12s,color .12s;
+ padding:0;line-height:1}
+#living-challenge .circuit-tile.connected{background:#24423c;color:#e0d69d;border-color:#c8bd82}
+.living-circuit-note{display:block;color:#95ada6;font-size:10px;letter-spacing:0;line-height:1.5}
+#living-cancel{font-size:11px;padding:6px}
+@media(max-width:360px){#living-challenge .circuit-tile{width:45px;height:44px}}
+@media(prefers-reduced-motion:reduce){#living-challenge .circuit-tile{transition:none}}
