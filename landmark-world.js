@@ -65,8 +65,8 @@ function progress(p){
 }
 function updatePanel(){
  const n=Object.keys(state.sites).length,d=Object.keys(state.districts).length;
- panel.querySelector('p').textContent='Restored landmarks: '+n+'\\nAwakened districts: '+d+
- '\\n\\nFind a named art, historical, natural or cultural landmark on the map. Restore it with 2 Lumen. Restore another landmark in the same district to awaken a permanent First Chord and earn up to 3 Lumen.\\n\\nAll positions come from OpenStreetMap data. Your progress is local to this device; shared-world sync comes later. Walking is never required.';
+ panel.querySelector('p').textContent='Restored landmarks: '+n+'\nAwakened districts: '+d+
+ '\n\nFind a named art, historical, natural or cultural landmark on the map. Restore it with 2 Lumen. Restore another landmark in the same district to awaken a permanent First Chord and earn up to 3 Lumen.\n\nAll positions come from OpenStreetMap data. Your progress is local to this device; shared-world sync comes later. Walking is never required.';
 }
 function update(p=null){
  const n=p?progress(p):null;
