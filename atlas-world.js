@@ -6,7 +6,7 @@ const A=globalThis.MajakkaAtlasCore,L=globalThis.MajakkaLivingCore,root=document
 if(!A||!L||!root)return;
 let running=true,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
 const layer=document.createElement('div');layer.id='atlas-markers';root.append(layer);
-const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Find places';button.setAttribute('aria-label','Load public place candidates from OpenStreetMap. Sends the approximate active map area to Overpass API.');button.title='Optional: request public places near this area from the OpenStreetMap Overpass API';document.body.append(button);
+const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Discover landmarks';button.setAttribute('aria-label','Load public place candidates from OpenStreetMap. Sends the approximate active map area to Overpass API.');button.title='Optional: request public places near this area from the OpenStreetMap Overpass API';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
 info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;});
 const sharedButton=document.createElement('button');sharedButton.type='button';sharedButton.id='atlas-shared-attune';sharedButton.hidden=true;
@@ -61,7 +61,7 @@ const notifyUser=s=>{if(typeof notify==='function')notify(s);};
 function active(){return running;}
 function anchorOf(p){return L.region(p).center;}
 function center(){const viewed=globalThis.MajakkaPerspective?.getCenter?.();if(viewed)return viewed;const c=typeof map!=='undefined'&&map?.getCenter?.();return c&&A.meters(c,c)===0?{lat:c.lat,lng:c.lng}:anchor||fix;}
-function snapshot(view=null){if(!active())return null;const c=view&&A.meters(view,view)===0?view:center();return c?A.place(c,source):null;}
+function snapshot(view=null){if(!active())return null;const c=anchor||center();return c?{real:anchor?A.landmarks(c,source):[],echoes:[],center:c,source:'fixed-landmarks',radius:1100}:null;}
 function send(){window.dispatchEvent(new Event('majakka:atlasupdate'));}
 function inspect(id){
  const data=snapshot(),p=[...(data?.real||[]),...(data?.echoes||[])].find(x=>x.id===id);
@@ -108,7 +108,7 @@ function render(){
  for(const [id,el] of atlasElements)if(!seen.has(id)){el.remove();atlasElements.delete(id);}
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
-function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();render();}
+function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Discover landmarks';button.disabled=false;lastRequest=0;send();render();}
 function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};render();send();}
 function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[tourism~"^(artwork|gallery|museum|viewpoint|attraction)$"];'+
@@ -120,7 +120,7 @@ button.addEventListener('click',async()=>{
  if(!active()||querying)return;
  const c=center();if(!c)return;
  const requestedAnchor=anchorOf(c);
- if(!anchor||A.meters(anchor,requestedAnchor)>450){anchor=requestedAnchor;source=[];queried=false;button.textContent='✦ Find places';}
+ if(!anchor||A.meters(anchor,requestedAnchor)>450){anchor=requestedAnchor;source=[];queried=false;button.textContent='✦ Discover landmarks';}
  if(queried)return;
  if(Date.now()-lastRequest<120000){notifyUser('Place lookup cooldown. Try again after two minutes.');return;}
  lastRequest=Date.now();
@@ -138,7 +138,7 @@ button.addEventListener('click',async()=>{
   queried=true;button.textContent='✦ Places loaded';render();send();
   notifyUser('Auto Atlas · '+(snapshot()?.real.length||0)+' public place candidates. Access unverified; remote preview.');
  }catch(e){
-  if(active()){button.textContent='✦ Retry places';notifyUser('Place data unavailable. Global fictional Echo network remains visible.');}
+  if(active()){button.textContent='✦ Retry places';notifyUser('Landmark data unavailable. Please try again.');}
  }finally{clearTimeout(timeout);querying=false;button.disabled=false;fetchAbort=null;}
 });
 window.addEventListener('online',()=>{running=true;render();send();});
