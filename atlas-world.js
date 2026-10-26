@@ -6,6 +6,25 @@ const A=globalThis.MajakkaAtlasCore,L=globalThis.MajakkaLivingCore,root=document
 if(!A||!L||!root)return;
 let running=true,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
 const layer=document.createElement('div');layer.id='atlas-markers';root.append(layer);
+const links=document.createElementNS('http://www.w3.org/2000/svg','svg');
+links.setAttribute('aria-hidden','true');links.setAttribute('class','landmark-threads');layer.append(links);
+const glow=document.createElementNS('http://www.w3.org/2000/svg','path');
+const thread=document.createElementNS('http://www.w3.org/2000/svg','path');
+glow.setAttribute('class','landmark-thread-glow');
+thread.setAttribute('class','landmark-thread-core');
+links.append(glow,thread);
+function paintConnections(sites){
+ const active=sites.filter(p=>globalThis.MajakkaSites?.get?.(p.id));
+ const sections=[];
+ for(let i=0;i<active.length;i++)for(let j=i+1;j<active.length;j++){
+  const aa=globalThis.MajakkaSites.get(active[i].id),bb=globalThis.MajakkaSites.get(active[j].id);
+  if(aa.district!==bb.district)continue;
+  const a=map.project([active[i].lng,active[i].lat]),b=map.project([active[j].lng,active[j].lat]);
+  const mx=(a.x+b.x)/2,my=(a.y+b.y)/2-12;
+  sections.push('M '+a.x+' '+a.y+' Q '+mx+' '+my+' '+b.x+' '+b.y);
+ }
+ const d=sections.join(' ');glow.setAttribute('d',d);thread.setAttribute('d',d);
+}
 const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Discover landmarks';button.setAttribute('aria-label','Discover named landmarks near the map center using OpenStreetMap. Sends the approximate map area to Overpass API.');button.title='Find a few named historic, natural and cultural landmarks. No procedural node spam.';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
 info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;});
@@ -21,6 +40,9 @@ sharedButton.addEventListener('click',()=>{
 info.appendChild(sharedButton);
 const css=document.createElement('style');css.textContent=`
 #atlas-markers{position:absolute;inset:0;z-index:24;pointer-events:none;overflow:hidden}
+.landmark-threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.landmark-thread-glow{fill:none;stroke:#bdaa80;stroke-width:10;opacity:.15}
+.landmark-thread-core{fill:none;stroke:#e5c48b;stroke-width:2;opacity:.80;stroke-dasharray:6 6}
 .atlas-marker{position:absolute;width:44px;height:44px;transform:translate(-50%,-60%);padding:0;border:0;background:transparent;color:#d5e8df;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 0 2px var(--aura))}
 .atlas-marker .ring{position:absolute;left:50%;bottom:6px;width:22px;height:9px;transform:translateX(-50%);border:1px solid var(--low);border-radius:50%;background:radial-gradient(ellipse,var(--low),transparent 75%);box-shadow:0 0 5px var(--low)}
 .atlas-marker .body{position:absolute;left:15px;top:12px;width:14px;height:18px;background:linear-gradient(115deg,#f6fff6, var(--aura) 35%,#092432 88%);border:1px solid #ecfff8a1;clip-path:polygon(50% 0,95% 30%,78% 88%,50% 100%,22% 88%,5% 30%);box-shadow:inset 0 0 3px #fff4;transform-origin:50% 90%}
@@ -80,12 +102,10 @@ function render(){
  if(!active()){clearAtlasElements();return;}
  if(typeof map==='undefined'||!map||!mapReady)return;
  const data=snapshot();if(!data)return;
- const liveNodes=globalThis.MajakkaLiving?.snapshot?.()?.projection?.nodes||[];
+ paintConnections(data.real||[]);
  const viewport=document.getElementById('map-viewport'),w=viewport.clientWidth,h=viewport.clientHeight;
  const seen=new Set();
- for(const p of [...data.real,...data.echoes]){
-  // An Echo near the bigger living crystal is represented by the playable living node.
-  if(p.kind==='atlas-echo'&&liveNodes.some(n=>A.meters(n,p)<125))continue;
+ for(const p of (data.real||[])){
   const pt=map.project([p.lng,p.lat]);if(pt.x<-30||pt.y<-30||pt.x>w+30||pt.y>h+30)continue;
   let el=atlasElements.get(p.id);
   if(!el){
