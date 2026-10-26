@@ -251,6 +251,7 @@ function choose(id){
  chosen=id;linkTarget=null;linkTargets.hidden=true;
  document.body.classList.add('living-selected');
  updateUI();emit();
+ message((id==='veil'?'Interference':world.nodes.find(n=>n.id===id)?.name||'Node')+' selected · choose Attune or Decode');
 }
 function close(){
  chosen=null;linkTarget=null;linkTargets.hidden=true;document.body.classList.remove('living-selected');updateUI();cancel();
