@@ -248,15 +248,16 @@ async function loadSites(force=false){
  const requested=anchorOf(current);
  if(!requested)return;
  if(!anchor||cacheId(anchor)!==cacheId(requested)){
-  anchor=requested;queried=false;source=[];selected=null;document.body.classList.remove('landmark-selected');info.hidden=true;
-  clearAtlasElements();paintConnections([]);render();send();
+  // Crossing a network search cell must not erase already sourced world nodes.
+  anchor=requested;queried=false;source=[];
+  render();send();
  }
  const key=cacheId(requested),entry=cache[key];
  if(!force&&entry&&Date.now()-entry.at<TTL&&Array.isArray(entry.sites)){
   applySites(requested,entry.sites,true);return;
  }
  if(!force&&tried.has(key))return;
- if(!force&&autoCount>=8)return;
+ if(!force&&autoCount>=16)return;
  if(Date.now()-lastRequest<(force?5000:17000)){scheduleSites(Math.max(1100,17000-(Date.now()-lastRequest)+350));return;}
  tried.add(key);if(!force)autoCount++;
  lastRequest=Date.now();querying=true;button.disabled=true;button.textContent='✦ Finding landmarks…';
