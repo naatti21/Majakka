@@ -7,18 +7,19 @@
 <meta name="description" content="Majakka Node Atlas 0B — manually review real OpenStreetMap candidates, never auto-publish.">
 <title>MAJAKKA — Node Atlas Review</title>
 <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
-<link rel="stylesheet" href="./atlas-review.css?v=0b1">
+<link rel="stylesheet" href="./atlas-review.css?v=0b2">
 </head>
 <body>
 <div id="page">
 <header>
-  <div class="brand">MAJAKKA <small>NODE ATLAS · REVIEW LAB 0B</small></div>
+  <div class="brand">MAJAKKA <small>NODE ATLAS · REVIEW LAB 0B.1</small></div>
   <a href="./index.html">Return to game</a>
 </header>
 <div id="workspace">
  <section id="map-wrap" aria-label="Node candidate street map">
   <div id="atlas-map" aria-label="Moveable geographic map"></div>
   <div id="atlas-pins" aria-label="Candidate markers"></div>
+  <button type="button" id="map-style" aria-pressed="false">Original map</button>
   <div class="crosshair" aria-hidden="true"></div>
   <div id="map-note">
    <span id="map-state">Loading street map…</span>
@@ -27,14 +28,15 @@
   </div>
  </section>
  <main id="controls">
-  <h1>Real places. Not game nodes.</h1>
-  <p>Use this private review lab to inspect park entrances, art, heritage and public places.
-   All locations must be checked before becoming playable anchors. This prototype uses no device GPS.</p>
-  <div id="readout" aria-live="polite">Center: Tampere demo · radius 1.2 km</div>
-  <div id="buttons">
-   <button type="button" class="action primary" id="fetch">Find OSM candidates</button>
-   <button type="button" class="action plain" id="reset-center">Tampere demo</button>
+  <div id="atlas-toolbar">
+   <div id="readout" aria-live="polite">Center: Tampere demo · radius 1.2 km</div>
+   <div id="buttons">
+    <button type="button" class="action primary" id="fetch">Find OSM candidates</button>
+    <button type="button" class="action plain" id="reset-center">Tampere demo</button>
+   </div>
   </div>
+  <h1>Real places. Not game nodes.</h1>
+  <p>Find candidate public places around the crosshair. These are NOT verified or published as game nodes. No device GPS is used.</p>
   <div id="atlas-status" role="status" aria-live="polite">
    Drag the map to choose an area, then tap Find. The selected center and 1.2 km radius
    will be sent to the public Overpass service only after you tap.
@@ -89,6 +91,6 @@
 <script src="./raster-map.js?v=035" defer></script>
 <script src="./node-atlas-policy.js?v=0b1" defer></script>
 <script src="./atlas-import.js?v=0b1" defer></script>
-<script src="./atlas-review.js?v=0b1" defer></script>
+<script src="./atlas-review.js?v=0b2" defer></script>
 </body>
 </html>

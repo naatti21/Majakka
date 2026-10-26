@@ -157,3 +157,13 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - Preserves source attribution, makes original OSM item accessible, uses textContent for untrusted source names/reasons, keeps in-session triage notes, and provides opt-in JSON report copy with coordinate disclosure.
 - Tests executed in model JS isolate: 10/10 Node Atlas policy checks, 8/8 importer tests, 8/8 reviewer static ID/JS/CSS/source checks, and a simulated one-query review UI which produced a list and markers, opened item details, and copied the report.
 - **Not verified:** external Overpass CORS and endpoint availability, actual Tampere OSM results, mobile tap/pan responsiveness, rendered layout on Android, safety/access validity of any real-world candidate. These require real user or Work browser testing; no fake POI rows were inserted into the production app.
+
+
+## Node Atlas 0B.1 — Android screenshot black map / missing buttons (26 October 2026)
+
+- The user's Android screenshot showed an entirely black map with a "Street map loaded" notice, plus the Find control scrolled out of view.
+- Root cause supported by stylesheet: filter `invert(.95) hue-rotate(179deg) saturate(.37) brightness(.36) contrast(1.46)` crushed map-tile luminance. Changed to legible dark map, still with a very dark backdrop.
+- Added an explicit **Original map / Dark map** toggle that disables/enables tile filters and offers an unambiguous visual diagnostic.
+- Fixed mobile scroll restoration and made the area/readout + Find/Tampere buttons sticky at the top of the review panel; map area uses ~40dvh instead of ~48dvh on phones.
+- Corrected the status message to "Street tiles received" rather than implying all geographic labels were visible. Cache-busted CSS/JS URLs.
+- Verified with a DOM-mocked Javascript review flow: 14/14 checks including filter, toggle, sticky toolbar, scroll reset, manual query, map pins, candidate details, copy report, source IDs, no GPS and no auto-publishing. **Actual Chrome Android after deployment still needs the user's observation**, including whether tile provider delivers data.

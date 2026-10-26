@@ -156,3 +156,8 @@ A separate public GitHub Pages URL, [Node Atlas review](./atlas-review.html), di
 Node Atlas imports OpenStreetMap point, way and relation records and treats a way/relation's center as an approximate candidate position, **never as an automatically verified public entrance**. Requests are manual (no map-pan auto-fetch), capped by area/result count and spaced out to respect community servers. Maps and public Overpass do receive the selected area as part of those explicit network requests. OSM attribution/ODbL and any derived-database obligations require further production review.
 
 Read [tests/atlas-import.test.mjs](./tests/atlas-import.test.mjs) for importer tests. Device network, third-party provider CORS, first real OSM candidate list and visual Android QA are still open.
+
+
+### Node Atlas 0B.1 — black map visibility hotfix
+
+After an Android screenshot showed a black map although at least one raster tile reported loaded, changed the overaggressive CSS inversion/brightness/contrast to a legible low-saturation night filter, and added an **Original map** toggle to show unfiltered OSM street tiles. The **Find OSM candidates** and test-area buttons now live in a sticky mobile toolbar instead of disappearing when the details panel scrolls. Revisit `atlas-review.html?rev=0b2` and verify real map tiles and candidate fetch. Pure JS DOM/mock checks passed; on-device CSS and network providers remain to be confirmed.

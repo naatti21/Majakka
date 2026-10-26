@@ -160,10 +160,16 @@
  }
  function boot(){
   state.map=new MajakkaRaster.Map({container:"atlas-map",center:[state.center.lng,state.center.lat],zoom:14,minZoom:11,maxZoom:19});
-  state.map.on("load",()=>{$("map-state").textContent="Street map loaded. Drag to select another test area.";});
+  state.map.on("load",()=>{$("map-state").textContent="Street tiles received. If the streets look blank, tap Original map.";});
   state.map.on("move",()=>{displayCenter();renderPins();});
   state.map.on("error",error=>{$("map-state").textContent="Map tiles unavailable. List review can still work.";console.warn(error);});
   displayCenter();
+  $("controls").scrollTop=0;
+  $("map-style").addEventListener("click",()=>{
+   const clear=$("atlas-map").classList.toggle("unfiltered");
+   $("map-style").textContent=clear?"Dark map":"Original map";
+   $("map-style").setAttribute("aria-pressed",String(clear));
+  });
   $("fetch").addEventListener("click",fetchCandidates);
   $("reset-center").addEventListener("click",()=>{state.map.jumpTo({center:[23.761,61.4978],zoom:14});displayCenter();});
   $("filter").addEventListener("change",e=>{state.filter=e.target.value;renderList();renderPins();});

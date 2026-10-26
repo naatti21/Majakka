@@ -17,7 +17,7 @@ header a{text-decoration:none;font-size:12px;white-space:nowrap}
 #atlas-map{position:absolute;inset:0;touch-action:none}
 #atlas-map.raster-map{background:#060b10;cursor:grab}
 #atlas-map .raster-surface{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-#atlas-map .raster-tile{position:absolute;width:256px;height:256px;max-width:none;filter:invert(.95) hue-rotate(179deg) saturate(.37) brightness(.36) contrast(1.46);pointer-events:none}
+#atlas-map .raster-tile{position:absolute;width:256px;height:256px;max-width:none;filter:invert(.84) hue-rotate(182deg) saturate(.42) brightness(1.10) contrast(.95);pointer-events:none}
 #atlas-pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .pin{position:absolute;transform:translate(-50%,-50%);height:27px;width:27px;pointer-events:auto;border-radius:50%;border:2px solid #8bacae;background:#102832;box-shadow:0 0 0 4px #0e2437a8;color:#fff;font-size:13px;display:grid;place-items:center;transition:filter .1s}
 .pin[data-status="rejected"]{background:#482027;border-color:#c37980}
@@ -74,3 +74,24 @@ label{font-size:11px;color:var(--muted)}
  #result-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:370px){#result-list{grid-template-columns:1fr}}
+
+/* Atlas 0B.1 — fixed black-map filter; original map is always available for diagnosis. */
+#atlas-map.unfiltered .raster-tile{filter:none!important}
+#map-style{position:absolute;right:10px;top:12px;z-index:7;
+ border:1px solid #a1ded0;background:#0a2731e8;color:#e8f8f2;
+ font-size:12px;font-weight:700;min-height:43px;border-radius:12px;padding:9px 13px;
+ box-shadow:0 2px 10px #0009}
+#atlas-toolbar{position:sticky;top:0;z-index:12;background:#0e1b25f5;
+ border-bottom:1px solid #42666a;padding:10px 12px 11px;margin:-8px -10px 12px;
+ box-shadow:0 5px 12px #06121aba}
+#atlas-toolbar #buttons{margin:7px 0 0}
+#atlas-toolbar button.action{flex:1;min-width:135px;min-height:46px}
+#atlas-toolbar #readout{font-size:11px;line-height:1.3}
+@media(max-width:720px){
+ #workspace{grid-template-rows:minmax(32dvh,40dvh) minmax(0,1fr)}
+ #map-wrap{min-height:0}
+ #controls{min-height:0;padding-top:8px}
+ #atlas-toolbar{margin:-8px -12px 12px}
+ #map-style{right:10px;top:10px}
+}
+@media(max-width:365px){#atlas-toolbar button.action{min-width:100px;font-size:11px}}
