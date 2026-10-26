@@ -72,5 +72,19 @@ function place(center,rawCandidates=[]){
  for(const e of echoes)if(chosen.length<wanted&&[...real,...chosen].every(p=>meters(p,e)>=MIN_GAP))chosen.push(e);
  return {real,echoes:chosen,center:{lat:center.lat,lng:center.lng},source:'candidate-based',radius:RANGE};
 }
-return {RANGE,MIN_GAP,MAX_REAL,MIN_ECHO,types,meters,category,dangerous,normalize,place};
+/* Reconstruct server-validated Echo from its deterministic global lattice ID.
+    This is a fictional remote-playable node, NEVER a physical destination. */
+function echoById(id){
+ if(typeof id!=='string'||id.length>65)return null;
+ const match=/^atlas-echo-(-?\d+)-(-?\d+)$/.exec(id);
+ if(!match)return null;
+ const gx=Number(match[1]),gy=Number(match[2]);
+ if(!Number.isSafeInteger(gx)||!Number.isSafeInteger(gy)||Math.abs(gx)>73000||Math.abs(gy)>57000)return null;
+ const h=hash('echo|'+gx+':'+gy),jx=((h&255)/255-.5)*55,jy=(((h>>>8)&255)/255-.5)*55;
+ const R=6378137,cell=275,mx=(gx+.5)*cell+jx,my=(gy+.5)*cell+jy;
+ const lat=(2*Math.atan(Math.exp(my/R))-Math.PI/2)/DEG,lng=(mx/R)/DEG;
+ const point={lat,lng};if(!valid(point))return null;
+ return {...point,id:'atlas-echo-'+gx+'-'+gy,name:'Unmapped Echo',kind:'atlas-echo',type:types[h%4],remoteOnly:true};
+}
+return {RANGE,MIN_GAP,MAX_REAL,MIN_ECHO,types,meters,category,echoById,dangerous,normalize,place};
 });
