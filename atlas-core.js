@@ -72,6 +72,24 @@ function place(center,rawCandidates=[]){
  for(const e of echoes)if(chosen.length<wanted&&[...real,...chosen].every(p=>meters(p,e)>=MIN_GAP))chosen.push(e);
  return {real,echoes:chosen,center:{lat:center.lat,lng:center.lng},source:'candidate-based',radius:RANGE};
 }
+/* Place-first pilot. Visible world sites MUST have an OSM-backed stable identity.
+   Unlike procedural Echo lattices, no landmark is generated in empty geography.
+   The caller passes a fixed query-area anchor, NEVER a moving camera center. */
+function landmarks(anchor,rawCandidates=[]){
+ if(!valid(anchor))throw Error('Invalid landmark anchor');
+ const options=(Array.isArray(rawCandidates)?rawCandidates:[]).slice(0,1800).map(normalize)
+   .filter(Boolean).filter(p=>p.name!=='Unknown place'&&p.name!=='Unnamed place')
+   .filter(p=>meters(anchor,p)<=1100);
+ const unique=new Map();for(const p of options)if(!unique.has(p.id))unique.set(p.id,p);
+ // Stable global-ID priority, independent of Overpass response order.
+ const order=[...unique.values()].sort((a,b)=>{
+  const rank={history:0,art:1,nature:2,culture:3};
+  return rank[a.type]-rank[b.type]||hash(a.id)-hash(b.id)||a.id.localeCompare(b.id);
+ });
+ const selected=[];
+ for(const site of order)if(selected.length<3&&selected.every(p=>meters(p,site)>=360))selected.push(site);
+ return selected.map(site=>({...site,kind:'atlas-real',remoteOnly:true}));
+}
 /* Reconstruct server-validated Echo from its deterministic global lattice ID.
     This is a fictional remote-playable node, NEVER a physical destination. */
 function echoById(id){
@@ -86,5 +104,5 @@ function echoById(id){
  const point={lat,lng};if(!valid(point))return null;
  return {...point,id:'atlas-echo-'+gx+'-'+gy,name:'Unmapped Echo',kind:'atlas-echo',type:types[h%4],remoteOnly:true};
 }
-return {RANGE,MIN_GAP,MAX_REAL,MIN_ECHO,types,meters,category,echoById,dangerous,normalize,place};
+return {RANGE,MIN_GAP,MAX_REAL,MIN_ECHO,types,meters,category,echoById,dangerous,normalize,place,landmarks};
 });
