@@ -3,9 +3,10 @@
 'use strict';
 const Core=globalThis.MajakkaLumenCore,viewport=document.getElementById('map-viewport'),overlay=document.getElementById('world-overlay');
 if(!Core||!viewport||!overlay)return;
-const SEED_KEY='majakka-lumen-personal-seed-v1',CLAIMS_KEY='majakka-lumen-claims-v1',DAY=()=>new Date().toLocaleDateString('sv-SE');
-const randomSeed=()=>{const b=new Uint8Array(16);crypto.getRandomValues(b);return Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');};
-let seed;try{seed=localStorage.getItem(SEED_KEY);if(!seed||seed.length<16){seed=randomSeed();localStorage.setItem(SEED_KEY,seed);}}catch{seed=randomSeed();}
+const CLAIMS_KEY='majakka-lumen-claims-v2',DAY=()=>new Date().toLocaleDateString('sv-SE');
+// World coordinate source is shared by everybody; collected grains remain private.
+const seed='majakka-global-world-lumen-v1';
+let last3DIds=new Map();
 function loadClaims(){try{const v=JSON.parse(localStorage.getItem(CLAIMS_KEY)||'null');if(v?.day===DAY()&&Array.isArray(v.ids))return new Set(v.ids.filter(x=>typeof x==='string').slice(-1800));}catch{}return new Set();}
 let claims=loadClaims(),claimsDay=DAY(),points=[],lastCenter=null,fix=null,firstFix=true,heading=null,stopped=true,lastEmit=0,lastDraw=0;
 const canvas=document.createElement('div');canvas.id='personal-lumen';canvas.setAttribute('aria-label','Collectible Lumen grains');overlay.append(canvas);
@@ -32,14 +33,17 @@ body.perspective-on #personal-lumen,body.perspective-on #lumen-avatar,body:not(.
 function save(){try{localStorage.setItem(CLAIMS_KEY,JSON.stringify({day:claimsDay,ids:[...claims].slice(-1800)}));}catch{}}
 function freshDay(){if(claimsDay!==DAY()){claimsDay=DAY();claims=new Set();save();}}
 function mapReady2D(){return typeof map!=='undefined'&&map&&typeof map.project==='function'&&typeof map.getCenter==='function'&&typeof mapReady!=='undefined'&&mapReady;}
-function regenerate(center){if(!Core.valid(center))return;if(lastCenter){const a=Core.merc(lastCenter),b=Core.merc(center);if(Math.hypot(a.x-b.x,a.y-b.y)<230)return;}lastCenter={lat:center.lat,lng:center.lng};points=Core.cells(center,seed);}
+function regenerate(center){
+ if(!Core.valid(center))return;
+ const w=viewport.clientWidth,h=viewport.clientHeight;
+ points=Core.visibleField(center,seed,{zoom:map.getZoom?.()||15,width:w,height:h,max:180});
+}
 function claim(id){
  if(stopped||navigator.onLine===false)return false;
  freshDay();
  if(typeof id!=='string'||claims.has(id))return false;
- const center=globalThis.MajakkaPerspective?.getCenter?.()||(mapReady2D()?map.getCenter():null);
- if(!Core.valid(center))return false;
- const grain=Core.cells(center,seed,990).find(p=>p.id===id);
+ const using3D=Boolean(globalThis.MajakkaPerspective?.isActive?.());
+ const grain=using3D?last3DIds.get(id):points.find(p=>p.id===id&&rendered.has(id));
  if(!grain)return false;
  const earned=globalThis.MajakkaLiving?.award?.(grain.value,'spark')??0;
  if(earned<=0){if(typeof notify==='function')notify('Lumen reserve is full or your daily allowance is used.');return false;}
@@ -63,7 +67,7 @@ function draw(){
    canvas.appendChild(el);rendered.set(p.id,el);
   }
   el.style.left=q.x+'px';el.style.top=q.y+'px';seen.add(p.id);
-  if(++shown>=125)break;
+  if(++shown>=180)break;
  }
  for(const [id,el] of rendered)if(!seen.has(id)){el.remove();rendered.delete(id);}
  if(fix){
@@ -77,7 +81,7 @@ function draw(){
  }
 }
 function emit(force=false){const now=Date.now();if(!force&&now-lastEmit<1700)return;lastEmit=now;window.dispatchEvent(new Event('majakka:lumenupdate'));}
-function begin(){stopped=false;fix=null;firstFix=true;heading=null;lastCenter=null;points=[];freshDay();clearRendered();avatar.hidden=true;emit(true);}
+function begin(){stopped=false;fix=null;firstFix=true;heading=null;lastCenter=null;points=[];last3DIds.clear();freshDay();clearRendered();avatar.hidden=true;emit(true);}
 function clearLocation(){fix=null;heading=null;firstFix=true;avatar.hidden=true;draw();emit(true);}
 function finish(){stopped=true;fix=null;points=[];clearRendered();avatar.hidden=true;emit(true);}
 function onFix(event){
@@ -86,7 +90,7 @@ const data=event.detail||{};if(!Core.valid(data)||!Number.isFinite(data.accuracy
 freshDay();const previous=fix;fix={lat:data.lat,lng:data.lng};
 const movement=Boolean(data.movementAccepted);
 if(movement&&previous)heading=Core.bearing(previous,fix)??heading;
-if(!lastCenter)regenerate(fix);
+// A GPS fix must never regenerate Lumen positions around the user's location.
 const canFirst=firstFix&&data.accuracy<=25;
 if(data.accuracy<=35&&(movement||canFirst)){
  const from=movement&&previous?previous:null,nearby=Core.cells(fix,seed,190);
@@ -102,7 +106,17 @@ if(data.accuracy<=25)firstFix=false;
 draw();emit();
 }
 const clear=()=>{claims=new Set();claimsDay=DAY();save();draw();emit(true);};
-const snapshot=(viewCenter=null)=>{if(stopped)return null;const center=Core.valid(viewCenter)?viewCenter:Core.valid(fix)?fix:(mapReady2D()?map.getCenter():null);if(!Core.valid(center))return null;const all=Core.cells(center,seed,990).filter(p=>!claims.has(p.id));const stride=Math.max(1,Math.ceil(all.length/160));return {points:all.filter((_,i)=>i%stride===0).slice(0,160).map(({id,lat,lng,size})=>({id,lat,lng,size})),fix:fix?{...fix}:null,heading,range:Core.PICKUP};};
+const snapshot=(viewCenter=null,view={})=>{
+ if(stopped)return null;
+ const center=Core.valid(viewCenter)?viewCenter:mapReady2D()?map.getCenter():Core.valid(fix)?fix:null;
+ if(!Core.valid(center))return null;
+ const zoom=Number.isFinite(view.zoom)?view.zoom:(mapReady2D()?map.getZoom?.()||15:15);
+ const w=view.width||viewport.clientWidth,h=view.height||viewport.clientHeight;
+ const all=Core.visibleField(center,seed,{zoom,width:w,height:h,pitch:view.pitch||0,max:190}).filter(p=>!claims.has(p.id));
+ last3DIds=new Map(all.map(p=>[p.id,p]));
+ return {points:all.map(({id,lat,lng,size})=>({id,lat,lng,size})),
+   fix:fix?{...fix}:null,heading,range:Core.PICKUP};
+};
 globalThis.MajakkaLumen={snapshot,clear,claim};
 window.addEventListener('majakka:worldonline',()=>{if(stopped)begin();});
 window.addEventListener('online',()=>{if(stopped)begin();});
