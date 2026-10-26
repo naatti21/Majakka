@@ -74,7 +74,14 @@ body.journal-open #atlas-places,body.field-open #atlas-places,body.living-select
 `;document.head.append(css);
 const notifyUser=s=>{if(typeof notify==='function')notify(s);};
 function active(){return running;}
-function anchorOf(p){return L.region(p).center;}
+function anchorOf(p){
+ // Fixed global Mercator 2.4km cells: two users looking at the same area ask
+ // for the same geographic search centre, regardless of GPS and camera motion.
+ if(!p||!Number.isFinite(p.lat)||!Number.isFinite(p.lng))return null;
+ const R=6378137,lat=p.lat*Math.PI/180,x=R*p.lng*Math.PI/180,y=R*Math.log(Math.tan(Math.PI/4+lat/2));
+ const fx=(Math.floor(x/2400)+.5)*2400,fy=(Math.floor(y/2400)+.5)*2400;
+ return {lat:(2*Math.atan(Math.exp(fy/R))-Math.PI/2)*180/Math.PI,lng:fx/R*180/Math.PI};
+}
 function center(){const viewed=globalThis.MajakkaPerspective?.getCenter?.();if(viewed)return viewed;const c=typeof map!=='undefined'&&map?.getCenter?.();return c&&A.meters(c,c)===0?{lat:c.lat,lng:c.lng}:anchor||fix;}
 function snapshot(view=null){if(!active())return null;const c=anchor||center();return c?{real:anchor?A.landmarks(c,source):[],echoes:[],center:c,source:'fixed-landmarks',radius:1100}:null;}
 function send(){window.dispatchEvent(new Event('majakka:atlasupdate'));}
@@ -125,37 +132,104 @@ function render(){
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
 function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Discover landmarks';button.disabled=false;lastRequest=0;send();render();}
 function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};render();send();}
-function query(c){return '[out:json][timeout:12];('+
- 'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[tourism~"^(artwork|gallery|museum|viewpoint|attraction)$"];'+
- 'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[historic];'+
- 'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[leisure~"^(park|garden|nature_reserve)$"];'+
- 'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[amenity~"^(library|arts_centre|theatre|community_centre)$"];'+
- ');out center 400;';}
-button.addEventListener('click',async()=>{
- if(!active()||querying)return;
- const c=center();if(!c)return;
- const requestedAnchor=anchorOf(c);
- if(!anchor||A.meters(anchor,requestedAnchor)>450){anchor=requestedAnchor;source=[];queried=false;selected=null;info.hidden=true;button.textContent='✦ Discover landmarks';}
- if(queried)return;
- if(Date.now()-lastRequest<120000){notifyUser('Place lookup cooldown. Try again after two minutes.');return;}
- lastRequest=Date.now();
- // Separate user click knowingly sends approximate current map region to a third party.
- querying=true;button.disabled=true;button.textContent='✦ Loading places';
- const thisAnchor={...anchor},controller=new AbortController();fetchAbort=controller;
- const timeout=setTimeout(()=>controller.abort(),12000);
+/* A small, cached place-catalog pilot. No continuously polling API: one
+   automatic lookup per new global cell, delayed until map movement settles.
+   Provider only sees the coarse fixed cell centre, never raw phone GPS. */
+const STORE_KEY='majakka-place-catalog-cache-v1',TTL=24*60*60*1000;
+const tried=new Set();
+let cache={},searchTimer=null,autoCount=0;
+try{
+ const saved=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
+ if(saved&&typeof saved==='object'&&!Array.isArray(saved))cache=saved;
+}catch{}
+function cacheId(p){return p.lat.toFixed(4)+':'+p.lng.toFixed(4);}
+function persistCache(){
  try{
-  const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query(thisAnchor));
-  const response=await fetch(url,{signal:controller.signal,mode:'cors'});
-  if(!response.ok)throw Error('Overpass '+response.status);
-  const raw=await response.json();
-  if(!active()||!anchor||L.meters(thisAnchor,anchor)>150)return;
-  source=(raw.elements||[]).slice(0,800).map(p=>({...p,lat:p.lat??p.center?.lat,lng:p.lon??p.center?.lon,center:p.center&&{lat:p.center.lat,lng:p.center.lon},source:'osm',sourceId:String(p.type||'node')+'/'+String(p.id)}));
-  queried=true;button.textContent='✦ '+(snapshot()?.real.length||0)+' landmarks';render();send();
-  notifyUser((snapshot()?.real.length||0)+' landmark sites found. Restore two nearby sites to awaken the district.');
- }catch(e){
-  if(active()){button.textContent='✦ Retry landmarks';notifyUser('Landmark data unavailable. Please try again.');}
- }finally{clearTimeout(timeout);querying=false;button.disabled=false;fetchAbort=null;}
-});
+  const latest=Object.entries(cache).sort((a,b)=>(b[1]?.at||0)-(a[1]?.at||0)).slice(0,28);
+  cache=Object.fromEntries(latest);localStorage.setItem(STORE_KEY,JSON.stringify(cache));
+ }catch{}
+}
+function rawItems(items){
+ return (Array.isArray(items)?items:[]).slice(0,950).map(p=>({
+  lat:p.lat??p.center?.lat,lng:p.lon??p.center?.lon,
+  source:'osm',sourceId:String(p.type||'node')+'/'+String(p.id||''),
+  tags:p.tags||{}
+ }));
+}
+function query(c){
+ const a=c.lat.toFixed(5),b=c.lng.toFixed(5),radius=2600;
+ return '[out:json][timeout:14];('+
+ 'nwr(around:'+radius+','+a+','+b+')['+'"name"'+']['+'"historic"'+'];'+
+ 'nwr(around:'+radius+','+a+','+b+')['+'"name"'+']['+'"tourism"~"^(artwork|gallery|museum|viewpoint|attraction)$"'+'];'+
+ 'nwr(around:'+radius+','+a+','+b+')['+'"name"'+']['+'"leisure"~"^(park|garden|nature_reserve)$"'+'];'+
+ 'nwr(around:'+radius+','+a+','+b+')['+'"name"'+']['+'"amenity"~"^(library|arts_centre|theatre|community_centre)$"'+'];'+
+ ');out center 950;';
+}
+function applySites(siteAnchor,sites,fromCache=false){
+ if(!anchor||cacheId(anchor)!==cacheId(siteAnchor))return;
+ source=sites.map(p=>({...p,atlasType:p.type,source:'osm'}));
+ queried=true;
+ const count=A.landmarks(siteAnchor,source).length;
+ button.textContent=count?'✦ '+count+' landmarks':'✦ No landmarks here';
+ button.title=count?'Tap to refresh this area. Sites are fixed in the world.':'No suitable named sites in this region. Move the map or try another area.';
+ render();send();
+ if(!fromCache&&typeof notify==='function')notify(count?count+' named landmark sites located on the map.':'No suitable public landmarks here. Move the map toward a town or park.');
+}
+async function requestSites(siteAnchor){
+ const text=query(siteAnchor);
+ for(const host of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){
+  const ctrl=new AbortController();
+  fetchAbort=ctrl;const timeout=setTimeout(()=>ctrl.abort(),10500);
+  try{
+   const response=await fetch(host+'?data='+encodeURIComponent(text),{signal:ctrl.signal,cache:'no-store',mode:'cors'});
+   if(!response.ok)throw Error('Overpass HTTP '+response.status);
+   const json=await response.json();
+   if(!Array.isArray(json.elements))throw Error('Invalid map site response');
+   return rawItems(json.elements);
+  }catch(error){
+   if(!anchor||cacheId(anchor)!==cacheId(siteAnchor))throw error;
+  }finally{clearTimeout(timeout);if(fetchAbort===ctrl)fetchAbort=null;}
+ }
+ throw Error('Both map data providers unavailable');
+}
+async function loadSites(force=false){
+ if(!active()||navigator.onLine===false||querying)return;
+ const current=center();
+ if(!current)return;
+ const requested=anchorOf(current);
+ if(!requested)return;
+ if(!anchor||cacheId(anchor)!==cacheId(requested)){
+  anchor=requested;queried=false;source=[];selected=null;info.hidden=true;
+  clearAtlasElements();paintConnections([]);render();send();
+ }
+ const key=cacheId(requested),entry=cache[key];
+ if(!force&&entry&&Date.now()-entry.at<TTL&&Array.isArray(entry.sites)){
+  applySites(requested,entry.sites,true);return;
+ }
+ if(!force&&tried.has(key))return;
+ if(!force&&autoCount>=8)return;
+ if(Date.now()-lastRequest<(force?5000:17000))return;
+ tried.add(key);if(!force)autoCount++;
+ lastRequest=Date.now();querying=true;button.disabled=true;button.textContent='✦ Finding landmarks…';
+ try{
+  const candidates=await requestSites(requested);
+  const selectedSites=A.landmarks(requested,candidates);
+  cache[key]={at:Date.now(),sites:selectedSites};
+  persistCache();
+  applySites(requested,selectedSites);
+ }catch(error){
+  if(anchor&&cacheId(anchor)===key){
+   button.textContent='✦ Retry landmarks';
+   notifyUser('Landmark lookup failed. Map sites are temporarily unavailable; try again or pan to another area.');
+  }
+ }finally{querying=false;button.disabled=false;}
+}
+function scheduleSites(delay=1100){
+ if(document.hidden||navigator.onLine===false||!active())return;
+ clearTimeout(searchTimer);
+ searchTimer=setTimeout(()=>{void loadSites(false);},delay);
+}
+button.addEventListener('click',()=>{clearTimeout(searchTimer);void loadSites(true);});
 window.addEventListener('online',()=>{running=true;render();send();});
 window.addEventListener('majakka:livestop',()=>{fix=null;send();});
 window.addEventListener('majakka:livefix',onFix);
