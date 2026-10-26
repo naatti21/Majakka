@@ -37,7 +37,7 @@ body.journal-open #atlas-places,body.field-open #atlas-places,body.living-select
 const notifyUser=s=>{if(typeof notify==='function')notify(s);};
 function active(){return running;}
 function anchorOf(p){return L.region(p).center;}
-function center(){const c=typeof map!=='undefined'&&map?.getCenter?.();return c&&A.meters(c,c)===0?{lat:c.lat,lng:c.lng}:anchor||fix;}
+function center(){const viewed=globalThis.MajakkaPerspective?.getCenter?.();if(viewed)return viewed;const c=typeof map!=='undefined'&&map?.getCenter?.();return c&&A.meters(c,c)===0?{lat:c.lat,lng:c.lng}:anchor||fix;}
 function snapshot(view=null){if(!active())return null;const c=view&&A.meters(view,view)===0?view:center();return c?A.place(c,source):null;}
 function send(){window.dispatchEvent(new Event('majakka:atlasupdate'));}
 function inspect(id){
