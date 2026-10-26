@@ -260,7 +260,13 @@ function showWorld(){
  // Landmark-only view. No synthetic node lattices, no camera-relative ghost beacons.
  const fieldFeatures=[],lines=[],points=[],haze=[],arcPairs=[];
  if(lastFix&&!personal)points.push({id:'player',name:'You',...lastFix,kind:'player'});
- if(atlas)points.push(...(atlas.real||[]));
+ if(atlas){
+  points.push(...(atlas.real||[]));
+  if(Array.isArray(atlas.links))for(const pair of atlas.links){
+   if(!Array.isArray(pair)||pair.length!==2)continue;
+   if(pair.every(p=>p&&Number.isFinite(p.lat)&&Number.isFinite(p.lng)))arcPairs.push(pair);
+  }
+ }
  const signature=JSON.stringify([
   points.map(p=>[p.id,p.lat,p.lng,p.kind,p.sharedCharge??null,p.archetype||p.type||'']),
   haze.map(h=>h.geometry.coordinates),fieldFeatures.map(f=>f.geometry.coordinates),
