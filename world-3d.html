@@ -192,7 +192,7 @@ function renderPersonal(){
 
 function showWorld(){
  if(!map||!ready)return;
- document.getElementById('hint').textContent=mode==='live'?'VIRTUAL NODES · personal preview only':'Drag ↕ to tilt · two fingers to rotate';
+ document.getElementById('hint').textContent='ONE WORLD · PROTOTYPE (NOT NETWORK-SYNCED)';
  clearMarkers();
  const fieldFeatures=[],lines=[],points=[],haze=[],arcPairs=[];
  if(mode==='demo'){
@@ -250,7 +250,7 @@ function receive(data){
   if(mode==='live'&&lastFix&&!userMoved&&!firstLiveCenter)centerLive();
   if(map&&ready)showWorld();
  }else if(data.type==='gps'){
-  if(!data.fix)return;
+  if(!data.fix){lastFix=null;if(ready)showWorld();return;}
   lastFix=data.fix;
   if(mode==='live'&&map&&ready){
    if(!firstLiveCenter&&!userMoved)centerLive();
