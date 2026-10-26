@@ -147,3 +147,13 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - 10/10 model-invoked JavaScript checks on `tests/node-atlas-policy.test.mjs` passed: approval impossible at this stage, private/unsafe/school/emergency filtering, missing pedestrian evidence, park centroid rejection for further review, photograph rights and EXIF requirements, duplicate candidates, bad coordinates and unknown type handling.
 - Human/public safety, photo rights and local park rules **cannot** be proven automatically. A review-ready candidate is NOT an approved public anchor. No public OSM POI import, photo storage or moderation backend implemented yet.
 - Real-world geospatial overlay and licensing review required before any automatic POI display.
+
+
+## Node Atlas 0B — isolated OSM review laboratory, 26 Oct 2026
+
+- New files: atlas-review.html, atlas-review.css, atlas-review.js, atlas-import.js; Node Atlas pure policy remains unchanged. No edits to the main Majakka app shell, gameplay, GPS, 3D layers, or PWA service worker.
+- New Overpass manually initiated query has max 1.2 km radius, [timeout:18], 125 result cap, one requested area at a time, 90-second repeat gap and 30-minute same-area memory cache.
+- Candidate visibility distinguishes review-ready / needs-evidence / excluded; initial OSM-only candidates cannot be automatically published. OSM area centers are marked approximate, not verified park entrances.
+- Preserves source attribution, makes original OSM item accessible, uses textContent for untrusted source names/reasons, keeps in-session triage notes, and provides opt-in JSON report copy with coordinate disclosure.
+- Tests executed in model JS isolate: 10/10 Node Atlas policy checks, 8/8 importer tests, 8/8 reviewer static ID/JS/CSS/source checks, and a simulated one-query review UI which produced a list and markers, opened item details, and copied the report.
+- **Not verified:** external Overpass CORS and endpoint availability, actual Tampere OSM results, mobile tap/pan responsiveness, rendered layout on Android, safety/access validity of any real-world candidate. These require real user or Work browser testing; no fake POI rows were inserted into the production app.
