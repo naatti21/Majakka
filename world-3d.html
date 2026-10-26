@@ -323,7 +323,7 @@ try {
  });
  map.touchZoomRotate.enableRotation();
  map.on('dragstart',()=>{userMoved=true;});
- map.on('moveend',()=>{if(ready&&mode==='live'){const c=map.getCenter();reply('camera-center',{center:[c.lng,c.lat]});}});
+ map.on('moveend',()=>{if(ready){const c=map.getCenter();reply('camera-center',{center:[c.lng,c.lat]});}});
  map.on('rotate',()=>{if(ready&&mode==='live')renderPersonal();});
  map.on('load',()=>{
   ready=true;try{showWorld();hide();reply('ready');}catch(error){console.warn('3D geometry unavailable',error);reply('error',{message:String(error?.message||error)});return;}
