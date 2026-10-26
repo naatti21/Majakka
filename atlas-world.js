@@ -61,15 +61,17 @@ function inspect(id){
  if(!p)return;
  selected=p.id;info.hidden=false;
  info.querySelector('#atlas-title').textContent=p.name;
- info.querySelector('#atlas-meta').textContent=(p.type.toUpperCase()+' · '+(p.kind==='atlas-real'?'OSM place candidate':'FICTIONAL ECHO'));
- const shared=globalThis.MajakkaSharedWorld,network=shared?.enabled?.();
- const record=p.kind==='atlas-echo'?(network?shared.get(p.id):globalThis.MajakkaSoloWorld?.get?.(p.id)):null;
- const charge=record?record.charge:null;
- info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified public place · remote discovery only, not walking directions.':
-  'Fictional Echo · '+(charge===null?'Loading node...':charge+'/2 resonance'+(charge>=2?' · awakened':'')+
-    (network?' · shared world':' · your solo world'))+'. Never a walking destination.';
- sharedButton.hidden=p.kind!=='atlas-echo'||charge===null||charge>=2;
- sharedButton.disabled=false;sharedButton.textContent='✧ Attune Echo · 2 Lumen';
+
+ info.querySelector('#atlas-meta').textContent=p.type.toUpperCase()+' · LANDMARK · OSM';
+ const restored=Boolean(globalThis.MajakkaSites?.get?.(p.id));
+ const progress=globalThis.MajakkaSites?.progress?.(p);
+ info.querySelector('#atlas-note').textContent=(restored?'This landmark has been restored. ':'Restore this named landmark to build the district chord. ')+
+  (progress?progress.restored+'/'+progress.goal+' sites restored in the district. ':'')+
+  ' Map access has not been verified; this is a remote digital interaction.';
+ globalThis.MajakkaSites?.select?.(p);
+ sharedButton.hidden=restored;
+ sharedButton.disabled=false;
+ sharedButton.textContent='Restore landmark · 2 ✧';
 }
 /* Stable live DOM markers: never replace touch targets every map frame. */
 const atlasElements=new Map();
