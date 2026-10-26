@@ -97,7 +97,7 @@ function resetWorld(){
   saveProgress();origin=null;world=null;progress=L.blank();position=null;accuracy=Infinity;chosen=null;activeKey=null;activeRegion=null;switching=false;epoch++;
   layer.replaceChildren();wrap.hidden=true;clearTimeout(stageTimer);clearTimeout(pulseTimer);challenge=null;linkTargets.hidden=true;document.body.classList.remove('living-selected');updateUI();emit();
 }
-function isActive(){return globalThis.MajakkaLive?.isActive()===true;}
+function isActive(){return navigator.onLine!==false;}
 async function create(originFix){
  if(switching)return;switching=true;
  const token=++epoch;
@@ -107,8 +107,9 @@ async function create(originFix){
  saveProgress();
  activeKey=key;activeRegion=cell.id;origin=cell.center;
  world=L.positions(cell.center);progress=key?sanitize(readRegions()[key]):L.blank();chosen=null;linkTarget=null;
+ cancel();document.body.classList.remove('living-selected');linkTargets.hidden=true;
  switching=false;wrap.hidden=false;
- message('Local field '+(key?'restored':'opened')+' · virtual signals are NOT walking destinations.');
+ status.textContent='Virtual signals are not walking destinations. Remote resonance is enabled.';
  redraw();updateUI();emit();
 }
 function renderMap(){
@@ -189,7 +190,7 @@ function infoText(){
  if(chosen==='veil')return 'INTERFERENCE · '+progress.rift+'/'+L.RIFT_TARGET+' · '+(progress.riftClear?'Restored':'Needs two world pulses');
  const i=world.nodes.findIndex(n=>n.id===chosen),n=progress.nodes[i];
  const next=progress.remoteAt?.[i]&&Date.now()-progress.remoteAt[i]<L.REMOTE_SETTLE_MS;
- const status=near?'CLEAR':next?'DISTANT · SETTLING':'FAINT';
+ const status=near?'CLEAR · HERE':'CLEAR · REMOTE';
  return p.name.toUpperCase()+' · '+status+' · '+Math.round(distance)+' m · '+(n>=2?'Awake':n+'/2 resonance');
 }
 function pairKey(a,b){return [a.replace('echo-',''),b.replace('echo-','')].sort().join('-');}
@@ -230,14 +231,14 @@ function updateUI(){
   info.textContent=infoText();
   const done=chosen==='veil'?progress.riftClear:progress.nodes[world.nodes.findIndex(n=>n.id===chosen)]>=2;
   const pending=chosen==='veil'?progress.riftPending:Boolean(progress.pending[world.nodes.findIndex(n=>n.id===chosen)]);
-  const remoteCooling=chosen!=='veil'&&!L.near(position,p,accuracy)&&
+  const remoteCooling=false&&chosen!=='veil'&&!L.near(position,p,accuracy)&&
     Boolean(progress.remoteAt?.[world.nodes.findIndex(n=>n.id===chosen)])&&
     Date.now()-progress.remoteAt[world.nodes.findIndex(n=>n.id===chosen)]<L.REMOTE_SETTLE_MS;
   by('living-spend').disabled=done||pending||remoteCooling;
   by('living-decode').disabled=done||pending||remoteCooling;
   by('living-weave').hidden=chosen==='veil'||!done;
   by('living-weave').disabled=chosen==='veil'||!done;
-  by('living-spend').textContent='✧ '+(chosen==='veil'?'Stabilize':L.near(position,p,accuracy)?'Attune · 2':'Attune · 3');
+  by('living-spend').textContent='✧ '+(chosen==='veil'?'Stabilize':'Attune · 2');
   by('living-decode').textContent='◇ Decode';
  }
  const remain=Math.max(0,90000-(Date.now()-progress.lastPulseAt));
@@ -259,7 +260,7 @@ function close(){
 function positive(type='attune'){fb(type);}
 function apply(method){
  if(!world||!chosen)return;
- const result=L.contribute(progress,{target:chosen,method,player:position,accuracy,lumen:state.lumen,world});
+ const result=L.contribute(progress,{target:chosen,method,player:position,accuracy,lumen:state.lumen,world,remote:true});
  if(!result.ok){message(result.reason);return;}
  state.lumen-=result.cost;save();render();saveProgress();metric('nodeSignals');updateUI();redraw();emit();positive('attune');message(result.reason);
 }
@@ -398,19 +399,35 @@ by('living-report').addEventListener('click',async ()=>{
 by('living-cancel').addEventListener('click',cancel);
 by('living-close').addEventListener('click',close);
 pulse.addEventListener('click',nextPulse);
-window.addEventListener('majakka:livestart',resetWorld);
-window.addEventListener('majakka:livestop',()=>{close();resetWorld();document.body.classList.remove('living-selected');});
+// One continuous online world. GPS start/pause never clears the visible world.
+window.addEventListener('majakka:livestop',()=>{position=null;accuracy=Infinity;redraw();updateUI();emit();});
 window.addEventListener('majakka:livefix',event=>{
  if(!isActive())return;
  const d=event.detail;if(!d||![d.lat,d.lng,d.accuracy].every(Number.isFinite))return;
  position={lat:d.lat,lng:d.lng};accuracy=d.accuracy;
  if(accuracy<=65){
-  if(!world&&!switching)void create(position);
-  else if(world&&!switching&&L.meters(position,origin)>550&&L.region(position).id!==activeRegion)void create(position);
+  // GPS updates the avatar only; browsing the map determines the active world region.
  }
  if(world){redraw();updateUI();emit();}
 });
-window.addEventListener('majakka:mapready',redraw);
+function viewedPoint(){if(typeof map==='undefined'||!map?.getCenter||!mapReady)return null;const c=map.getCenter();return {lat:c.lat,lng:c.lng};}
+ function refreshRegion(){
+  const c=viewedPoint();if(!c||!isActive()||switching)return;
+  let cell;try{cell=L.region(c);}catch{return;}
+  if(!world||cell.id!==activeRegion)void create(c);
+  else redraw();
+ }
+ window.addEventListener('majakka:mapready',refreshRegion);
+ window.addEventListener('online',refreshRegion);
+ window.addEventListener('offline',()=>{layer.replaceChildren();wrap.hidden=true;});
+ let regionMap=null,attachAttempts=0;
+ function attachRegionMap(){
+  if(typeof map!=='undefined'&&map&&mapReady){
+    if(map!==regionMap){regionMap=map;map.on('moveend',refreshRegion);}
+    refreshRegion();
+  }else if(attachAttempts++<35)setTimeout(attachRegionMap,400);
+ }
+ attachRegionMap();
 window.addEventListener('resize',redraw);
 window.addEventListener('majakka:livingselect',e=>choose(e.detail?.id));
 window.addEventListener('majakka:livingcollect',e=>collect(e.detail?.id));
