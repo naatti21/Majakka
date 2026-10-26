@@ -94,10 +94,10 @@ function render(){
    el.addEventListener('click',event=>{event.stopPropagation();inspect(p.id);});
    atlasElements.set(p.id,el);layer.appendChild(el);
   }
-  const charge=(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(p.id):globalThis.MajakkaSoloWorld?.get?.(p.id))?.charge||0;
-  el.className='atlas-marker '+p.type+' '+p.kind+(charge>=2?' awake':'');
+  const restored=Boolean(globalThis.MajakkaSites?.get?.(p.id));
+  el.className='atlas-marker '+p.type+' '+p.kind+(restored?' awake':'');
   el.style.left=pt.x+'px';el.style.top=pt.y+'px';
-  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Explore unverified place':'Activate fictional Echo')+': '+p.name+(charge>=2?' · awake':''));
+  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Explore unverified place':'Activate fictional Echo')+': '+p.name+(restored?' · restored':''));
   seen.add(p.id);
  }
  for(const [id,el] of atlasElements)if(!seen.has(id)){el.remove();atlasElements.delete(id);}
