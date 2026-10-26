@@ -18,7 +18,7 @@
   if(!enabled||!frame?.contentWindow)return;
   frame.contentWindow.postMessage({source:'majakka-parent',type,...other},location.origin);
  }
- function currentMode(){return globalThis.MajakkaLive?.isActive()?'live':'demo';}
+ function currentMode(){return 'live';} // 2D/3D are views of one world, not game modes.
  function safeFix(){
   const data=globalThis.MajakkaLive?.getFix?.()||lastFix;
   if(!data)return null;
@@ -39,12 +39,14 @@
   send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
  }
  function disable(message){
+  const lastCamera=cameraCenter;
   enabled=false;ready=false;cameraCenter=null;clearTimeout(loadingTimer);loadingTimer=0;
   document.body.classList.remove('perspective-on','perspective-ready');
   frame?.remove();frame=null;
   btn.textContent='3D';btn.setAttribute('aria-pressed','false');
   btn.setAttribute('aria-label','Try 3D perspective map; switch back to 2D anytime');
   if(message){status(message);setTimeout(()=>{if(!enabled)clearStatus();},5300);}else clearStatus();
+  if(typeof map!=='undefined'&&map?.jumpTo&&lastCamera)map.jumpTo({center:[lastCamera.lng,lastCamera.lat]});
   if(typeof map!=='undefined'&&map?.resize)map.resize();
  }
  function enable(){
@@ -76,7 +78,7 @@
   if(data.type==='camera-center'){
    const c=data.center;
    if(Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
-    cameraCenter={lat:c[1],lng:c[0]};send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
+    cameraCenter={lat:c[1],lng:c[0]};globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
    }
   }else if(data.type==='node-select'){
    const id=data.id;
@@ -103,8 +105,8 @@
   lastFix={lat:fix.lat,lng:fix.lng};
   if(ready)send('gps',{fix:lastFix});
  });
- window.addEventListener('majakka:livestart',()=>{if(ready)send('mode',{mode:'live'});});
- window.addEventListener('majakka:livestop',()=>{lastFix=null;cameraCenter=null;if(ready)send('mode',{mode:'demo'});});
+ // GPS permission never changes world mode.
+ window.addEventListener('majakka:livestop',()=>{lastFix=null;if(ready)send('gps',{fix:null});});
  window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
