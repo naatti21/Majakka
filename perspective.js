@@ -36,6 +36,7 @@
   const zoom=(typeof map!=='undefined'&&map?.getZoom)?map.getZoom():15;
   send('init',{center:[center.lng,center.lat],zoom,mode:currentMode(),fix:safeFix(),world:world()});
   send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
+  send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
  }
  function disable(message){
   enabled=false;ready=false;cameraCenter=null;clearTimeout(loadingTimer);loadingTimer=0;
@@ -55,7 +56,7 @@
   frame=document.createElement('iframe');frame.id='perspective-frame';frame.title='Majakka 3D perspective trial';
   frame.setAttribute('allow','fullscreen');
   // Same-origin iframe, no extra location permission. GPS supplied ephemerally by parent.
-  frame.src='./world-3d.html?v=080';
+  frame.src='./world-3d.html?v=081';
   viewport.appendChild(frame);
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
@@ -75,7 +76,7 @@
   if(data.type==='camera-center'){
    const c=data.center;
    if(currentMode()==='live'&&Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
-    cameraCenter={lat:c[1],lng:c[0]};send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});
+    cameraCenter={lat:c[1],lng:c[0]};send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});
    }
   }else if(data.type==='node-select'){
    const id=data.id;
@@ -91,6 +92,8 @@
    window.dispatchEvent(new CustomEvent('majakka:livingselect',{detail:{id:data.type==='live-rift-select'?'veil':data.id}}));
   }else if(data.type==='live-lumen'){
    window.dispatchEvent(new CustomEvent('majakka:livingcollect',{detail:{id:data.id}}));
+  }else if(data.type==='atlas-select'){
+   window.dispatchEvent(new CustomEvent('majakka:atlasselect',{detail:{id:data.id}}));
   }else if(data.type==='trial-node'){
    if(typeof notify==='function')notify('This is a temporary visual test light, not a real public node.');
   }
@@ -102,6 +105,7 @@
  });
  window.addEventListener('majakka:livestart',()=>{if(ready)send('mode',{mode:'live'});});
  window.addEventListener('majakka:livestop',()=>{lastFix=null;cameraCenter=null;if(ready)send('mode',{mode:'demo'});});
+ window.addEventListener('majakka:atlasupdate',()=>{if(ready)send('atlas',{atlas:globalThis.MajakkaAtlas?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:lumenupdate',()=>{if(ready)send('lumen',{personal:globalThis.MajakkaLumen?.snapshot?.(cameraCenter)||null});});
  window.addEventListener('majakka:livingupdate',()=>{if(ready)send('living',{live:globalThis.MajakkaLiving?.snapshot?.()||null,selected:document.body.classList.contains('living-selected')});});
  const sync=()=>{if(ready)send('world',{world:world()});};
