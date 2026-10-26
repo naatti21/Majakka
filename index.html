@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="./perspective.css?v=040"><link rel="stylesheet" href="./living-world.css?v=103">
 <title>MAJAKKA — First Light</title>
 </head>
-<body>
+<body class="place-first">
 <div class="mist"></div>
 <div class="shell">
 <header class="topbar">
@@ -22,7 +22,7 @@
 <section class="heading"><div class="overline">FIRST LIGHT <span>·</span> EXPERIMENT 02</div><h1>The world is <em>waiting to resonate.</em></h1><p>Gather light. Awaken places. Let the city find its first chord.</p></section>
 <div class="layout" id="world">
 <section class="map-card" aria-label="Worldwide interactive map">
- <div class="map-bar"><div><span class="eyebrow">YOUR LIVING WORLD</span><h2>One world <span>· personal prototype</span></h2></div><div class="pulse-badge"><span class="dot"></span> PULSE <strong id="cycle">01</strong></div></div>
+ <div class="map-bar"><div><span class="eyebrow">YOUR LIVING WORLD</span><h2>One world <span>· place-first pilot</span></h2></div><div class="pulse-badge"><span class="dot"></span> PULSE <strong id="cycle">01</strong></div></div>
  <div class="map-viewport" id="map-viewport">
   <div class="fallback-geography" id="fallback-geography" aria-hidden="true">
    <svg viewBox="0 0 400 550" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#12445a"/><stop offset="1" stop-color="#0b283e"/></linearGradient></defs><rect width="400" height="550" fill="#0b1a26"/><path d="M245 -30 Q170 105 225 200 T175 405 Q155 477 106 590" fill="none" stroke="url(#river)" stroke-width="62"/><g fill="none" stroke="#456271" stroke-width="1.2" opacity=".4"><path d="M-50 90L450 340M-30 130L445 385M-20 220L450 480M-20 335L400 90M0 425L375 200M15 550L310 -40M350 -30L40 580M415 100L-50 350"/></g><g font-size="10" fill="#718c99" letter-spacing="2"><text x="30" y="100">FINLAYSON</text><text x="252" y="210">KOSKIPUISTO</text><text x="40" y="335">KESKUSTORI</text><text x="218" y="460">LAUKONTORI</text></g></svg>
@@ -31,7 +31,7 @@
   <div id="map-load-status" class="map-load-status" role="status" aria-live="polite">Loading real street map…</div>
   <div id="world-overlay" class="world-overlay"><svg id="field-layer" aria-hidden="true"></svg><div id="world-markers"></div></div>
   <div class="map-ambient" aria-hidden="true"></div>
-  <div class="map-legend"><span class="ping">✦</span> <span id="map-legend-text">ONE WORLD · ONLINE</span></div>
+  <div class="map-legend"><span class="ping">✦</span> <span id="map-legend-text">LANDMARKS · ONLINE · LOCAL PROGRESS</span></div>
   <div class="map-right"><button id="recenter" class="map-button" type="button" aria-label="Recenter map">⌖</button></div>
   <div id="map-credit" class="map-credit"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div>
  </div>
@@ -44,11 +44,11 @@
 </aside>
 </div>
 <section class="journal-card" id="journal"><div><span class="eyebrow">YOUR MEMORY</span><h2>Small moments, kept.</h2><p>Every place you encounter leaves a quiet echo. No streaks. No pressure.</p></div><ul id="journal-list"><li>Your first light is waiting.</li></ul><button id="reset" class="reset" type="button">Reset this demo</button></section>
-<footer><span>MAJAKKA · SOLO WORLD ALPHA v0.10.6</span><span>RESTORE THE LIGHT · RECONNECT THE WORLD</span></footer>
+<footer><span>MAJAKKA · LANDMARK ALPHA v0.11.1</span><span>RESTORE THE LIGHT · RECONNECT THE WORLD</span></footer>
 </main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="./raster-map.js?v=035" defer></script>
-<script src="./core.js?v=035" defer></script><script src="./app.js?v=035" defer></script><script src="./map-shell.js?v=035" defer></script><script src="./rift-core.js?v=035" defer></script><script src="./map-hud-v0.3.js?v=035" defer></script><script src="./live-core.js?v=035" defer></script><script src="./walk-energy.js?v=070" defer></script><script src="./live-field.js?v=090" defer></script><script src="./perspective.js?v=106" defer></script><script src="./living-core.js?v=090" defer></script><script src="./field-feedback.js?v=060" defer></script><script src="./field-metrics.js?v=070" defer></script><script src="./living-world.js?v=106" defer></script><script src="./lumen-core.js?v=080" defer></script><script src="./lumen-world.js?v=105" defer></script><script src="./atlas-core.js?v=081" defer></script><script src="./atlas-world.js?v=105" defer></script><script src="./solo-echo.js?v=101" defer></script><script src="./shared-world.js?v=100" defer></script>
+<script src="./core.js?v=035" defer></script><script src="./app.js?v=035" defer></script><script src="./map-shell.js?v=111" defer></script><script src="./rift-core.js?v=035" defer></script><script src="./map-hud-v0.3.js?v=035" defer></script><script src="./live-core.js?v=035" defer></script><script src="./walk-energy.js?v=070" defer></script><script src="./live-field.js?v=090" defer></script><script src="./perspective.js?v=111" defer></script><script src="./living-core.js?v=090" defer></script><script src="./field-feedback.js?v=060" defer></script><script src="./field-metrics.js?v=070" defer></script><script src="./living-world.js?v=111" defer></script><script src="./lumen-core.js?v=080" defer></script><script src="./lumen-world.js?v=105" defer></script><script src="./atlas-core.js?v=111" defer></script><script src="./atlas-world.js?v=111" defer></script><script src="./landmark-world.js?v=111" defer></script><script src="./solo-echo.js?v=101" defer></script><script src="./shared-world.js?v=100" defer></script>
 </body>
 </html>
