@@ -28,6 +28,17 @@ test('panning does not respawn existing global Lumen points',()=>{
  assert.ok(matches.length>=a.length*.65,'Small camera movements should retain most grains');
  for(const p of matches){const q=byId.get(p.id);assert.equal(q.lat,p.lat);assert.equal(q.lng,p.lng);}
 });
+test('Zoomed-out Lumen points remain the same real grains when zooming closer',()=>{
+ const far=L.visibleField(at,seed,{zoom:13,width:390,height:1100,max:190});
+ const near=L.visibleField(at,seed,{zoom:14,width:1500,height:2300,max:240});
+ const byId=new Map(near.map(p=>[p.id,p]));
+ assert.ok(far.length>20);
+ for(const p of far){
+  const q=byId.get(p.id);
+  assert.ok(q,'Far-zoom grain must persist in the closer field');
+  assert.equal(q.lat,p.lat);assert.equal(q.lng,p.lng);
+ }
+});
 test('Every visible grain uses the same physical cell ID as the shared worldwide collection field',()=>{
  const grains=L.visibleField(at,seed,{zoom:14,width:390,height:1100});
  for(const p of grains.slice(0,12)){
