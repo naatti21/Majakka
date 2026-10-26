@@ -87,7 +87,7 @@
   const data=event.data;
   if(data?.source!=='majakka-3d')return;
   if(data.type==='ready'){
-   clearTimeout(loadingTimer);ready=true;document.body.classList.add('perspective-ready');clearStatus();initial();
+   clearTimeout(loadingTimer);ready=true;document.body.classList.add('perspective-ready');clearStatus();initial();window.dispatchEvent(new Event('majakka:camera-area'));
    return;
   }
   if(data.type==='error'){disable('3D unavailable on this device or connection. 2D remains available.');return;}
@@ -96,7 +96,7 @@
    const c=data.center;
    if(Array.isArray(c)&&c.length===2&&Number.isFinite(c[0])&&Number.isFinite(c[1])){
     cameraCenter={lat:c[1],lng:c[0]};cameraZoom=Number.isFinite(data.zoom)?data.zoom:cameraZoom;
-    globalThis.MajakkaLiving?.navigate?.(cameraCenter);send('lumen',{personal:lumenSnapshot()});send('atlas',{atlas:atlasSnapshot()});
+    globalThis.MajakkaLiving?.navigate?.(cameraCenter);window.dispatchEvent(new Event('majakka:camera-area'));send('lumen',{personal:lumenSnapshot()});send('atlas',{atlas:atlasSnapshot()});
    }
   }else if(data.type==='node-select'){
    const id=data.id;
