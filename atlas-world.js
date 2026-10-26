@@ -9,6 +9,16 @@ const layer=document.createElement('div');layer.id='atlas-markers';root.append(l
 const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Find places';button.setAttribute('aria-label','Load public place candidates from OpenStreetMap. Sends the approximate active map area to Overpass API.');button.title='Optional: request public places near this area from the OpenStreetMap Overpass API';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
 info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;});
+const sharedButton=document.createElement('button');sharedButton.type='button';sharedButton.id='atlas-shared-attune';sharedButton.hidden=true;
+sharedButton.textContent='✧ Send shared resonance · 2';
+sharedButton.addEventListener('click',async()=>{
+ if(!selected||!globalThis.MajakkaSharedWorld?.enabled?.())return;
+ sharedButton.disabled=true;sharedButton.textContent='Sending…';
+ try{await globalThis.MajakkaSharedWorld.attune(selected);inspect(selected);}
+ catch(e){notifyUser('Shared action not committed: '+(e?.body?.error||e?.message||'network error'));inspect(selected);}
+ finally{sharedButton.disabled=false;}
+});
+info.appendChild(sharedButton);
 const css=document.createElement('style');css.textContent=`
 #atlas-markers{position:absolute;inset:0;z-index:24;pointer-events:none;overflow:hidden}
 .atlas-marker{position:absolute;width:40px;height:48px;transform:translate(-50%,-63%);padding:0;border:0;background:transparent;color:#e9fff6;pointer-events:auto;cursor:pointer;filter:drop-shadow(0 0 5px var(--aura))}
@@ -20,6 +30,8 @@ const css=document.createElement('style');css.textContent=`
 .atlas-marker.nature{--aura:#8ce1b2;--low:#62c89a55}.atlas-marker.nature .body{clip-path:polygon(50% 0,72% 22%,100% 45%,74% 83%,50% 100%,26% 83%,0 45%,28% 22%);border-radius:40%}
 .atlas-marker.culture{--aura:#8edbe7;--low:#57bed365}.atlas-marker.culture .body{clip-path:polygon(50% 0,88% 18%,94% 76%,50% 100%,6% 76%,12% 18%)}
 .atlas-marker.atlas-echo{opacity:.58;filter:saturate(.7) drop-shadow(0 0 4px #538d93)}.atlas-marker.atlas-echo .body{height:20px;top:9px;background:linear-gradient(120deg,#86bbc5,#213c48);opacity:.85}
+.atlas-marker.atlas-echo.awake{opacity:1;filter:drop-shadow(0 0 9px #f6d99b)}
+.atlas-marker.atlas-echo.awake .body{background:linear-gradient(120deg,#fff0cc,#dbb36c,#594627);opacity:1}
 .atlas-marker:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:10px}
 #atlas-places{display:none;position:fixed;right:12px;top:calc(276px + env(safe-area-inset-top,0px));z-index:31;min-height:38px;border:1px solid #84ded175;border-radius:18px;padding:7px 11px;background:#123041ef;color:#d2faf0;font:700 10px system-ui}
 #atlas-places{display:block}
@@ -30,6 +42,10 @@ const css=document.createElement('style');css.textContent=`
 #atlas-inspect small{display:block;color:#92dacf;margin-top:4px}
 #atlas-inspect p{margin:5px 0 0;line-height:1.4}
 #atlas-close{position:absolute;right:7px;top:6px;border:0;background:#244452;color:#e4f5ef;border-radius:50%;width:32px;height:32px}
+#atlas-shared-attune{display:block;margin-top:9px;background:#dfbe82;border:1px solid #f6dcac;color:#172332;
+ border-radius:10px;min-height:40px;padding:7px 10px;font:750 11px system-ui;width:100%}
+#atlas-shared-attune[hidden]{display:none!important}
+#atlas-shared-attune:disabled{opacity:.55}
 body.perspective-on #atlas-markers{display:none!important}
 body.journal-open #atlas-places,body.field-open #atlas-places,body.living-selected #atlas-places{display:none!important}
 @media(max-width:355px){#atlas-places{right:82px;top:calc(278px + env(safe-area-inset-top,0px))}}
@@ -46,7 +62,12 @@ function inspect(id){
  selected=p.id;info.hidden=false;
  info.querySelector('#atlas-title').textContent=p.name;
  info.querySelector('#atlas-meta').textContent=(p.type.toUpperCase()+' · '+(p.kind==='atlas-real'?'OSM place candidate':'FICTIONAL ECHO'));
- info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified access. Remote discovery preview only; do not use as walking directions. Full node mechanics are not yet connected.':'A stable fictional signal that makes sparse regions worth exploring. Not a real-world destination.';
+ const shared=globalThis.MajakkaSharedWorld;
+ const charge=p.kind==='atlas-echo'&&shared?.enabled?.()?shared.get(p.id)?.charge??0:null;
+ info.querySelector('#atlas-note').textContent=p.kind==='atlas-real'?'Unverified access. Remote discovery preview only; do not use as walking directions.':'A stable fictional Echo, not a walking destination.'+
+   (charge===null?' Shared progression not yet connected.':' Shared resonance '+charge+'/2 · verified on world server.');
+ sharedButton.hidden=charge===null||charge>=2;
+ sharedButton.disabled=false;sharedButton.textContent='✧ Send shared resonance · 2';
 }
 function render(){
  if(!active()){layer.replaceChildren();return;}
@@ -60,7 +81,9 @@ function render(){
   const pt=map.project([p.lng,p.lat]);if(pt.x<-30||pt.y<-30||pt.x>w+30||pt.y>h+30)continue;
   const el=document.createElement('button');el.type='button';el.className='atlas-marker '+p.type+' '+p.kind;
   el.style.left=pt.x+'px';el.style.top=pt.y+'px';el.innerHTML='<i class="ring"></i><i class="body"></i>';
-  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Public place candidate':'Fictional Echo')+': '+p.name+'. View details.');
+  const sharedCharge=globalThis.MajakkaSharedWorld?.get?.(p.id)?.charge||0;
+  if(sharedCharge>=2)el.classList.add('awake');
+  el.setAttribute('aria-label',(p.kind==='atlas-real'?'Public place candidate':'Fictional Echo')+': '+p.name+(sharedCharge>=2?', awake':'')+'. View details.');
   el.addEventListener('click',()=>inspect(p.id));frag.appendChild(el);
  }
  layer.replaceChildren(frag);
@@ -106,6 +129,7 @@ window.addEventListener('majakka:mapready',()=>{render();send();});
 window.addEventListener('majakka:livingupdate',redraw);
 window.addEventListener('resize',redraw);
 window.addEventListener('majakka:atlasselect',e=>{if(active())inspect(e.detail?.id);});
+window.addEventListener('majakka:shared-update',()=>{render();if(selected)inspect(selected);send();});
 let loops=0;const attach=()=>{if(typeof map!=='undefined'&&map?.on)map.on('move',redraw);else if(loops++<30)setTimeout(attach,500);};attach();
 globalThis.MajakkaAtlas={snapshot,select:inspect};
 // Map startup may have completed before this deferred module attached.
