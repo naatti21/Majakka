@@ -164,7 +164,7 @@ function renderMap(){
  for(const p of items){
   const pt=map.project([p.lng,p.lat]);
   if(pt.x< -55||pt.x>innerWidth+55||pt.y< -55||pt.y>innerHeight+55)continue;
-  const b=document.createElement('button');b.type='button';b.className='living-point '+p.kind;
+  const b=document.createElement('button');b.type='button';b.className='living-point '+p.kind+' '+(p.archetype||'');
   b.style.left=pt.x+'px';b.style.top=pt.y+'px';
   b.setAttribute('aria-label',p.kind==='lumen'?'Collect Lumen preview':p.kind==='rift'||p.kind==='restored'?'Interference preview':p.kind==='distant'?'Unexplored region signal':p.name+' virtual node');
   b.innerHTML='<i aria-hidden="true"></i>';
