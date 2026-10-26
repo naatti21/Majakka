@@ -96,7 +96,7 @@ const message=text=>{status.textContent=text;if(typeof notify==='function')notif
 function emit(){window.dispatchEvent(new Event('majakka:livingupdate'));}
 function resetWorld(){
   saveProgress();origin=null;world=null;progress=L.blank();position=null;accuracy=Infinity;chosen=null;activeKey=null;activeRegion=null;switching=false;epoch++;
-  layer.replaceChildren();wrap.hidden=true;clearTimeout(stageTimer);clearTimeout(pulseTimer);challenge=null;linkTargets.hidden=true;document.body.classList.remove('living-selected');updateUI();emit();
+  layer.replaceChildren();clearPointElements();wrap.hidden=true;clearTimeout(stageTimer);clearTimeout(pulseTimer);challenge=null;linkTargets.hidden=true;document.body.classList.remove('living-selected');updateUI();emit();
 }
 function isActive(){return navigator.onLine!==false;}
 async function create(originFix){
@@ -113,23 +113,28 @@ async function create(originFix){
  status.textContent='Virtual signals are not walking destinations. Remote resonance is enabled.';
  redraw();updateUI();emit();
 }
+/* Keep actual touch targets mounted while map pans.
+   Recreating all DOM markers each frame caused flicker and lost pointer taps. */
+const pointElements=new Map();
+function clearPointElements(){for(const el of pointElements.values())el.remove();pointElements.clear();}
 function renderMap(){
- if(!world||!isActive()||document.body.classList.contains('perspective-ready')){layer.replaceChildren();return;}
+ if(!world||!isActive()||document.body.classList.contains('perspective-ready')){
+  layer.replaceChildren();clearPointElements();return;
+ }
  if(typeof map==='undefined'||!map||!mapReady)return;
  const data=L.projection(progress,world);
  const items=[...data.nodes,data.rift,...(data.outer||[])];
- const glimmers=L.energyField(position);
- layer.replaceChildren();
+ for(const old of layer.querySelectorAll('.living-curves,.living-haze,.living-glimmer'))old.remove();
  if(data.edges?.length||data.fields?.length){
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.setAttribute('class','living-curves');svg.setAttribute('viewBox','0 0 '+innerWidth+' '+innerHeight);
   svg.setAttribute('width','100%');svg.setAttribute('height','100%');
   for(const trio of data.fields||[]){
-    const ps=trio.map(id=>data.nodes.find(n=>n.id===id)).filter(Boolean).map(n=>map.project([n.lng,n.lat]));
-    if(ps.length!==3)continue;
-    const polygon=document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    polygon.setAttribute('class','living-harmonic-area');
-    polygon.setAttribute('points',ps.map(p=>p.x+','+p.y).join(' '));svg.appendChild(polygon);
+   const ps=trio.map(id=>data.nodes.find(n=>n.id===id)).filter(Boolean).map(n=>map.project([n.lng,n.lat]));
+   if(ps.length!==3)continue;
+   const polygon=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+   polygon.setAttribute('class','living-harmonic-area');
+   polygon.setAttribute('points',ps.map(p=>p.x+','+p.y).join(' '));svg.appendChild(polygon);
   }
   for(const [aid,bid] of data.edges){
    const a=data.nodes.find(n=>n.id===aid),b=data.nodes.find(n=>n.id===bid);
@@ -140,8 +145,7 @@ function renderMap(){
    for(const cls of ['living-curve-halo','living-curve-core']){
     const path=document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('class',cls);
-    path.setAttribute('d','M '+A.x+' '+A.y+' Q '+mx+' '+my+' '+B.x+' '+B.y);
-    svg.appendChild(path);
+    path.setAttribute('d','M '+A.x+' '+A.y+' Q '+mx+' '+my+' '+B.x+' '+B.y);svg.appendChild(path);
    }
   }
   layer.appendChild(svg);
@@ -149,34 +153,29 @@ function renderMap(){
  if(data.interference>0&&data.rift.kind==='rift'){
   const center=map.project([data.rift.lng,data.rift.lat]);
   const far=L.addMeters(data.rift,0,80+data.interference*34);
-  const edge=map.project([far.lng,far.lat]);
-  const radius=Math.max(12,Math.abs(edge.x-center.x));
+  const edge=map.project([far.lng,far.lat]),radius=Math.max(12,Math.abs(edge.x-center.x));
   const haze=document.createElement('div');haze.className='living-haze';
-  haze.style.left=center.x+'px';haze.style.top=center.y+'px';
-  haze.style.width=radius*2+'px';haze.style.height=radius*2+'px';
+  haze.style.left=center.x+'px';haze.style.top=center.y+'px';haze.style.width=radius*2+'px';haze.style.height=radius*2+'px';
   layer.appendChild(haze);
  }
- for(const sparkle of glimmers){
-  const p=map.project([sparkle.lng,sparkle.lat]);
-  if(p.x<0||p.y<0||p.x>innerWidth||p.y>innerHeight)continue;
-  const el=document.createElement('i');el.className='living-glimmer';
-  el.style.left=p.x+'px';el.style.top=p.y+'px';
-  layer.appendChild(el);
- }
+ const seen=new Set(),viewport=by('map-viewport'),w=viewport?.clientWidth||innerWidth,h=viewport?.clientHeight||innerHeight;
  for(const p of items){
+  if(p.kind==='lumen'||p.kind==='distant')continue; // never advertise unplayable beacons
   const pt=map.project([p.lng,p.lat]);
-  if(pt.x< -55||pt.x>innerWidth+55||pt.y< -55||pt.y>innerHeight+55)continue;
-  const b=document.createElement('button');b.type='button';b.className='living-point '+p.kind+' '+(p.archetype||'');
+  if(pt.x<-50||pt.x>w+50||pt.y<-50||pt.y>h+50)continue;
+  let b=pointElements.get(p.id);
+  if(!b){
+   b=document.createElement('button');b.type='button';
+   b.innerHTML='<i aria-hidden="true"></i><span></span>';
+   b.addEventListener('click',event=>{event.stopPropagation();choose(p.id);});
+   layer.appendChild(b);pointElements.set(p.id,b);
+  }
+  b.className='living-point '+p.kind+' '+(p.archetype||'');
   b.style.left=pt.x+'px';b.style.top=pt.y+'px';
-  b.setAttribute('aria-label',p.kind==='lumen'?'Collect Lumen preview':p.kind==='rift'||p.kind==='restored'?'Interference preview':p.kind==='distant'?'Unexplored region signal':p.name+' virtual node');
-  b.innerHTML='<i aria-hidden="true"></i>';
-  if(p.kind!=='lumen'&&p.kind!=='distant'){const text=document.createElement('span');text.textContent=p.name;b.appendChild(text);}
-  if(p.kind==='distant'){
-   b.disabled=true;
-   b.title='An undiscovered region. This light is not a verified real-world point of interest.';
-  }else b.addEventListener('click',()=>choose(p.id));
-  layer.appendChild(b);
+  b.setAttribute('aria-label',(p.kind==='rift'||p.kind==='restored'?'Interference':p.name)+' · Open node actions');
+  b.lastElementChild.textContent=p.name||'Signal';seen.add(p.id);
  }
+ for(const [id,el] of pointElements)if(!seen.has(id)){el.remove();pointElements.delete(id);}
 }
 let attachedMap=null;
 function redraw(){
