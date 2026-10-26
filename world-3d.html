@@ -44,6 +44,12 @@ html,body,#scene{width:100%;height:100%;margin:0;overflow:hidden;background:#030
 .lumen-speck:after{content:"";position:absolute;inset:-10px;border:1px solid #e4bc7a38;border-radius:50%}
 @keyframes float{50%{transform:translateY(-8px)}}@keyframes glow{50%{opacity:.45}}
 @media(prefers-reduced-motion:reduce){.beacon .orb,.lumen-speck{animation:none}}
+/* Persistent native touch targets stay clickable above fragile 3D geometry. */
+.node-tap{width:40px;height:40px;border:0;background:transparent;padding:0;cursor:pointer;display:grid;place-items:center;touch-action:manipulation}
+.node-tap::after{content:"";width:10px;height:12px;display:block;transform:rotate(45deg);border:1px solid #b5d2c7aa;background:#324e50b8;box-shadow:0 0 4px #79c4af55}
+.node-tap.awake::after{background:#dcbe82;border-color:#ffe7aa;box-shadow:0 0 7px #dfbb7966}
+.node-tap.echo::after{width:7px;height:7px;border-color:#91b5b1a6;background:#49666a99}
+.node-tap:focus-visible{outline:2px solid #e4cd93;border-radius:50%}
 </style>
 </head>
 <body>
@@ -98,6 +104,39 @@ const makeMarker=(point,{kind='node',awake=false,temporary=false,callback=()=>{}
  markers.push(marker);return marker;
 };
 function clearMarkers(){for(const m of markers)m.remove();markers=[];}
+/* Persistent HTML marker controls provide reliable 40px touch targets. */
+const nodeTouches=new Map();
+function selectPhysical(id){
+ if(!id||id==='player'||id.startsWith('ambient-'))return;
+ if(id.startsWith('poi-')||id.startsWith('atlas-echo-')){reply('atlas-select',{id});return;}
+ if(mode==='live'){
+  if(id==='veil')reply('live-rift-select');
+  else if(id.startsWith('echo-'))reply('live-node-select',{id});
+  return;
+ }
+ if(id==='rift')reply('rift-select');
+ else if(nodes.some(n=>n.id===id))reply('node-select',{id});
+}
+function syncNodeTouches(points){
+ if(!map||!lib)return;
+ const visible=new Set();
+ for(const point of points){
+  const id=point.id;
+  if(typeof id!=='string'||id==='player'||id.startsWith('ambient-')||point.kind==='distant'||point.kind==='lumen')continue;
+  let entry=nodeTouches.get(id);
+  if(!entry){
+   const el=document.createElement('button');el.type='button';el.className='node-tap';
+   el.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();selectPhysical(id);});
+   const marker=new lib.Marker({element:el,anchor:'center',pitchAlignment:'viewport',rotationAlignment:'viewport'})
+     .setLngLat([point.lng,point.lat]).addTo(map);
+   entry={el,marker};nodeTouches.set(id,entry);
+  }else entry.marker.setLngLat([point.lng,point.lat]);
+  entry.el.className='node-tap'+((point.kind==='awake'||point.sharedCharge>=2)?' awake':'')+(id.startsWith('atlas-echo-')?' echo':'');
+  entry.el.setAttribute('aria-label',id.startsWith('poi-')?'Explore location '+point.name:'Open '+(point.name||'node')+' actions');
+  visible.add(id);
+ }
+ for(const [id,entry] of nodeTouches)if(!visible.has(id)){entry.marker.remove();nodeTouches.delete(id);}
+}
 function updateGeoJSON(id,features,type){
  const source=map.getSource(id);
  if(source)source.setData({type:'FeatureCollection',features});
@@ -154,18 +193,7 @@ function drawPhysicalWorld(points){
  map.addLayer({id:'majakka-physical-hit',type:'circle',source:'majakka-physical-targets',
   paint:{'circle-radius':22,'circle-color':'#ffffff','circle-opacity':.01,
          'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
- map.on('click','majakka-physical-hit',e=>{
-  const id=e.features?.[0]?.properties?.id;
-  if(!id||id==='player'||id.startsWith('ambient-'))return;
-  if(id.startsWith('poi-')||id.startsWith('atlas-echo-')){reply('atlas-select',{id});return;}
-  if(mode==='live'){
-   if(id==='veil')reply('live-rift-select');
-   else if(id.startsWith('echo-'))reply('live-node-select',{id});
-   return;
-  }
-  if(id==='rift')reply('rift-select');
-  else if(nodes.some(n=>n.id===id))reply('node-select',{id});
- });
+ map.on('click','majakka-physical-hit',e=>selectPhysical(e.features?.[0]?.properties?.id));
  // Ambient glimmers cannot be collected by tapping.
  physicsLayersReady=true;
 }
@@ -190,11 +218,15 @@ function renderPersonal(){
  if(!map||!ready)return;
  const fc=features=>({type:'FeatureCollection',features});
  const update=(id,features)=>{const src=map.getSource(id),data=fc(features);if(src)src.setData(data);else map.addSource(id,{type:'geojson',data});};
- const features=(personal?.points||[]).map(p=>({type:'Feature',properties:{size:p.size||'dust'},geometry:{type:'Point',coordinates:[p.lng,p.lat]}}));
+ const features=(personal?.points||[]).filter(p=>typeof p.id==='string').map(p=>({type:'Feature',properties:{id:p.id,size:p.size||'dust'},geometry:{type:'Point',coordinates:[p.lng,p.lat]}}));
  update('personal-sparks',features);
  if(!map.getLayer('personal-sparks-glow')){
   map.addLayer({id:'personal-sparks-glow',type:'circle',source:'personal-sparks',paint:{'circle-color':'#dbc69b','circle-radius':['match',['get','size'],'heart',4,'glow',2.6,1.2],'circle-opacity':.13,'circle-blur':.85}});
   map.addLayer({id:'personal-sparks-points',type:'circle',source:'personal-sparks',paint:{'circle-color':'#f4ddb2','circle-radius':['match',['get','size'],'heart',2.1,'glow',1.2,.7],'circle-opacity':['match',['get','size'],'heart',.88,'glow',.67,.44],'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+  map.addLayer({id:'personal-sparks-hit',type:'circle',source:'personal-sparks',paint:{
+   'circle-radius':16,'circle-color':'#ffffff','circle-opacity':.01,
+   'circle-pitch-alignment':'viewport','circle-pitch-scale':'viewport'}});
+  map.on('click','personal-sparks-hit',e=>{const id=e.features?.[0]?.properties?.id;if(id)reply('lumen-claim',{id});});
  }
  const fix=personal?.fix,geom=globalThis.MajakkaSceneGeometry;
  update('personal-radius',fix&&geom?[{type:'Feature',properties:{},geometry:geom.circle(fix,personal.range||30)}]:[]);
@@ -216,7 +248,7 @@ function renderPersonal(){
 function showWorld(){
  if(!map||!ready)return;
  document.getElementById('hint').hidden=true;
- clearMarkers();
+ // Marker taps are reused, not destroyed on every world update.
  const fieldFeatures=[],lines=[],points=[],haze=[],arcPairs=[];
  if(mode==='demo'){
   for(const n of nodes)points.push({...n,kind:(world?.awake||[]).includes(n.id)?'awake':'quiet'});
@@ -253,7 +285,8 @@ function showWorld(){
  }
  if(atlas)points.push(...(atlas.real||[]),...(atlas.echoes||[]));
  drawPhysicalWorld(points);
- drawAerialLinks(arcPairs);
+  syncNodeTouches(points);
+  drawAerialLinks(arcPairs);
  updateGeoJSON('majakka-haze',haze,'haze');
  updateGeoJSON('majakka-field',fieldFeatures,'field');
  updateGeoJSON('majakka-threads',lines,'line');
@@ -355,11 +388,7 @@ try {
   try{
    if(typeof map.setSky==='function')map.setSky({'sky-color':'#020509','horizon-color':'#0a1519','fog-color':'#071116','sky-horizon-blend':.52,'horizon-fog-blend':.65});
   }catch(e){console.warn('Sky unavailable',e);}
-  try{
-   map.addSource('majakka-dem',{type:'raster-dem',url:'https://tiles.mapterhorn.com/tilejson.json',encoding:'terrarium',tileSize:512});
-   map.setTerrain({source:'majakka-dem',exaggeration:1});
-   terrainReady=true;
-  }catch(e){console.warn('Terrain unavailable, pitched map stays active',e);}
+  // Terrain disabled: GPU depth collisions with ground extrusions obscured selectable nodes.
   // Optional 3D building extrusions on OpenMapTiles vector data, if present.
   try{
    const style=map.getStyle(),sourceId=Object.keys(style.sources).find(k=>style.sources[k].type==='vector');
