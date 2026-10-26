@@ -62,10 +62,17 @@ function recenter(){
 }
 globalThis.MajakkaLive={isActive:()=>connected(),hasLocation:()=>watch!==null&&fix!==null,recenter,getFix:()=>fix?{lat:fix.lat,lng:fix.lng}:null};
 btn.addEventListener('click',()=>watch!==null?(wantLocation=false,pause()):startLocation());
-channel.addEventListener('click',()=>{
+channel.addEventListener('click',async()=>{
  if(!connected())return;
  const now=Date.now(),cooldown=120000;
  if(now-channelAt<cooldown){notifyUser('The Lumen field is recharging · '+Math.ceil((cooldown-now+channelAt)/1000)+' s.');return;}
+ if(globalThis.MajakkaSharedWorld?.enabled?.()){
+  channel.disabled=true;
+  try{await globalThis.MajakkaSharedWorld.channel();channelAt=now;try{localStorage.setItem('majakka-channel-at',String(channelAt));}catch{}}
+  catch(e){notifyUser('Server did not grant Lumen: '+(e?.body?.error||e?.message||'network error'));}
+  finally{channel.disabled=false;}
+  return;
+ }
  const gained=globalThis.MajakkaLiving?.award?.(2,'channel')??0;
  if(!gained){notifyUser('Lumen reserve is full or today’s personal allowance is exhausted.');return;}
  channelAt=now;try{localStorage.setItem('majakka-channel-at',String(channelAt));}catch{}
