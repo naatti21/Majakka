@@ -79,12 +79,12 @@ function landmarks(anchor,rawCandidates=[]){
  if(!valid(anchor))throw Error('Invalid landmark anchor');
  const options=(Array.isArray(rawCandidates)?rawCandidates:[]).slice(0,1800).map(normalize)
    .filter(Boolean).filter(p=>p.name!=='Unknown place'&&p.name!=='Unnamed place')
-   .filter(p=>meters(anchor,p)<=1100);
+   .filter(p=>meters(anchor,p)<=2600);
  const unique=new Map();for(const p of options)if(!unique.has(p.id))unique.set(p.id,p);
  // Stable global-ID priority, independent of Overpass response order.
  const order=[...unique.values()].sort((a,b)=>{
   const rank={history:0,art:1,nature:2,culture:3};
-  return rank[a.type]-rank[b.type]||hash(a.id)-hash(b.id)||a.id.localeCompare(b.id);
+  return Math.floor(meters(anchor,a)/600)-Math.floor(meters(anchor,b)/600)||rank[a.type]-rank[b.type]||hash(a.id)-hash(b.id)||a.id.localeCompare(b.id);
  });
  const selected=[];
  for(const site of order)if(selected.length<3&&selected.every(p=>meters(p,site)>=360))selected.push(site);
