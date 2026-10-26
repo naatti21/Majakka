@@ -210,7 +210,7 @@ function showWorld(){
   points.push(live.rift);
   // v0.8: use personal field only; old position-following glimmers are retired.
   points.push(...(live.outer||[]));
-  if(atlas){points.push(...(atlas.real||[]),...(atlas.echoes||[]));}
+  // Auto Atlas nodes appear in both LIVE and couch exploration modes.
   if(live.interference>0&&live.rift.kind!=='restored'){
    const G=globalThis.MajakkaSceneGeometry;
    haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
@@ -228,6 +228,7 @@ function showWorld(){
  }else if(lastFix){
   points.push({id:'player',name:'You',...lastFix,kind:'player'});
  }
+ if(atlas)points.push(...(atlas.real||[]),...(atlas.echoes||[]));
  drawPhysicalWorld(points);
  drawAerialLinks(arcPairs);
  updateGeoJSON('majakka-haze',haze,'haze');
@@ -258,7 +259,7 @@ function receive(data){
  }else if(data.type==='world'){world=data.world||{};living=world.live||living;if(ready)showWorld();}
  else if(data.type==='living'){living=data.live||null;document.getElementById('pitch').hidden=Boolean(data.selected);if(ready&&mode==='live')showWorld();}
  else if(data.type==='lumen'){personal=data.personal||null;if(ready&&mode==='live')renderPersonal();}
- else if(data.type==='atlas'){atlas=data.atlas||null;if(ready&&mode==='live')showWorld();}
+ else if(data.type==='atlas'){atlas=data.atlas||null;if(ready)showWorld();}
  else if(data.type==='recenter'){
   if(!map||!ready)return;
   if(mode==='live'&&lastFix)centerLive();
