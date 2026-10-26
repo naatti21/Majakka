@@ -34,7 +34,12 @@
  function atlasSnapshot(){
   const atlas=globalThis.MajakkaAtlas?.snapshot?.(cameraCenter);
   if(!atlas)return null;
-  return {...atlas,echoes:(atlas.echoes||[]).map(e=>({...e,sharedCharge:(globalThis.MajakkaSharedWorld?.enabled?.()?globalThis.MajakkaSharedWorld?.get?.(e.id):globalThis.MajakkaSoloWorld?.get?.(e.id))?.charge??null}))};
+  const restored=(atlas.real||[]).filter(p=>globalThis.MajakkaSites?.get?.(p.id));
+  const links=[];
+  for(let i=0;i<restored.length;i++)for(let j=i+1;j<restored.length;j++)
+   if(globalThis.MajakkaSites.get(restored[i].id).district===globalThis.MajakkaSites.get(restored[j].id).district)
+    links.push([restored[i],restored[j]]);
+  return {...atlas,echoes:[],links};
  }
  function initial(){
   const center=(typeof map!=='undefined'&&map?.getCenter)?map.getCenter():{lng:23.7623,lat:61.4984};
