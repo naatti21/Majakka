@@ -80,7 +80,16 @@
   document.body.classList.remove('perspective-ready');document.body.classList.add('perspective-on');
   loadingTimer=setTimeout(()=>{if(enabled&&!ready)disable('3D could not load; returned safely to 2D.');},24000);
  }
- globalThis.MajakkaPerspective={isActive:()=>enabled&&ready,getCenter:()=>enabled&&ready&&cameraCenter?{...cameraCenter}:null,recenter:()=>send('recenter')};
+ globalThis.MajakkaPerspective={
+ isActive:()=>enabled&&ready,
+ getCenter:()=>enabled&&ready&&cameraCenter?{...cameraCenter}:null,
+ recenter:()=>send('recenter'),
+ focus:point=>{
+  if(!enabled||!ready||!point||!Number.isFinite(point.lat)||!Number.isFinite(point.lng))return false;
+  send('focus-landmark',{center:[point.lng,point.lat],zoom:15});
+  return true;
+ }
+};
  btn.addEventListener('click',()=>enabled?disable():enable());
  window.addEventListener('message',event=>{
   if(event.origin!==location.origin||!frame||event.source!==frame.contentWindow)return;
