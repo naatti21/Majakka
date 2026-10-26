@@ -51,6 +51,7 @@ async function regionKey(cell){
  return Array.from(hash.slice(0,12),b=>b.toString(16).padStart(2,'0')).join('');
 }
 function eraseFields(){
+ globalThis.MajakkaLumen?.clear?.();
  try{localStorage.removeItem(REGIONS_KEY);localStorage.removeItem(SALT_KEY);}catch{}
  activeKey=null;resetWorld();
  message('Stored local field progress cleared. This does not reset other Majakka data.');
