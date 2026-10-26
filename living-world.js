@@ -24,6 +24,7 @@ function sanitize(input){
  s.interference=clamp(input.interference,0,3);
  s.claimed=Array.isArray(input.claimed)?input.claimed.filter(x=>/^spark-[0-5]$/.test(x)).slice(0,6):[];
  s.visited=Array.isArray(input.visited)?input.visited.filter(x=>/^echo-(?:[0-9]|1[01])$/.test(x)).slice(0,L.NODE_COUNT):[];
+ s.decodeRewards=Array.isArray(input.decodeRewards)?[...new Set(input.decodeRewards.filter(x=>/^(echo-(?:[0-9]|1[01])|veil|link-[0-9]+-[0-9]+)$/.test(x)))].slice(0,80):[];
  s.links=Array.isArray(input.links)?[...new Set(input.links.filter(x=>/^\d+-\d+$/.test(x)&&x.split('-').every(v=>Number(v)>=0&&Number(v)<L.NODE_COUNT)))]:[];
  s.lastPulseAt=Math.min(Date.now(),Math.max(0,Number(input.lastPulseAt)||0));
  s.remoteAt=Array.from({length:L.NODE_COUNT},(_,i)=>Math.max(0,Math.min(Date.now(),Number(input.remoteAt?.[i])||0)));
@@ -216,9 +217,9 @@ function openLinkOptions(){
 function connect(method){
  if(!world||!chosen||!linkTarget)return;
  const out=L.weave(progress,chosen,linkTarget,{method,lumen:state.lumen});
- if(!out.ok){message(out.reason);return;}
+ if(!out.ok){message(out.reason);return out;}
  state.lumen-=out.cost;save();render();saveProgress();metric('threads');linkTarget=null;linkTargets.hidden=true;
- redraw();updateUI();emit();fb('weave');message(out.reason+'. '+progress.links.length+' links joined.');
+ redraw();updateUI();emit();fb('weave');message(out.reason+'. '+progress.links.length+' links joined.');return out;
 }
 function updateUI(){
  if(!world||!isActive()){info.hidden=actions.hidden=true;return;}
@@ -259,8 +260,8 @@ function positive(type='attune'){fb(type);}
 function apply(method){
  if(!world||!chosen)return;
  const result=L.contribute(progress,{target:chosen,method,player:position,accuracy,lumen:state.lumen,world,remote:true});
- if(!result.ok){message(result.reason);return;}
- state.lumen-=result.cost;save();render();saveProgress();metric('nodeSignals');updateUI();redraw();emit();positive('attune');message(result.reason);
+ if(!result.ok){message(result.reason);return result;}
+ state.lumen-=result.cost;save();render();saveProgress();metric('nodeSignals');updateUI();redraw();emit();positive('attune');message(result.reason);return result;
 }
 function collect(id){
  message('Lumen appears around you and gathers automatically as you move.');
@@ -280,104 +281,58 @@ function nextPulse(){
  message(r.reason+(gain?' ✧ +'+gain:'')+(r.opened?' · Fields '+counters.fields:'')+(r.cleared?' · Restorations '+counters.veils:''));
 }
 function cancel(){clearTimeout(stageTimer);challenge?.cleanup?.();challenge=null;by('living-challenge').hidden=true;}
+/* Optional three-piece circuit repair; normal Lumen attunement remains one tap.
+   First successful repair of a node earns +1 Lumen (subject to daily caps). */
 function startDecode(){
  if(!chosen||!world)return;
  cancel();
- const i=chosen==='veil'?3:world.nodes.findIndex(n=>n.id===chosen);
- const level=chosen==='veil'?progress.rift+1:progress.nodes[i]+1;
- const seed=i+progress.cycle+(linkTarget?1:0);
- const variant=((seed%3)+3)%3;
- const dialog=by('living-challenge'),prompt=by('living-prompt'),symbols=by('living-symbols'),answers=by('living-answers');
- dialog.hidden=false;symbols.replaceChildren();answers.replaceChildren();metric('decodes');
- challenge={variant,started:Date.now(),level};
- const success=()=>{cancel();linkTarget?connect('decode'):apply('decode');fb('decode');};
- const failure=()=>{metric('decodeMisses');fb('error');message('Not quite. Try another method or replay the signal.');cancel();};
- if(variant===0){
-  // Visual phase alignment: sound and haptic optional, not required.
-  const target=(17+seed*19+level*7)%87+7;
-  prompt.textContent='Phase lock · align the cyan signal with the amber marker';
-  const track=document.createElement('div');track.className='living-phase-track';
-  const signal=document.createElement('span');signal.className='living-phase-target';signal.style.left=target+'%';
-  const cursor=document.createElement('span');cursor.className='living-phase-cursor';cursor.style.left='50%';
-  track.append(signal,cursor);symbols.appendChild(track);
-  const input=document.createElement('input');input.type='range';input.min='0';input.max='100';input.value='50';
-  input.setAttribute('aria-label','Adjust phase alignment');input.addEventListener('input',()=>{cursor.style.left=input.value+'%';});
-  answers.appendChild(input);
-  const confirm=document.createElement('button');confirm.type='button';confirm.textContent='Lock signal';
-  confirm.addEventListener('click',()=>Math.abs(Number(input.value)-target)<=9?success():failure());
-  answers.appendChild(confirm);
- }else if(variant===1){
-  // Deduce the shared relay frequency — values vary with zone and pulse cycle.
-  const answer=3+(seed*3+level)%8;
-  const a=[answer-2,answer,answer+3],b=[answer+1,answer-3,answer];
-  prompt.textContent='Relay filter · choose the one frequency shared by both sources';
-  symbols.textContent='A: '+a.join('  ·  ')+'     B: '+b.join('  ·  ');
-  for(const n of [answer-3,answer,answer+2,answer-2].sort((x,y)=>((x*17+seed)%7)-((y*17+seed)%7))){
-   const button=document.createElement('button');button.type='button';button.textContent=String(n);
-   button.addEventListener('click',()=>n===answer?success():failure());answers.appendChild(button);
-  }
- }else{
-  // An entirely visible metronome. No hearing, vibration or remembered audio required.
-  prompt.textContent='Visual rhythm · tap when the moving light meets the center gate';
-  const track=document.createElement('div');track.className='living-rhythm-track';
-  const gate=document.createElement('span');gate.className='living-rhythm-gate';
-  const marker=document.createElement('span');marker.className='living-rhythm-marker';
-  gate.setAttribute('aria-hidden','true');marker.setAttribute('aria-hidden','true');
-  track.append(gate,marker);symbols.appendChild(track);
-  const caption=document.createElement('small');caption.className='living-rhythm-caption';
-  caption.textContent='Center gate · 0 of 3 beats';caption.setAttribute('aria-live','polite');symbols.appendChild(caption);
-  const indicator=document.createElement('div');indicator.className='living-rhythm-count';indicator.textContent='○ ○ ○';symbols.appendChild(indicator);
-  const button=document.createElement('button');button.type='button';button.textContent='TAP ON LIGHT';
-  const interval=1500,started=performance.now();let hits=0,lastCycle=-1,raf=0;
-  let phase=0;
-  const animate=(timestamp)=>{
-   if(!challenge||challenge.variant!==2)return;
-   phase=((timestamp-started)%interval)/interval;
-   marker.style.left=(phase*100)+'%';
-   const aligned=Math.abs(phase-.5)<=.17;
-   track.classList.toggle('in-window',aligned);
-   raf=requestAnimationFrame(animate);
-  };
-  const animateSafe=()=>{raf=requestAnimationFrame(animate);};
-  animateSafe();
-  const originalCancel=challenge;
-  challenge.cleanup=()=>cancelAnimationFrame(raf);
-  const untimed=document.createElement('button');untimed.type='button';
-  untimed.textContent='Untimed visual alternative';
-  untimed.className='living-rhythm-alternative';
-  untimed.addEventListener('click',()=>{
-   if(challenge!==originalCancel)return;
-   originalCancel.cleanup?.();originalCancel.cleanup=null;
-   track.remove();button.remove();untimed.remove();
-   prompt.textContent='Pattern reading · which cadence repeats the short–long–short motif?';
-   const motif=document.createElement('div');motif.className='living-pattern-reference';
-   motif.textContent='SHORT · LONG · SHORT';symbols.prepend(motif);
-   caption.textContent='Choose the matching pattern. No timer.';
-   indicator.textContent='▮ ▰ ▮';
-   for(const value of ['▮ ▮ ▰','▮ ▰ ▮','▰ ▮ ▮']){
-    const b=document.createElement('button');b.type='button';b.textContent=value;
-    b.setAttribute('aria-label',value==='▮ ▰ ▮'?'Short long short':'Different rhythm pattern');
-    b.addEventListener('click',()=>value==='▮ ▰ ▮'?success():failure());
-    answers.appendChild(b);
+ const selected=chosen,link=linkTarget;
+ const rewardKey=link?'link-'+pairKey(selected,link):selected;
+ const dialog=by('living-challenge'),prompt=by('living-prompt'),
+       symbols=by('living-symbols'),answers=by('living-answers');
+ const seed=(selected==='veil'?17:Number(selected.replace('echo-',''))*7)+progress.cycle*5+(link?11:0);
+ const orientations=[1,(seed%2===0?1:0),1];
+ dialog.hidden=false;symbols.replaceChildren();answers.replaceChildren();
+ metric('decodes');
+ challenge={variant:'circuit',started:Date.now(),level:progress.cycle};
+ prompt.textContent=link?'Repair the thread · rotate to connect':'Reconnect the signal · rotate three conductors';
+ const board=document.createElement('div');board.className='living-circuit';
+ board.setAttribute('role','group');board.setAttribute('aria-label','Rotate three conductors to connect the terminals');
+ const left=document.createElement('span');left.className='circuit-port';left.textContent='●';
+ board.append(left);
+ for(let i=0;i<3;i++){
+  const tile=document.createElement('button');tile.type='button';tile.className='circuit-tile';
+  tile.setAttribute('aria-label','Rotate conductor '+(i+1));
+  const paint=()=>{tile.textContent=orientations[i]===0?'━':'┃';tile.classList.toggle('connected',orientations[i]===0);};
+  paint();
+  tile.addEventListener('click',()=>{
+   if(!challenge||challenge.variant!=='circuit')return;
+   orientations[i]=1-orientations[i];paint();fb('decode');
+   if(orientations.every(v=>v===0)){
+    const result=link?connect('decode'):apply('decode');
+    cancel();
+    if(!result?.ok)return;
+    progress.decodeRewards??=[];
+    let bonus=0;
+    if(!progress.decodeRewards.includes(rewardKey)){
+     progress.decodeRewards.push(rewardKey);
+     bonus=award(1,'decode');saveProgress();
+    }
+    message(bonus?'Circuit complete · free resonance + 1 Lumen':'Circuit complete · free resonance');
+    positive('field');
    }
   });
-  button.addEventListener('click',()=>{
-   if(!challenge||challenge.variant!==2)return;
-   const elapsed=performance.now()-started;
-   const cycle=Math.floor(elapsed/interval),p=(elapsed%interval)/interval;
-   if(cycle===lastCycle)return; // only one accepted tap per sweep
-   if(Math.abs(p-.5)>.17){
-    caption.textContent='Watch the cyan dot reach the amber gate, then tap.';
-    fb('error');return;
-   }
-   lastCycle=cycle;hits++;fb('decode');
-   indicator.textContent='● '.repeat(hits)+'○ '.repeat(3-hits);
-   caption.textContent='Aligned · '+hits+' of 3 beats';
-   if(hits===3)success();
-  });
-  answers.append(button,untimed);
-
+  board.append(tile);
  }
+ const right=document.createElement('span');right.className='circuit-port target';right.textContent='◆';
+ board.append(right);symbols.append(board);
+ const clue=document.createElement('small');clue.className='living-circuit-note';
+ clue.textContent='Connect ● to ◆. The first successful repair earns 1 extra Lumen.';
+ symbols.append(clue);
+ const skip=document.createElement('button');skip.type='button';skip.className='living-circuit-exit';
+ skip.textContent='Use 2 Lumen instead';
+ skip.addEventListener('click',()=>{cancel();apply('lumen');});
+ answers.append(skip);
 }
 by('living-spend').addEventListener('click',()=>apply('lumen'));
 by('living-decode').addEventListener('click',startDecode);
