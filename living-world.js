@@ -191,7 +191,7 @@ function infoText(){
  const i=world.nodes.findIndex(n=>n.id===chosen),n=progress.nodes[i];
  const next=progress.remoteAt?.[i]&&Date.now()-progress.remoteAt[i]<L.REMOTE_SETTLE_MS;
  const status=near?'CLEAR · HERE':'CLEAR · REMOTE';
- return p.name.toUpperCase()+' · '+status+' · '+Math.round(distance)+' m · '+(n>=2?'Awake':n+'/2 resonance');
+ return p.name.toUpperCase()+' · '+status+(Number.isFinite(distance)?' · '+Math.round(distance)+' m':'')+' · '+(n>=2?'Awake':n+'/2 resonance');
 }
 function pairKey(a,b){return [a.replace('echo-',''),b.replace('echo-','')].sort().join('-');}
 function openLinkOptions(){
@@ -231,9 +231,7 @@ function updateUI(){
   info.textContent=infoText();
   const done=chosen==='veil'?progress.riftClear:progress.nodes[world.nodes.findIndex(n=>n.id===chosen)]>=2;
   const pending=chosen==='veil'?progress.riftPending:Boolean(progress.pending[world.nodes.findIndex(n=>n.id===chosen)]);
-  const remoteCooling=false&&chosen!=='veil'&&!L.near(position,p,accuracy)&&
-    Boolean(progress.remoteAt?.[world.nodes.findIndex(n=>n.id===chosen)])&&
-    Date.now()-progress.remoteAt[world.nodes.findIndex(n=>n.id===chosen)]<L.REMOTE_SETTLE_MS;
+  const remoteCooling=false; // No distance penalty for playing from home.
   by('living-spend').disabled=done||pending||remoteCooling;
   by('living-decode').disabled=done||pending||remoteCooling;
   by('living-weave').hidden=chosen==='veil'||!done;
@@ -405,9 +403,7 @@ window.addEventListener('majakka:livefix',event=>{
  if(!isActive())return;
  const d=event.detail;if(!d||![d.lat,d.lng,d.accuracy].every(Number.isFinite))return;
  position={lat:d.lat,lng:d.lng};accuracy=d.accuracy;
- if(accuracy<=65){
-  // GPS updates the avatar only; browsing the map determines the active world region.
- }
+ // GPS updates the avatar only; browsing the map determines the active world region.
  if(world){redraw();updateUI();emit();}
 });
 function viewedPoint(){if(typeof map==='undefined'||!map?.getCenter||!mapReady)return null;const c=map.getCenter();return {lat:c.lat,lng:c.lng};}
@@ -415,7 +411,7 @@ function viewedPoint(){if(typeof map==='undefined'||!map?.getCenter||!mapReady)r
   const c=viewedPoint();if(!c||!isActive()||switching)return;
   let cell;try{cell=L.region(c);}catch{return;}
   if(!world||cell.id!==activeRegion)void create(c);
-  else redraw();
+  else{wrap.hidden=false;redraw();}
  }
  window.addEventListener('majakka:mapready',refreshRegion);
  window.addEventListener('online',refreshRegion);
