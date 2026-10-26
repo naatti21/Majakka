@@ -296,6 +296,10 @@ function receive(data){
   if(mode==='live'&&previous!=='live')firstLiveCenter=false;
   if(mode==='live'&&lastFix&&!userMoved&&!firstLiveCenter)centerLive();
   if(map&&ready)showWorld();
+ }else if(data.type==='focus-landmark'){
+  if(!map||!ready||!Array.isArray(data.center)||data.center.length!==2||!data.center.every(Number.isFinite))return;
+  userMoved=true;
+  map.flyTo({center:data.center,zoom:Math.max(14,Number(data.zoom)||15),pitch:58,duration:650,essential:true});
  }else if(data.type==='gps'){
   if(!data.fix){lastFix=null;if(ready)showWorld();return;}
   lastFix=data.fix;
