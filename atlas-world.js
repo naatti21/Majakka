@@ -6,7 +6,7 @@ const A=globalThis.MajakkaAtlasCore,L=globalThis.MajakkaLivingCore,root=document
 if(!A||!L||!root)return;
 let running=true,fix=null,anchor=null,source=[],querying=false,queried=false,lastRendered=0,selected=null,fetchAbort=null,lastRequest=0;
 const layer=document.createElement('div');layer.id='atlas-markers';root.append(layer);
-const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Discover landmarks';button.setAttribute('aria-label','Load public place candidates from OpenStreetMap. Sends the approximate active map area to Overpass API.');button.title='Optional: request public places near this area from the OpenStreetMap Overpass API';document.body.append(button);
+const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Discover landmarks';button.setAttribute('aria-label','Discover named landmarks near the map center using OpenStreetMap. Sends the approximate map area to Overpass API.');button.title='Find a few named historic, natural and cultural landmarks. No procedural node spam.';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
 info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;});
 const sharedButton=document.createElement('button');sharedButton.type='button';sharedButton.id='atlas-shared-attune';sharedButton.hidden=true;
@@ -115,7 +115,7 @@ button.addEventListener('click',async()=>{
  if(!active()||querying)return;
  const c=center();if(!c)return;
  const requestedAnchor=anchorOf(c);
- if(!anchor||A.meters(anchor,requestedAnchor)>450){anchor=requestedAnchor;source=[];queried=false;button.textContent='✦ Discover landmarks';}
+ if(!anchor||A.meters(anchor,requestedAnchor)>450){anchor=requestedAnchor;source=[];queried=false;selected=null;info.hidden=true;button.textContent='✦ Discover landmarks';}
  if(queried)return;
  if(Date.now()-lastRequest<120000){notifyUser('Place lookup cooldown. Try again after two minutes.');return;}
  lastRequest=Date.now();
@@ -130,10 +130,10 @@ button.addEventListener('click',async()=>{
   const raw=await response.json();
   if(!active()||!anchor||L.meters(thisAnchor,anchor)>150)return;
   source=(raw.elements||[]).slice(0,800).map(p=>({...p,lat:p.lat??p.center?.lat,lng:p.lon??p.center?.lon,center:p.center&&{lat:p.center.lat,lng:p.center.lon},source:'osm',sourceId:String(p.type||'node')+'/'+String(p.id)}));
-  queried=true;button.textContent='✦ Places loaded';render();send();
-  notifyUser('Auto Atlas · '+(snapshot()?.real.length||0)+' public place candidates. Access unverified; remote preview.');
+  queried=true;button.textContent='✦ '+(snapshot()?.real.length||0)+' landmarks';render();send();
+  notifyUser((snapshot()?.real.length||0)+' landmark sites found. Restore two nearby sites to awaken the district.');
  }catch(e){
-  if(active()){button.textContent='✦ Retry places';notifyUser('Landmark data unavailable. Please try again.');}
+  if(active()){button.textContent='✦ Retry landmarks';notifyUser('Landmark data unavailable. Please try again.');}
  }finally{clearTimeout(timeout);querying=false;button.disabled=false;fetchAbort=null;}
 });
 window.addEventListener('online',()=>{running=true;render();send();});
