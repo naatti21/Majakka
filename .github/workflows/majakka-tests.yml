@@ -1,7 +1,7 @@
 name: Majakka code checks
 on:
   push:
-    branches: ["feature/personal-lumen-v0.8"]
+    branches: ["main", "feature/personal-lumen-v0.8"]
   pull_request:
     branches: ["main"]
 permissions:
