@@ -13,6 +13,7 @@ This is a **local-only prototype**, not a released shared-world feature. Test on
 - Stop LIVE, background the PWA, then restart: geolocation stops as before; the same device sees the same field positions, and today's claimed particles remain unavailable.
 - Test moving from one coarse node region to another; Lumen generation must be continuous and must not depend on node positions.
 - Test 3D → 2D → 3D and low signal; 2D map and core node mechanics should remain functional.
+- Pan the 3D map far away from the GPS marker: Lumen should regenerate around the **viewed area**, without moving the player or collecting remotely. Rotate the camera: the player arrow should follow camera viewing direction.
 - Run `node --test tests/lumen-core.test.mjs` and existing repository tests for logic regression.
 
 ## Privacy and constraints
