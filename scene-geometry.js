@@ -20,27 +20,41 @@
  }
  const shape=(id,part,point,radius,height,color)=>({type:'Feature',properties:{id,part,color,height},geometry:circle(point,radius)});
  const dot=(id,part,point,color)=>({type:'Feature',properties:{id,part,color},geometry:{type:'Point',coordinates:[point.lng,point.lat]}});
+ // Compact polygonal shards, not enormous cylindrical light posts.
+ function fragment(point,id,color,index,count,height,spread){
+  const direction=2*Math.PI*index/count;
+  const offset=index===0?0:spread*(.42+.18*(index%3));
+  const cx=point.lng+Math.cos(direction)*offset/(DEG*Math.max(.15,Math.cos(point.lat*Math.PI/180)));
+  const cy=point.lat+Math.sin(direction)*offset/DEG;
+  const sides=[3,4,5,3,6][index%5],radius=(index===0?3.0:1.35+.32*(index%3));
+  const vertices=[];
+  for(let i=0;i<=sides;i++){
+   const ang=direction+i*Math.PI*2/sides,dist=radius*(i%2===0?1:.79);
+   vertices.push([cx+Math.cos(ang)*dist/(DEG*Math.max(.15,Math.cos(cy*Math.PI/180))),cy+Math.sin(ang)*dist/DEG]);
+  }
+  return {type:'Feature',properties:{id,part:'facet',color,height,base:index===0?0:height*.16},geometry:{type:'Polygon',coordinates:[vertices]}};
+ }
  function build(points){
   const ground=[],shafts=[],cores=[],targets=[],lumens=[],facets=[];
   for(const p of points){
-   const kind=p.kind||'quiet',color=p.sharedCharge>=2?colors.awake:(archetypes[p.type||p.archetype]||colors[kind]||colors.quiet);
-   if(kind==='lumen'){
-    lumens.push(dot(p.id,'lumen',p,color));
-    continue;
-   }
-   const main=kind==='player',rift=kind==='rift',restored=kind==='restored',atlas=kind==='atlas-real'||kind==='atlas-echo';
-   const radius=main?15:rift?38:atlas?kind==='atlas-echo'?12:25:kind==='trial'?21:kind==='distant'?13:27;
-   const tall=main?9:rift?40:restored?46:p.sharedCharge>=2?60:atlas?kind==='atlas-echo'?16:30:kind==='awake'?65:kind==='distant'?21:51;
+   const kind=p.kind||'quiet',awake=kind==='awake'||kind==='restored'||p.sharedCharge>=2;
+   const color=awake?colors.awake:(archetypes[p.type||p.archetype]||colors[kind]||colors.quiet);
+   if(kind==='lumen'){lumens.push({...dot(p.id,'lumen',p,color),properties:{id:p.id,part:'lumen',color,size:p.size||'dust'}});continue;}
+   const player=kind==='player',rift=kind==='rift'||kind==='corrupted',distant=kind==='distant';
+   const echo=kind==='atlas-echo',real=kind==='atlas-real';
+   const height=player?3:rift?7:distant?4:awake?19:echo?8:real?12:11;
+   const radius=player?7:rift?19:distant?9:awake?18:echo?10:14;
    ground.push(shape(p.id,'aura',p,radius,0,color));
-   ground.push(shape(p.id,'footprint',p,radius*.43,0,color));
-   shafts.push(shape(p.id,'light-shell',p,main?4.5:rift?8:9,tall,color));
-   shafts.push(shape(p.id,'light-core',p,main?2.3:rift?3:3.4,tall*.76,color));
-   if(!main&&!rift&&kind!=='distant'&&kind!=='atlas-echo'){
-    const type=p.type||p.archetype||'culture',arms=type==='art'?3:type==='nature'?5:type==='history'?4:6;
-    for(let i=0;i<arms;i++){
-     const angle=i*2*Math.PI/arms,dist=type==='nature'?10:7;
-     const point={lat:p.lat+Math.cos(angle)*dist/111320,lng:p.lng+Math.sin(angle)*dist/(111320*Math.max(.18,Math.cos(p.lat*Math.PI/180)))};
-     facets.push(shape(p.id,'facet',point,type==='history'?2.7:2.2,tall*(.45+.25*(i%3)),color));
+   ground.push(shape(p.id,'footprint',p,Math.max(3,radius*.36),0,color));
+   // A faint, low pedestal under the sculpture; vertical pillars removed.
+   shafts.push(shape(p.id,'light-shell',p,player?1.3:2.0,height*.31,color));
+   shafts.push(shape(p.id,'light-core',p,player?.6:.9,height*.44,color));
+   if(!player&&!distant){
+    const archetype=p.type||p.archetype||'culture';
+    const count=rift?3:archetype==='nature'?5:archetype==='art'?3:archetype==='history'?4:4;
+    for(let i=0;i<count;i++){
+     const tall=height*(i===0?1:(.45+.09*((i+2)%3)));
+     facets.push(fragment(p,p.id,color,i,count,tall,rift?5:6));
     }
    }
    cores.push(dot(p.id,'core',p,color));
