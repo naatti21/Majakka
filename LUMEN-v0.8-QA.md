@@ -20,3 +20,23 @@ This is a **local-only prototype**, not a released shared-world feature. Test on
 The local seed identifies a **browser installation**, not a signed-in player across devices. No new backend, shared Lumen synchronization, GPS trail or geolocation upload has been added. Claimed virtual particle IDs are stored locally for the current date. This is pseudonymous local data, not a strong anonymization guarantee. Third-party map tile providers can infer the viewed region.
 
 Physical GPS tests, battery/performance on Android, 3D rendering and accessibility remain **unverified** until device QA. OpenAutoAtlas is still not connected to LIVE. This draft is not production-ready.
+
+## Auto Atlas v0.8.1 — node coverage and visuals (draft)
+
+The old 12 LIVE virtual nodes remain **playable** with their previous resonance, threads and field progress. They now use four differentiated sculptural node silhouettes in 2D and 3D. An **additional Auto Atlas preview layer** fills map browsing worldwide, even in DEMO without GPS:
+- 1 km selection radius, maximum 24 real candidates, minimum 125 m candidate spacing, round-robin between art / history / nature / culture.
+- Exclude explicit private, military, restricted, school, hazardous-status and incompatible-access POIs. All remaining POIs are nonetheless **remote-only**: OSM tagging is NOT pedestrian routing or on-site safety verification.
+- In sparse areas generate at least six **fictional Echo markers**, located on a globally fixed deterministic coordinate grid. These are not real-world targets.
+- 2D markers have distinct art/history/nature/culture prism shapes, subtle rings, and tap-to-read provenance; optional 3D renders colored physical extrusions, facets and bases anchored to real map coordinates.
+- '✦ Find places' requests nearby OpenStreetMap points **only on tap**, sending the approximate current viewed area to public Overpass. 12-second timeout; no more than one request per two minutes; read-only, max 400 source elements per request; no personal GPS trail persisted. This public endpoint is **for low-volume private testing only**, not for general release.
+- Overture Places *global batch provider* and OSM walking-network route safety checks are **not yet connected**; loading those reliably will require a prepared area dataset / controlled service. Do not describe these as already implemented.
+- Auto Atlas POI and extra Echo markers are **preview/discovery markers only**. They do not yet take part in attunement / weave / saving / multiplayer. The old 12 LIVE nodes remain functional.
+
+### Mobile QA
+1. In ordinary DEMO without granting GPS, pan 2D over Tampere and then another district: six Echo silhouettes should appear, stable when revisiting the same coordinates.
+2. Switch 3D; verify new shapes have physical world scale (no pixel-constant poles). Pan/rotate map and tap Echo. Ensure 2D still works after returning.
+3. Click ✦ Find places: approve the explicit query knowingly; inspect candidate count, labels, remote-only warning and 2-minute cooldown. If Overpass fails, Echo layer must remain.
+4. Start LIVE on a safe route: legacy 12 playable nodes, Lumen, 30 m pickup ring and directional marker must still work; extra public POIs must not offer directions.
+5. Reload PWA on Android and verify v0.8.1 assets are active; look for UI/button collisions at narrow screen sizes and performance issues.
+
+**Status:** Code-level syntax and selector smoke checks passed. Actual Android GPS/3D/Overpass network tests are not verified. Main branch intentionally remains unchanged.
