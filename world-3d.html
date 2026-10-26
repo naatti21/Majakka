@@ -61,7 +61,7 @@ const nodes=[
  {id:'square',name:'Quiet Square',lat:61.49772,lng:23.76018},
  {id:'harbor',name:'Southern Lantern',lat:61.49422,lng:23.76218}
 ];
-let map=null,lib=null,world=null,living=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false,personal=null;
+let map=null,lib=null,world=null,living=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false,personal=null,atlas=null;
 const makeMarker=(point,{kind='node',awake=false,temporary=false,callback=()=>{}}={})=>{
  const el=document.createElement('div');
  el.className='beacon'+(awake?' awake':'')+(temporary?' temporary':'')+(kind==='rift'?' rift':'')+(kind==='player'?' player':'');
@@ -114,6 +114,8 @@ function drawPhysicalWorld(points){
   filter:['==',['get','part'],'light-core'],
   paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],
          'fill-extrusion-base':0,'fill-extrusion-opacity':.78}});
+ map.addLayer({id:'majakka-node-facets',type:'fill-extrusion',source:'majakka-physical-facets',
+  paint:{'fill-extrusion-color':getColor,'fill-extrusion-height':['get','height'],'fill-extrusion-base':0,'fill-extrusion-opacity':.72}});
  map.addLayer({id:'majakka-core-glow',type:'circle',source:'majakka-physical-cores',
   paint:{'circle-color':getColor,'circle-radius':['interpolate',['linear'],['zoom'],12,3,15,13,18,25],
          'circle-opacity':.42,'circle-blur':.9,'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
@@ -133,7 +135,8 @@ function drawPhysicalWorld(points){
   const id=e.features?.[0]?.properties?.id;
   if(!id||id==='player'||id.startsWith('ambient-'))return;
   if(mode==='live'){
-   if(id==='veil')reply('live-rift-select');
+   if(id.startsWith('poi-')||id.startsWith('atlas-echo-'))reply('atlas-select',{id});
+   else if(id==='veil')reply('live-rift-select');
    else if(id.startsWith('echo-'))reply('live-node-select',{id});
    return;
   }
@@ -207,6 +210,7 @@ function showWorld(){
   points.push(live.rift);
   // v0.8: use personal field only; old position-following glimmers are retired.
   points.push(...(live.outer||[]));
+  if(atlas){points.push(...(atlas.real||[]),...(atlas.echoes||[]));}
   if(live.interference>0&&live.rift.kind!=='restored'){
    const G=globalThis.MajakkaSceneGeometry;
    haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
@@ -254,6 +258,7 @@ function receive(data){
  }else if(data.type==='world'){world=data.world||{};living=world.live||living;if(ready)showWorld();}
  else if(data.type==='living'){living=data.live||null;document.getElementById('pitch').hidden=Boolean(data.selected);if(ready&&mode==='live')showWorld();}
  else if(data.type==='lumen'){personal=data.personal||null;if(ready&&mode==='live')renderPersonal();}
+ else if(data.type==='atlas'){atlas=data.atlas||null;if(ready&&mode==='live')showWorld();}
  else if(data.type==='recenter'){
   if(!map||!ready)return;
   if(mode==='live'&&lastFix)centerLive();
