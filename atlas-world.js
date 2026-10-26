@@ -67,7 +67,7 @@ function render(){
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
 function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;layer.replaceChildren();button.textContent='✦ Find places';button.disabled=false;lastRequest=0;send();render();}
-function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};const c=anchorOf(fix);if(!anchor||L.meters(c,anchor)>450){anchor=c;source=[];queried=false;button.textContent='✦ Find places';}render();send();}
+function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};render();send();}
 function query(c){return '[out:json][timeout:12];('+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[tourism~"^(artwork|gallery|museum|viewpoint|attraction)$"];'+
  'nwr(around:1000,'+c.lat.toFixed(5)+','+c.lng.toFixed(5)+')[historic];'+
@@ -99,8 +99,8 @@ button.addEventListener('click',async()=>{
   if(active()){button.textContent='✦ Retry places';notifyUser('Place data unavailable. Global fictional Echo network remains visible.');}
  }finally{clearTimeout(timeout);querying=false;button.disabled=false;fetchAbort=null;}
 });
-window.addEventListener('majakka:livestart',()=>{reset();running=true;send();});
-window.addEventListener('majakka:livestop',reset);
+window.addEventListener('online',()=>{running=true;render();send();});
+window.addEventListener('majakka:livestop',()=>{fix=null;send();});
 window.addEventListener('majakka:livefix',onFix);
 window.addEventListener('majakka:mapready',()=>{render();send();});
 window.addEventListener('majakka:livingupdate',redraw);
