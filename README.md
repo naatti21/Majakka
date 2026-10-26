@@ -1,3 +1,28 @@
+# Majakka Solo Alpha v0.10.2 — current app (26 October 2026)
+
+Majakka is a **single-player, online-map Alpha**. It is intended to be deployed
+to the existing site from the repository's **main** branch. This is a prototype,
+not a production-ready shared multiplayer game.
+
+- GPS is optional and only anchors your avatar; you can play in any map region
+  remotely. No separate LIVE, DEMO or offline game mode.
+- Per-region virtual node progression, decode challenges, links and pulses run
+  locally in your browser. Fictional Auto Atlas Echoes can be awakened (0/2 → 2/2)
+  with 2 Lumen per action; both charge and wallet persist on this device.
+- Collect Lumen via GPS movement when allowed, or Channel Lumen from home.
+- 2D and 3D are views into the same solo map world. Real OSM places are
+  exploratory previews, not verified walking destinations.
+- The standalone Cloudflare multiplayer backend source is present but **not
+  configured or deployed**, and cannot block solo gameplay.
+- Online connection is required; no offline play mode or cached game shell.
+
+**Android browser, GPS accuracy, 3D performance and existing Pages hosting
+still require real-device verification.** See `ONE-WORLD-v0.9-QA.md`.
+
+The sections below retain earlier milestone notes for continuity.
+
+---
+
 # Majakka v0.10 — Shared Echo Alpha (draft, NOT deployed)
 
 **New milestone:** A separate, server-authoritative Echo node API and client bridge.
