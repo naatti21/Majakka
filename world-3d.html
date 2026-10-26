@@ -370,7 +370,7 @@ try {
  });
  map.touchZoomRotate.enableRotation();
  map.on('dragstart',()=>{userMoved=true;});
- map.on('moveend',()=>{if(ready){const c=map.getCenter();reply('camera-center',{center:[c.lng,c.lat]});}});
+ map.on('moveend',()=>{if(ready){const c=map.getCenter();reply('camera-center',{center:[c.lng,c.lat],zoom:map.getZoom()});}});
  map.on('rotate',()=>{if(ready&&mode==='live')renderPersonal();});
  map.on('load',()=>{
   applyNightPalette();
