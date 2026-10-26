@@ -161,3 +161,8 @@ Read [tests/atlas-import.test.mjs](./tests/atlas-import.test.mjs) for importer t
 ### Node Atlas 0B.1 — black map visibility hotfix
 
 After an Android screenshot showed a black map although at least one raster tile reported loaded, changed the overaggressive CSS inversion/brightness/contrast to a legible low-saturation night filter, and added an **Original map** toggle to show unfiltered OSM street tiles. The **Find OSM candidates** and test-area buttons now live in a sticky mobile toolbar instead of disappearing when the details panel scrolls. Revisit `atlas-review.html?rev=0b2` and verify real map tiles and candidate fetch. Pure JS DOM/mock checks passed; on-device CSS and network providers remain to be confirmed.
+
+
+## Node Atlas AutoGen v0.1 — RULE-BASED global node creation (design pivot)
+
+**Supersedes the earlier expectation that one human reviews every global POI.** The old `atlas-review.html` remains an optional inspection/debugging tool, **not** the route for building Majakka's world. A pure `atlas-autogen.js` engine selects fixed, spatially distributed, category-diverse real-world POI-derived candidates from normalized Overture/OSM inputs, filters restricted/private/sensitive features, requires affirmative public pedestrian-route evidence before any walk-up classification, and generates non-geolocated virtual Echoes for at-home play and sparse regions. The algorithm never assumes OSM/Overture POI existence equals safe public access. It does not make automatic network requests or publish photos. Read [Node Atlas AutoGen specification](docs/NODE-ATLAS-AUTOGEN-v0.1.md) and [autogen tests](tests/atlas-autogen.test.mjs). **The global Overture source feed, GIS path/access normalizer and in-game renderer have not yet been integrated.**

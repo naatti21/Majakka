@@ -167,3 +167,11 @@ User reported total map failure after v0.3.3. Restored live-field.js and live-fi
 - Fixed mobile scroll restoration and made the area/readout + Find/Tampere buttons sticky at the top of the review panel; map area uses ~40dvh instead of ~48dvh on phones.
 - Corrected the status message to "Street tiles received" rather than implying all geographic labels were visible. Cache-busted CSS/JS URLs.
 - Verified with a DOM-mocked Javascript review flow: 14/14 checks including filter, toggle, sticky toolbar, scroll reset, manual query, map pins, candidate details, copy report, source IDs, no GPS and no auto-publishing. **Actual Chrome Android after deployment still needs the user's observation**, including whether tile provider delivers data.
+
+
+## Node Atlas AutoGen v0.1 — 26 October 2026
+
+- Created `atlas-autogen.js`, `tests/atlas-autogen.test.mjs` and `docs/NODE-ATLAS-AUTOGEN-v0.1.md`.
+- In the model's JavaScript sandbox **12/12** pure rule tests passed: walk-up vs remote classification, no public-access inference from POI confidence, hard exclusions of private/school/track/motorway, missing/low confidence, meaningful node categories, no exact coordinates in remote gameplay output, deterministic input-order independence, spacing/dedupe, rural virtual Echo coverage, 1 km radius and parameter bounds.
+- Validation uses **synthetic normalized POI fixtures**, NOT extracted real Overture/OSM geography, and is **not** a proof of real-world safety. The GIS import/footway routing/access checks are an essential upstream dependency and are not yet coded.
+- Previous Node Atlas 0B manual viewer is now only an auxiliary inspection tool. The main LIVE v0.7 game remains unchanged until an automated area import and map UX test succeeds.
