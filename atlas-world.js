@@ -27,7 +27,7 @@ function paintConnections(sites){
 }
 const button=document.createElement('button');button.id='atlas-places';button.type='button';button.textContent='✦ Discover landmarks';button.setAttribute('aria-label','Discover named landmarks near the map center using OpenStreetMap. Sends the approximate map area to Overpass API.');button.title='Find a few named historic, natural and cultural landmarks. No procedural node spam.';document.body.append(button);
 const info=document.createElement('div');info.id='atlas-inspect';info.hidden=true;info.innerHTML='<button type="button" id="atlas-close" aria-label="Close place details">×</button><strong id="atlas-title"></strong><small id="atlas-meta"></small><p id="atlas-note"></p>';document.body.append(info);
-info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;});
+info.querySelector('#atlas-close').addEventListener('click',()=>{info.hidden=true;selected=null;document.body.classList.remove('landmark-selected');});
 const sharedButton=document.createElement('button');sharedButton.type='button';sharedButton.id='atlas-shared-attune';sharedButton.hidden=true;
 sharedButton.textContent='✧ Send shared resonance · 2';
 sharedButton.addEventListener('click',()=>{
@@ -88,7 +88,7 @@ function send(){window.dispatchEvent(new Event('majakka:atlasupdate'));}
 function inspect(id){
  const data=snapshot(),p=[...(data?.real||[]),...(data?.echoes||[])].find(x=>x.id===id);
  if(!p)return;
- selected=p.id;info.hidden=false;
+ selected=p.id;info.hidden=false;document.body.classList.add('landmark-selected');
  info.querySelector('#atlas-title').textContent=p.name;
 
  info.querySelector('#atlas-meta').textContent=p.type.toUpperCase()+' · LANDMARK · OSM';
@@ -130,7 +130,7 @@ function render(){
  for(const [id,el] of atlasElements)if(!seen.has(id)){el.remove();atlasElements.delete(id);}
 }
 const redraw=()=>{if(!active()||Date.now()-lastRendered<180)return;lastRendered=Date.now();render();};
-function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Discover landmarks';button.disabled=false;lastRequest=0;send();render();}
+function reset(){source=[];fix=null;anchor=null;queried=false;querying=false;selected=null;document.body.classList.remove('landmark-selected');fetchAbort?.abort();fetchAbort=null;info.hidden=true;clearAtlasElements();button.textContent='✦ Discover landmarks';button.disabled=false;lastRequest=0;send();render();}
 function onFix(e){if(!active())return;const d=e.detail||{};if(!Number.isFinite(d.lat)||!Number.isFinite(d.lng)||d.accuracy>65)return;fix={lat:d.lat,lng:d.lng};render();send();}
 /* A small, cached place-catalog pilot. No continuously polling API: one
    automatic lookup per new global cell, delayed until map movement settles.
@@ -199,7 +199,7 @@ async function loadSites(force=false){
  const requested=anchorOf(current);
  if(!requested)return;
  if(!anchor||cacheId(anchor)!==cacheId(requested)){
-  anchor=requested;queried=false;source=[];selected=null;info.hidden=true;
+  anchor=requested;queried=false;source=[];selected=null;document.body.classList.remove('landmark-selected');info.hidden=true;
   clearAtlasElements();paintConnections([]);render();send();
  }
  const key=cacheId(requested),entry=cache[key];
