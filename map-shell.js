@@ -15,7 +15,7 @@
  const pips=el('lumen-pips');function update(){const match=(pips?.getAttribute('aria-label')||'').match(/\d+/g);charge.textContent=match?.length>=2?'✧ '+match[0]+' / '+match[1]:'✧ Lumen';}
  if(pips){new MutationObserver(update).observe(pips,{attributes:true,attributeFilter:['aria-label'],childList:true});update();}
  el('world-markers')?.addEventListener('click',e=>{if(e.target.closest('.node-marker'))show('node');});
- const tip=document.createElement('div');tip.id='map-intro';tip.innerHTML='<button type="button" aria-label="Dismiss tip">×</button><strong>FIRST LIGHT · DEMO</strong>Tap a glowing node to interact.';tip.querySelector('button').addEventListener('click',()=>tip.hidden=true);document.body.append(tip);
+ const tip=document.createElement('div');tip.id='map-intro';tip.innerHTML='<button type="button" aria-label="Dismiss tip">×</button><strong>ONE CONNECTED WORLD</strong>Tap a signal or pan the map. GPS is optional.';tip.querySelector('button').addEventListener('click',()=>tip.hidden=true);document.body.append(tip);
  document.addEventListener('keydown',e=>{if(e.key==='Escape')show('');});
  window.addEventListener('resize',()=>{try{if(typeof map!=='undefined'&&map)map.resize();if(typeof drawWorld==='function')drawWorld();}catch(e){console.warn('Map resize',e);}});
 })();
