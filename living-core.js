@@ -36,7 +36,7 @@
    const bearing=angle+i*(Math.PI*2/3)+(random()-.5)*.38;
    const radius=base+(random()-.5)*90;
    const north=Math.cos(bearing)*radius,east=Math.sin(bearing)*radius;
-   return {...addMeters(origin,north,east),id:'echo-'+i,name:names[(hash32(cell.id+':name')+i*3)%names.length],kind:'node',level:0};
+   return {...addMeters(origin,north,east),id:'echo-'+i,name:names[(hash32(cell.id+':name')+i*3)%names.length],kind:'node',level:0,archetype:['art','history','nature','culture'][i%4]};
   });
   // Keep the original three deterministic nodes intact for existing saved progress.
   // Add nine stable beacons with varied distances and bearings; enforce a spatial gap.
@@ -48,7 +48,7 @@
     candidate=addMeters(origin,Math.cos(theta)*radius,Math.sin(theta)*radius);
     if(nodes.every(n=>meters(n,candidate)>=135))break;
    }
-   nodes.push({...candidate,id:'echo-'+i,name:names[(hash32(cell.id+':new-name')+i*5)%names.length],kind:'node',level:0});
+   nodes.push({...candidate,id:'echo-'+i,name:names[(hash32(cell.id+':new-name')+i*5)%names.length],kind:'node',level:0,archetype:['art','history','nature','culture'][i%4]});
   }
   const riftBearing=angle+Math.PI*.53,riftDistance=230+random()*180;
   const rift={...addMeters(origin,Math.cos(riftBearing)*riftDistance,Math.sin(riftBearing)*riftDistance),id:'veil',name:'Interference Veil',kind:'rift'};
