@@ -119,3 +119,6 @@ body.journal-open #living-report{display:block}
 
 /* Larger world: link selection must scroll rather than cover the whole map. */
 #living-link-targets{max-height:40vh;overflow-y:auto}
+
+/* v0.8: old simulated sparks are retired; personal location-stable Lumen is drawn by lumen-world.js. */
+body.live-gps .living-point.lumen,body.live-gps .living-glimmer{display:none!important}
