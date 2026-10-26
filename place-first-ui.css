@@ -1,0 +1,71 @@
+/* Majakka v0.11.2 — one mobile HUD instead of layered prototype UI. */
+body.place-first{--navh:66px}
+body.place-first .map-bar{display:none!important}
+body.place-first .map-legend,body.place-first .pulse-badge{display:none!important}
+body.place-first .prototype-chip{display:none!important}
+body.place-first .topbar{height:calc(57px + env(safe-area-inset-top,0px))!important;
+ background:linear-gradient(180deg,rgba(2,8,13,.93),rgba(2,8,13,.18))!important}
+body.place-first #perspective-toggle{
+ top:calc(75px + env(safe-area-inset-top,0px))!important;left:13px!important;
+ min-width:65px;height:44px;border-radius:22px;z-index:35!important}
+body.place-first .map-right{
+ top:calc(75px + env(safe-area-inset-top,0px))!important;right:13px!important}
+body.place-first #hud-lumen{
+ top:calc(132px + env(safe-area-inset-top,0px))!important;right:13px!important;
+ min-width:70px;text-align:center;padding:8px 10px}
+body.place-first #live-toggle{
+ top:calc(180px + env(safe-area-inset-top,0px))!important;right:13px!important;
+ min-width:94px;height:41px;border-radius:21px;padding:0 12px;max-width:160px;z-index:27!important;
+ white-space:nowrap}
+body.place-first #atlas-places{
+ top:calc(230px + env(safe-area-inset-top,0px))!important;right:13px!important;
+ min-height:41px;max-width:180px;padding:8px 11px;border-radius:21px;
+ background:#0b2330f1;color:#e2e7dc;z-index:27!important;
+ text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+body.place-first #live-readout{position:fixed;z-index:30!important;
+ bottom:calc(161px + env(safe-area-inset-bottom,0px))!important;
+ left:12px!important;width:min(58vw,235px)!important;
+ padding:7px 9px!important;font-size:9px!important;line-height:1.3;box-shadow:none!important}
+body.place-first #live-readout strong{font-size:9px!important;margin:0!important}
+body.place-first #live-readout[hidden]{display:none!important}
+body.place-first #landmark-mission{
+ position:fixed;left:12px!important;right:12px!important;max-width:none!important;
+ bottom:calc(137px + env(safe-area-inset-bottom,0px))!important;
+ padding:8px 11px!important;min-height:0;border-radius:12px;
+ background:#061218ee;line-height:1.45;font-size:10px!important;
+ z-index:21!important;box-shadow:none!important}
+body.place-first #world-channel{
+ right:12px!important;bottom:calc(84px + env(safe-area-inset-bottom,0px))!important;
+ min-height:42px;max-width:180px;padding:7px 13px!important;
+ z-index:27!important;white-space:nowrap}
+body.place-first #landmark-summary{bottom:calc(83px + env(safe-area-inset-bottom,0px))!important}
+body.place-first #atlas-inspect{
+ left:12px!important;right:12px!important;bottom:calc(82px + env(safe-area-inset-bottom,0px))!important;
+ max-width:420px;margin:0 auto;border-radius:15px;padding:13px 43px 12px 14px;
+ z-index:38!important;max-height:min(43dvh,330px);overflow:auto}
+body.place-first.landmark-selected #landmark-mission,
+body.place-first.landmark-selected #world-channel,
+body.place-first.landmark-selected #atlas-places,
+body.place-first.field-open #landmark-mission,
+body.place-first.journal-open #landmark-mission{display:none!important}
+body.place-first.field-open #world-channel,
+body.place-first.journal-open #world-channel,
+body.place-first.field-open #atlas-places,
+body.place-first.journal-open #atlas-places{display:none!important}
+body.place-first .map-bottom-nav{z-index:36}
+body.place-first .map-credit{bottom:calc(72px + env(safe-area-inset-bottom,0px))!important;
+ right:8px!important;opacity:.7}
+body.place-first #map-load-status{
+ top:calc(292px + env(safe-area-inset-top,0px))!important;
+ left:12px;max-width:min(70vw,260px)}
+/* Do not let controls cover all landmarks on short/landscape screens. */
+@media(max-height:690px){
+ body.place-first #landmark-mission{bottom:calc(88px + env(safe-area-inset-bottom,0px))!important;
+  left:12px!important;right:calc(50vw - 8px)!important;font-size:9px!important}
+ body.place-first #world-channel{bottom:calc(91px + env(safe-area-inset-bottom,0px))!important}
+ body.place-first #atlas-places{top:calc(222px + env(safe-area-inset-top,0px))!important}
+}
+@media(max-width:355px){
+ body.place-first #atlas-places{max-width:154px;font-size:10px}
+ body.place-first #landmark-mission{font-size:9px!important}
+}
