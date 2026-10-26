@@ -73,7 +73,7 @@ if(data.accuracy<=25)firstFix=false;
 draw();emit();
 }
 const clear=()=>{claims=new Set();claimsDay=DAY();save();draw();emit(true);};
-const snapshot=()=>{if(stopped||!fix)return null;const all=Core.cells(fix,seed,990).filter(p=>!claims.has(p.id));const stride=Math.max(1,Math.ceil(all.length/450));return {points:all.filter((_,i)=>i%stride===0).slice(0,450).map(({lat,lng,size})=>({lat,lng,size})),fix:{...fix},heading,range:Core.PICKUP};};
+const snapshot=(viewCenter=null)=>{if(stopped||!fix)return null;const center=Core.valid(viewCenter)?viewCenter:fix;const all=Core.cells(center,seed,990).filter(p=>!claims.has(p.id));const stride=Math.max(1,Math.ceil(all.length/450));return {points:all.filter((_,i)=>i%stride===0).slice(0,450).map(({lat,lng,size})=>({lat,lng,size})),fix:{...fix},heading,range:Core.PICKUP};};
 globalThis.MajakkaLumen={snapshot,clear};
 window.addEventListener('majakka:livestart',begin);
 window.addEventListener('majakka:livestop',finish);
