@@ -122,3 +122,13 @@ body.journal-open #living-report{display:block}
 
 /* v0.8: old simulated sparks are retired; personal location-stable Lumen is drawn by lumen-world.js. */
 body.live-gps .living-point.lumen,body.live-gps .living-glimmer{display:none!important}
+
+/* v0.8.1 — carved/faceted node silhouettes instead of identical luminous posts. */
+.living-point.trial i,.living-point.awake i,.living-point.corrupted i{width:19px;height:23px;border-radius:2px;transform:translateY(-5px);border:1px solid #d8fff2a6;background:linear-gradient(130deg,#dcfff3,#2c7f87 43%,#0d2638 90%);
+ box-shadow:0 0 0 11px #60c7aa1c,0 0 21px 4px #6fdfc36b}
+.living-point.art i{clip-path:polygon(50% 0,97% 40%,75% 100%,25% 100%,3% 40%);transform:translateY(-6px) rotate(16deg);background:linear-gradient(120deg,#f5dcff,#9974c9,#13334e)}
+.living-point.history i{clip-path:polygon(50% 0,92% 22%,86% 87%,50% 100%,14% 87%,8% 22%);background:linear-gradient(100deg,#ffe6ad,#bd9254,#123443)}
+.living-point.nature i{clip-path:polygon(50% 0,80% 27%,100% 51%,77% 79%,50% 100%,23% 79%,0 51%,20% 27%);background:linear-gradient(115deg,#e0ffe3,#69ae91,#11403f)}
+.living-point.culture i{clip-path:polygon(50% 0,90% 16%,97% 76%,50% 100%,3% 76%,10% 16%);background:linear-gradient(120deg,#e1feff,#65b4c2,#18355b)}
+.living-point.awake i{filter:brightness(1.15) sepia(.15);box-shadow:0 0 0 12px #ecc6812c,0 0 25px 6px #f3d795b0}
+.living-point.trial::before,.living-point.awake::before{content:'';position:absolute;left:50%;top:12px;transform:translateX(-50%) rotateX(72deg);width:34px;height:34px;border-radius:50%;border:1px solid #9ce8d15c;box-shadow:0 0 11px #6dbba359;pointer-events:none}
