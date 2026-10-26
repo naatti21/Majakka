@@ -71,6 +71,39 @@ function visibleField(center,seed,{zoom=15,width=390,height=700,pitch=0,max=240}
  }
  return points;
 }
+/* Screen-space balanced sampling of fixed WORLD cells.
+   Pan does not re-seed points: each LOD block owns one fixed 140m-cell grain.
+   The lattice exists everywhere; no centered disc and no abrupt cloud edge.
+   Zooming out shows a stable sparse subset, never all nearby grains clustered. */
+function field(center,worldSeed,{zoom=15,width=390,height=700,pitch=0}={}){
+ if(!valid(center)||typeof worldSeed!=='string'||worldSeed.length<16)return[];
+ const z=Math.max(3,Math.min(19,Number(zoom)||15));
+ const W=Math.max(100,Math.min(2400,Number(width)||390)),H=Math.max(100,Math.min(2400,Number(height)||700));
+ const mercPixels=2*PI*EARTH/(256*2**z);
+ const depth=Math.max(1,Math.min(4,1+Math.max(0,Number(pitch)||0)/24));
+ const halfW=W*mercPixels*.65,halfH=H*mercPixels*.65*depth;
+ const centerXY=merc(center),areaW=2*halfW,areaH=2*halfH;
+ let factor=1;
+ while(areaW*areaH/(CELL*CELL*factor*factor)>145&&factor<65536)factor*=2;
+ const step=CELL*factor,seed=String(worldSeed);
+ const x0=Math.floor((centerXY.x-halfW)/step),x1=Math.ceil((centerXY.x+halfW)/step);
+ const y0=Math.floor((centerXY.y-halfH)/step),y1=Math.ceil((centerXY.y+halfH)/step);
+ const out=[];
+ for(let gx=x0;gx<=x1;gx++)for(let gy=y0;gy<=y1;gy++){
+  const r=random(hash(seed+'|LOD|'+gx+'|'+gy+'|'+factor));
+  const bx=gx*factor+Math.floor(r()*factor);
+  const by=gy*factor+Math.floor(r()*factor);
+  const rand=random(hash(seed+'|'+bx+'|'+by));
+  rand(); // skip the cell's original 1-or-2 count decision
+  const px=(bx+.1+rand()*.8)*CELL,py=(by+.1+rand()*.8)*CELL;
+  const pos=unmerc(px,py);
+  if(!valid(pos)||px<centerXY.x-halfW||px>centerXY.x+halfW||py<centerXY.y-halfH||py>centerXY.y+halfH)continue;
+  const roll=rand(),size=roll<.72?'dust':roll<.95?'glow':'heart';
+  const id=hash(seed+'|claim|'+bx+'|'+by+'|0').toString(36);
+  out.push({...pos,id,size,value:size==='heart'?3:size==='glow'?2:1,x:px,y:py});
+ }
+ return out.sort((a,b)=>a.id.localeCompare(b.id));
+}
 function segmentDistance(p,a,b){const px=p.x-a.x,py=p.y-a.y,dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,(px*dx+py*dy)/(dx*dx+dy*dy||1)));return Math.hypot(px-t*dx,py-t*dy);}
 function pickups(points,from,to,{accuracy=Infinity,accepted=false,firstFix=false,claimed=new Set(),radius=PICKUP}={}){
 if(!valid(to)||accuracy>35||accuracy<0||(!accepted&&!firstFix))return[];
