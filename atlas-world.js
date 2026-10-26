@@ -108,4 +108,6 @@ window.addEventListener('resize',redraw);
 window.addEventListener('majakka:atlasselect',e=>{if(active())inspect(e.detail?.id);});
 let loops=0;const attach=()=>{if(typeof map!=='undefined'&&map?.on)map.on('move',redraw);else if(loops++<30)setTimeout(attach,500);};attach();
 globalThis.MajakkaAtlas={snapshot,select:inspect};
+// Map startup may have completed before this deferred module attached.
+setTimeout(()=>{render();send();},650);
 })();
