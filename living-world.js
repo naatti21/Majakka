@@ -432,6 +432,11 @@ globalThis.MajakkaLiving={
  snapshot:()=>world&&isActive()?{projection:{...L.projection(progress,world),lumen:L.energyField(position)},position:position?{...position}:null}:null,
  eraseFields,
  award,
+ balance:()=>Number.isFinite(state?.lumen)?state.lumen:0,
+ spend:amount=>{
+  if(!Number.isSafeInteger(amount)||amount<=0||!isActive()||state.lumen<amount)return false;
+  state.lumen-=amount;save();render();emit();return true;
+ },
  navigate:point=>{if(!point||!isActive()||switching)return;try{if(!world||L.region(point).id!==activeRegion)void create(point);}catch{}},
  select:choose,collect,restore:()=>{close();resetWorld();}
 };
