@@ -61,7 +61,7 @@ const nodes=[
  {id:'square',name:'Quiet Square',lat:61.49772,lng:23.76018},
  {id:'harbor',name:'Southern Lantern',lat:61.49422,lng:23.76218}
 ];
-let map=null,lib=null,world=null,living=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false;
+let map=null,lib=null,world=null,living=null,ready=false,mode='demo',lastFix=null,firstLiveCenter=false,markers=[],selectedId=null,terrainReady=false,userMoved=false,personal=null;
 const makeMarker=(point,{kind='node',awake=false,temporary=false,callback=()=>{}}={})=>{
  const el=document.createElement('div');
  el.className='beacon'+(awake?' awake':'')+(temporary?' temporary':'')+(kind==='rift'?' rift':'')+(kind==='player'?' player':'');
@@ -158,6 +158,35 @@ function drawAerialLinks(pairs){
     'fill-extrusion-height':['get','height'],'fill-extrusion-opacity':.70}});
  aerialLayersReady=true;
 }
+
+/* v0.8 personal field: GPU sparks and meter-scaled collection/arrow. */
+function renderPersonal(){
+ if(!map||!ready)return;
+ const fc=features=>({type:'FeatureCollection',features});
+ const update=(id,features)=>{const src=map.getSource(id),data=fc(features);if(src)src.setData(data);else map.addSource(id,{type:'geojson',data});};
+ const features=(personal?.points||[]).map(p=>({type:'Feature',properties:{size:p.size||'dust'},geometry:{type:'Point',coordinates:[p.lng,p.lat]}}));
+ update('personal-sparks',features);
+ if(!map.getLayer('personal-sparks-glow')){
+  map.addLayer({id:'personal-sparks-glow',type:'circle',source:'personal-sparks',paint:{'circle-color':'#ebc588','circle-radius':['match',['get','size'],'heart',16,'glow',9,5],'circle-opacity':.17,'circle-blur':.85}});
+  map.addLayer({id:'personal-sparks-points',type:'circle',source:'personal-sparks',paint:{'circle-color':'#f9dfaa','circle-radius':['match',['get','size'],'heart',6,'glow',3,1.5],'circle-opacity':['match',['get','size'],'heart',.94,'glow',.65,.30],'circle-pitch-alignment':'map','circle-pitch-scale':'map'}});
+ }
+ const fix=personal?.fix,geom=globalThis.MajakkaSceneGeometry;
+ update('personal-radius',fix&&geom?[{type:'Feature',properties:{},geometry:geom.circle(fix,personal.range||30)}]:[]);
+ if(!map.getLayer('personal-radius-fill')){
+  map.addLayer({id:'personal-radius-fill',type:'fill',source:'personal-radius',paint:{'fill-color':'#67e2ce','fill-opacity':.06}});
+  map.addLayer({id:'personal-radius-edge',type:'line',source:'personal-radius',paint:{'line-color':'#a4f6e1','line-width':1.3,'line-opacity':.7}});
+ }
+ const arrow=[];
+ if(fix){
+  const a=(Number.isFinite(personal.heading)?personal.heading:map.getBearing())*Math.PI/180;
+  const dx=Math.sin(a),dy=Math.cos(a),scale=111320*Math.max(.15,Math.cos(fix.lat*Math.PI/180));
+  const vertex=(f,s)=>[fix.lng+(f*dx+s*dy)/scale,fix.lat+(f*dy-s*dx)/111320];
+  arrow.push({type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[vertex(18,0),vertex(-2,9),vertex(-2,4),vertex(-12,4),vertex(-12,-4),vertex(-2,-4),vertex(-2,-9),vertex(18,0)]]}});
+ }
+ update('personal-arrow',arrow);
+ if(!map.getLayer('personal-arrow-solid'))map.addLayer({id:'personal-arrow-solid',type:'fill-extrusion',source:'personal-arrow',paint:{'fill-extrusion-color':'#83f0d9','fill-extrusion-height':5,'fill-extrusion-base':0,'fill-extrusion-opacity':.97}});
+}
+
 function showWorld(){
  if(!map||!ready)return;
  document.getElementById('hint').textContent=mode==='live'?'VIRTUAL NODES · personal preview only':'Drag ↕ to tilt · two fingers to rotate';
@@ -182,7 +211,7 @@ function showWorld(){
    const G=globalThis.MajakkaSceneGeometry;
    haze.push({type:'Feature',properties:{},geometry:G.circle(live.rift,80+live.interference*34)});
   }
-  if(lastFix)points.push({id:'player',name:'You',...lastFix,kind:'player'});
+  if(lastFix&&!personal)points.push({id:'player',name:'You',...lastFix,kind:'player'});
   for(const ids of (live.fields||[]).slice(0,18)){
    const vertices=ids.map(id=>live.nodes.find(n=>n.id===id)).filter(Boolean);
    if(vertices.length!==3)continue;
@@ -200,6 +229,7 @@ function showWorld(){
  updateGeoJSON('majakka-haze',haze,'haze');
  updateGeoJSON('majakka-field',fieldFeatures,'field');
  updateGeoJSON('majakka-threads',lines,'line');
+ renderPersonal();
 }
 function receive(data){
  if(data.type==='init'){
@@ -223,6 +253,7 @@ function receive(data){
   }
  }else if(data.type==='world'){world=data.world||{};living=world.live||living;if(ready)showWorld();}
  else if(data.type==='living'){living=data.live||null;document.getElementById('pitch').hidden=Boolean(data.selected);if(ready&&mode==='live')showWorld();}
+ else if(data.type==='lumen'){personal=data.personal||null;if(ready&&mode==='live')renderPersonal();}
  else if(data.type==='recenter'){
   if(!map||!ready)return;
   if(mode==='live'&&lastFix)centerLive();
@@ -286,6 +317,7 @@ try {
  });
  map.touchZoomRotate.enableRotation();
  map.on('dragstart',()=>{userMoved=true;});
+ map.on('rotate',()=>{if(ready&&mode==='live'&&personal?.heading==null)renderPersonal();});
  map.on('load',()=>{
   ready=true;try{showWorld();hide();reply('ready');}catch(error){console.warn('3D geometry unavailable',error);reply('error',{message:String(error?.message||error)});return;}
   // Enhancement only: loss of a terrain service must not blank the base map.
