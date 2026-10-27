@@ -1,0 +1,66 @@
+{
+  "version": "fixture-worldwide-v1",
+  "fixtureOnly": true,
+  "sites": [
+    {
+      "id": "test:global:tampere",
+      "kind": "test_site",
+      "category": "Nature",
+      "name": "Synthetic global A — Finland",
+      "geo": {
+        "latitude": 61.5,
+        "longitude": 23.7
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:global:rome",
+      "kind": "test_site",
+      "category": "History",
+      "name": "Synthetic global B — Italy",
+      "geo": {
+        "latitude": 41.89,
+        "longitude": 12.49
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:global:newyork",
+      "kind": "test_site",
+      "category": "Art",
+      "name": "Synthetic global C — USA",
+      "geo": {
+        "latitude": 40.689,
+        "longitude": -74.045
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:global:dateline-west",
+      "kind": "test_site",
+      "category": "Culture",
+      "name": "Synthetic dateline west",
+      "geo": {
+        "latitude": 0,
+        "longitude": 179.5
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:global:dateline-east",
+      "kind": "test_site",
+      "category": "Culture",
+      "name": "Synthetic dateline east",
+      "geo": {
+        "latitude": 0,
+        "longitude": -179.5
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    }
+  ]
+}
