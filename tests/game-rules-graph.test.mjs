@@ -357,6 +357,7 @@ test('committing the final transatlantic edge closes a canonical Tampereâ€“Romeâ
  assert.deepEqual(final.result.newFieldIds,[expected]);
  assert.ok(s.fields[expected]);
  assert.equal(FIELD_AREA_LUMEN,0);
- const replay=act(s,'w'+(Number(final.result.stage==='align')||0),'a','n','anchor','helper0');
- assert.equal(replay.state.fields[expected].id,expected);
+ const late=act(s,'late','a','n','anchor','helper1');
+ assert.equal(late.result.code,'LINK_ALREADY_COMMITTED');
+ assert.equal(late.state.fields[expected].id,expected);
 });
