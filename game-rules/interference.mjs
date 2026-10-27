@@ -4,7 +4,7 @@ import config from './balance-config.json' with {type:'json'};
 import {spendLumen} from './wallet.mjs';
 import {linkId} from './identity.mjs';
 import {isCommitted} from './field.mjs';
-import {eventPhase,utcMs,canonicalId} from './events.mjs';
+import {eventPhase,utcMs,canonicalId,SIGNAL_MS} from './events.mjs';
 const P=config.parameters, DAY=24*3600000;
 export const FIELD_ROLES=Object.freeze(['Beacon','Shelter','Lens']);
 export const RESPONSES=Object.freeze(['STABILIZE','INVESTIGATE','REROUTE','IGNORE']);
@@ -28,13 +28,14 @@ export function setFieldFocus(state,{actorId,fieldId,role,nowMs}){
  const player=state.players[who],focuses=player.fieldFocuses||{};
  const before=focuses[which]??null;
  if(before===role)return {state,result:{ok:true,code:'FOCUS_UNCHANGED',role}};
- if(effects(state,which,now).some(x=>x.phase==='Interference'))
+ if(before!==null&&effects(state,which,now).some(x=>x.phase==='Interference'))
   return {state,result:{ok:false,code:'FOCUS_LOCKED_DURING_INTERFERENCE'}};
  if(role!==null&&before===null&&Object.keys(focuses).length>=P.focus_slots)
   return {state,result:{ok:false,code:'FOCUS_LIMIT'}};
  const next={...focuses};
  if(role===null)delete next[which];else next[which]=role;
- return {state:{...state,players:{...state.players,[who]:{...player,fieldFocuses:next}}},
+ return {state:{...state,players:{...state.players,[who]:{...player,fieldFocuses:next,
+   fieldFocusChosenAtMs:{...(player.fieldFocusChosenAtMs||{}),[which]:now}}}},
   result:{ok:true,code:'FOCUS_SET',role,fieldId:which}};
 }
 export function fieldSignalQuality(state,actorId,fieldId,nowMs){
@@ -42,7 +43,9 @@ export function fieldSignalQuality(state,actorId,fieldId,nowMs){
  if(!state.players?.[who]||!state.fields?.[which])
   throw new RangeError('Known actor and committed field required');
  const player=state.players[who],items=effects(state,which,now);
- const shielded=player.fieldFocuses?.[which]==='Shelter'?items[0]?.id??null:null;
+ const chosenAt=player.fieldFocusChosenAtMs?.[which]??0;
+ const shielded=player.fieldFocuses?.[which]==='Shelter'?
+  items.find(item=>chosenAt<=item.start+SIGNAL_MS)?.id??null:null;
  const breakdown=items.map(item=>{
   const shieldedThis=shielded===item.id;
   const expired=player.reroutes?.[rerouteKey(item.id,which)]??null;
