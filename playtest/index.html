@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#091016">
+<meta name="description" content="Majakka – First Light. The Missing Beat: isolated interactive mobile research playtest.">
+<title>Majakka · The Missing Beat [Gate 2 playtest]</title>
+<link rel="stylesheet" href="./playtest.css">
+</head>
+<body>
+<main class="app">
+ <header class="topbar">
+  <div class="brand">
+   <div class="brand-mark" aria-hidden="true">✧</div>
+   <div><div class="brand-word">MAJAKKA</div><div class="brand-small">FIRST LIGHT · EXPERIMENT 01</div></div>
+  </div>
+  <div class="credits" aria-label="Playtest Lumen balance"><span aria-hidden="true">◈</span><span id="lumen-count" class="count">6</span><span>L</span></div>
+ </header>
+ <div class="label-row"><div class="kicker">THE MISSING BEAT</div><div class="step">STEP <span id="step-count">1 / 5</span></div></div>
+ <h1>Listen to the light.</h1>
+ <p class="lead">A second signal appears along one route. Observe the field, choose your method, and explain the delay.</p>
+ <div class="progress-track" aria-hidden="true"><div id="progress-fill" class="progress-fill" style="width:0"></div></div>
+ <section class="mapframe" aria-label="Schematic three-node signal network">
+  <div class="map-head"><span class="micro">THREE-NODE FIELD · SIMULATION</span><span class="map-state" id="map-label">ARCHIVED SIGNAL</span></div>
+  <div class="svg-holder">
+   <svg class="route-map" viewBox="0 0 360 216" role="img" aria-labelledby="network-title network-desc">
+    <title id="network-title">Triangle field: A, B and C</title>
+    <desc id="network-desc">Three preconstructed test links connect A to B, B to C, and A directly to C. The optional route through B adds a delayed signal.</desc>
+    <defs><radialGradient id="halo" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#a68ad0" stop-opacity=".2"/><stop offset="1" stop-color="#a68ad0" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="183" cy="113" rx="164" ry="101" fill="url(#halo)"/>
+    <path class="region" d="M51 164 Q150 77 177 34 Q250 63 310 165 Q180 212 51 164 Z"/>
+    <path id="thread-ab" class="thread" d="M51 164 Q97 85 177 34"/>
+    <path id="thread-bc" class="thread" d="M177 34 Q267 81 310 165"/>
+    <path id="thread-ac" class="thread" d="M51 164 Q180 187 310 165"/>
+    <path class="noise" d="M153 80 Q186 106 216 93"/>
+    <g><circle class="node-ring" cx="51" cy="164" r="14"/><circle class="node-core" cx="51" cy="164" r="4"/><text class="node-label" x="50" y="143" text-anchor="middle">A</text><text class="node-caption" x="51" y="193" text-anchor="middle">SOURCE</text></g>
+    <g><circle class="node-ring" cx="177" cy="34" r="14"/><circle class="node-core" cx="177" cy="34" r="4"/><text class="node-label" x="176" y="11" text-anchor="middle">B</text><text class="node-caption" x="179" y="65" text-anchor="middle">RELAY</text></g>
+    <g><circle class="node-ring" cx="310" cy="165" r="14"/><circle class="node-core" cx="310" cy="165" r="4"/><text class="node-label" x="310" y="144" text-anchor="middle">C</text><text class="node-caption" x="309" y="194" text-anchor="middle">RECEIVER</text></g>
+   </svg>
+  </div>
+  <div class="map-footer">Schematic routes, not a geographic map. All three anchors are synthetic test data. The anomaly is archived: there is no live countdown or location requirement.</div>
+ </section>
+ <div id="feedback" aria-live="polite"></div>
+ <div id="game"></div>
+ <footer class="bottombar"><span id="storage-status">Private local playtest • No GPS</span><button type="button" class="secondary" id="reset">↺ Reset test</button></footer>
+ <p class="quiet">Development playtest · Real Majakka rules engine, fictional authored signals. Does not affect the public Majakka world. No account required.</p>
+</main>
+<script type="module" src="./ui.mjs"></script>
+</body>
+</html>
