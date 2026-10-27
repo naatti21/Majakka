@@ -1,0 +1,44 @@
+{
+  "version": "fixture-rural-v1",
+  "fixtureOnly": true,
+  "sites": [
+    {
+      "id": "test:rural:phenomenon",
+      "kind": "regional_phenomenon",
+      "category": "Regional",
+      "name": "Fictional regional signal — test",
+      "geo": {
+        "latitude": 64.8,
+        "longitude": 26.3
+      },
+      "safetyClass": "remote_only",
+      "walkable": false,
+      "regionId": "fixture:region:rural-a",
+      "fictionLabel": "Fictional regional signal"
+    },
+    {
+      "id": "test:rural:remote-b",
+      "kind": "test_site",
+      "category": "Nature",
+      "name": "Synthetic remote B",
+      "geo": {
+        "latitude": 64.96,
+        "longitude": 26.3
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:rural:remote-c",
+      "kind": "test_site",
+      "category": "History",
+      "name": "Synthetic remote C",
+      "geo": {
+        "latitude": 65.02,
+        "longitude": 26.3
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    }
+  ]
+}
