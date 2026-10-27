@@ -123,10 +123,10 @@ export function applyInterferenceAction(state,action){
    return {state,result:{ok:false,code:'NOT_ACTIVE_OR_ALREADY_RESOLVED'}};
   if(!state.fields?.[fieldId]||state.fields[fieldId].status!=='Committed')
    return {state,result:{ok:false,code:'UNKNOWN_FIELD'}};
-  if(!player.fieldFocuses?.[fieldId])
-   return {state,result:{ok:false,code:'FOCUS_REQUIRED'}};
   if(!event.fieldImpacts.some(x=>x.fieldId===fieldId))
    return {state,result:{ok:false,code:'FIELD_NOT_AFFECTED'}};
+  if(!player.fieldFocuses?.[fieldId])
+   return {state,result:{ok:false,code:'FOCUS_REQUIRED'}};
   const key=rerouteKey(eventId,fieldId),until=player.reroutes?.[key];
   if(Number.isSafeInteger(until)&&until>now)
    return {state,result:{ok:false,code:'ALREADY_REROUTED'}};
