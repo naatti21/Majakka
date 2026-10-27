@@ -1,0 +1,65 @@
+{
+  "id": "the-missing-beat",
+  "version": "0.1-fixture",
+  "fixtureOnly": true,
+  "title": "The Missing Beat",
+  "fictionNotice": "Fictional signal case. The coordinates are synthetic reference anchors, not claims about real locations.",
+  "question": "Why does the second pulse arrive late only when the signal passes through node B?",
+  "anchors": {
+    "a": "test:tampere:a",
+    "b": "test:tampere:b",
+    "c": "test:tampere:c"
+  },
+  "fieldRequirements": [
+    "A–B",
+    "B–C",
+    "A–C"
+  ],
+  "hypothesisOptions": [
+    {
+      "id": "route_echo",
+      "label": "The existing route repeats the signal"
+    },
+    {
+      "id": "local_noise",
+      "label": "Local interference creates an unrelated pulse"
+    },
+    {
+      "id": "hidden_source",
+      "label": "A fourth source is secretly transmitting"
+    }
+  ],
+  "roles": [
+    {
+      "id": "Lens",
+      "effect": "Separate overlapping pulses from the B detour; the source signature becomes readable"
+    },
+    {
+      "id": "Shelter",
+      "effect": "Create a clean 100% reference; compare direct and detour paths"
+    },
+    {
+      "id": "Beacon",
+      "effect": "Show where the delay starts; a second observation is still needed"
+    }
+  ],
+  "outcome": {
+    "findingId": "finding:the-missing-beat:route-echo",
+    "methodUnlock": "Echo Differentiation",
+    "nextQuestion": "Does the same route-dependent echo appear beyond the home region?"
+  },
+  "authoredEvidence": {
+    "direct": {
+      "signalCount": 1,
+      "delayMs": 0,
+      "frequency": "low",
+      "label": "One clean pulse on A–C"
+    },
+    "via_b": {
+      "signalCount": 2,
+      "delayMs": 300,
+      "frequency": "low",
+      "label": "A second pulse follows the A–B–C route"
+    }
+  }
+}

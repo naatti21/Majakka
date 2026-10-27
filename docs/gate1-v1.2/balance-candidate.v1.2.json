@@ -1,0 +1,102 @@
+{
+  "schema": "majakka-gate1-candidate-1.2",
+  "status": "CANDIDATE_FOR_TESTING_NOT_APPROVED",
+  "derived_from": "Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json",
+  "supersedes_for_gate1": "Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config",
+  "version": "1.2.0",
+  "parameters": {
+    "schema": "majakka-balance-proposal-1.2",
+    "status": "PROVISIONAL_GATE1",
+    "node_progress_threshold": 1.0,
+    "wallet_start": 8,
+    "wallet_cap": 18,
+    "channel_grant": 4,
+    "channel_cooldown_hours": 20,
+    "earned_cap_rolling_24h": 10,
+    "grain_pickup_radius_m": 30,
+    "grain_reclaim_days": 7,
+    "node_attune_lumen": 2,
+    "weave_lumen": 2,
+    "node_attune_cooldown_hours": 20,
+    "link_initial_design_actions": [
+      "anchor",
+      "align"
+    ],
+    "link_reinforce_cooldown_hours": 20,
+    "node_investigation_max_per_person": 1,
+    "node_research_ways": 3,
+    "node_research_delta_each": 0.3,
+    "node_research_cost_each": 1,
+    "link_research_ways": 3,
+    "link_research_work_each": 1.5,
+    "link_research_cost_each": 1,
+    "link_proof_max_per_player_project": 3,
+    "link_research_min_distance_km": 100,
+    "link_max_proof_fraction": 0.8,
+    "home_change_cooldown_days": 30,
+    "relay_attenuation_distance_fraction": 0.12,
+    "relay_edge_penalty_km": 20,
+    "relay_max_hops": 6,
+    "relay_max_effectiveness": 0.6,
+    "interference_min_gap_days_same_region": 21,
+    "interference_signal_hours": 24,
+    "interference_active_hours": 72,
+    "interference_recovery_hours": 48,
+    "interference_one_event_penalty_pp": 20,
+    "interference_total_penalty_pp": 40,
+    "focus_slots": 2,
+    "field_area_lumen_reward": 0,
+    "direct_efficiency_keypoints_km": [
+      [
+        0,
+        1.0
+      ],
+      [
+        5,
+        1.0
+      ],
+      [
+        25,
+        0.65
+      ],
+      [
+        100,
+        0.3
+      ],
+      [
+        1000,
+        0.08
+      ]
+    ],
+    "far_efficiency_floor": 0.02,
+    "far_efficiency_exponential_scale_km": 1400,
+    "link_min_work": 2,
+    "link_max_work": 6,
+    "map_default_fps_target": 30,
+    "authored_challenges_min_for_alpha": 12
+  },
+  "decisions": {
+    "canonical_world": "one shared world, server authoritative for common effects",
+    "home_region": "one selectable coarse region; 30-day switch interval is provisional",
+    "geographical_identity": "immutable published Majakka node_uuid with source aliases",
+    "world_sites": "real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps",
+    "distance_engine": "haversine and piecewise linear curve from Work section 04",
+    "link_work": "2 + min(4,max(0,log10(max(1,length_km/2))))",
+    "link_action_effect": "sqrt(effective_distance_A * effective_distance_B)",
+    "field_rule": "three different nodes and exactly all three committed links, no auto link, no passive area yield",
+    "field_roles": "Beacon, Shelter, Lens; personal focus only, other players cannot overwrite",
+    "interference": "Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction",
+    "client_world": "render, inspect and request; no authoritative wallet or graph modifications",
+    "gps": "optional; map camera never changes action center; GPS economic benefits are unapproved",
+    "research": "authored meaningful one-time alternatives; no button-spam repeatable surrogates",
+    "content": "first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"
+  },
+  "risk_gates": {
+    "RG1": "8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.",
+    "RG2": "A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.",
+    "RG3": "Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.",
+    "RG4": "GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.",
+    "RG5": "2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.",
+    "RG6": "global server atomicity and multiaccount abuse not solved by mock tests."
+  }
+}
