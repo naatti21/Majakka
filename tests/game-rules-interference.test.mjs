@@ -178,7 +178,8 @@ test('Investigate needs trusted authored proof; client solved=true is NOT author
   {solved:true,correct:true,fragmentId:'hacked'});
  assert.equal(fake.result.code,'PROOF_NOT_APPROVED');
  assert.equal(fake.state,s);
- assert.equal(act(s,'INVESTIGATE','too-early',-1).result.code,'PROOF_NOT_APPROVED');
+ const future=publish(fixture(),'future','rural',A,ab,100*H);
+ assert.equal(act(future,'INVESTIGATE','early',50*H,'alice','future').result.code,'EVENT_NOT_STARTED');
 });
 test('Investigate stores unique personal fragment at zero L, even from archived event',()=>{
  let s=publish(fixture());
