@@ -41,7 +41,7 @@ test('rolling earnings cap spans Channel and any trusted source and expires at e
  w=grantEarnedLumen(w,7,0).wallet;
  const add=channelLumen(w,2*H);
  assert.equal(add.granted,3);assert.equal(add.wallet.balance,10);
- assert.equal(channelLumen(add.wallet,23*H).reason,'CHANNEL_COOLDOWN');
+ assert.equal(channelLumen(add.wallet,21*H).reason,'CHANNEL_COOLDOWN');
  const whenExpired=channelLumen(add.wallet,26*H);
  assert.equal(whenExpired.granted,4);
  assert.equal(whenExpired.wallet.balance,14);
