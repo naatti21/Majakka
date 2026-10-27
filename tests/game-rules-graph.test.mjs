@@ -297,3 +297,66 @@ test('link progress and fields do not decay after 21 days of inactivity',()=>{
  assert.deepEqual(s.fields,old.fields);
  assert.ok(after.state.fields[fieldId('a','b','c')]);
 });
+
+test('a transatlantic link can be COMMITTED by multiple distant players with capped proof',()=>{
+ const players=Object.fromEntries(Array.from({length:12},(_,i)=>
+  ['maker'+i,createPlayer(i%2?ny:tampere,18)]));
+ let s=createGraphState(createRulesState({players,nodes:{a:awake(tampere),n:awake(ny)}}));
+ const id=linkId('a','n');
+ s={...s,linkProofGrants:Object.fromEntries(['survey','interpret','route'].map(stage=>
+  [linkProofKey('maker0',id,stage),true]))};
+ for(const [i,stage] of ['survey','interpret','route'].entries()){
+  const done=act(s,'proof-'+i,'a','n',stage,'maker0','LINK_PROOF');
+  assert.equal(done.result.ok,true);s=done.state;
+ }
+ let completed=false,paidLight=0;
+ for(let i=0;i<12&&!completed;i++){
+  for(const stage of ['anchor','align']){
+   const done=act(s,'build-'+i+'-'+stage,'a','n',stage,'maker'+i);
+   if(done.result.code==='LINK_ALREADY_COMMITTED'){completed=true;break;}
+   assert.equal(done.result.ok,true);
+   paidLight+=done.result.creditedUnits;
+   s=done.state;
+   if(done.result.committed){completed=true;break;}
+  }
+ }
+ assert.equal(completed,true);
+ assert.equal(s.links[id].status,'Committed');
+ assert.equal(s.links[id].workDoneUnits,s.links[id].workRequiredUnits);
+ assert.equal(s.links[id].proofWorkUnits,Math.floor(s.links[id].workRequiredUnits*.8));
+ assert.ok(paidLight>=s.links[id].workRequiredUnits-s.links[id].proofWorkUnits);
+ assert.equal(Object.keys(s.fields).length,0);
+});
+test('committing the final transatlantic edge closes a canonical Tampere–Rome–New York field',()=>{
+ const players=Object.fromEntries(Array.from({length:12},(_,i)=>
+  ['helper'+i,createPlayer(i%2?ny:tampere,18)]));
+ let s=createGraphState(createRulesState({players,nodes:{a:awake(tampere),r:awake(rome),n:awake(ny)}}));
+ const committed=(a,b)=>{
+  const id=linkId(a,b),len=distanceKm(s.nodes[a].geo,s.nodes[b].geo),work=linkRequiredUnits(len);
+  return {id,a,b,lengthKm:len,status:'Committed',workRequiredUnits:work,
+   workDoneUnits:work,lightWorkUnits:work,proofWorkUnits:0};
+ };
+ s={...s,links:{[linkId('a','r')]:committed('a','r'),[linkId('r','n')]:committed('r','n')}};
+ const id=linkId('a','n');
+ s={...s,linkProofGrants:Object.fromEntries(['survey','interpret','route'].map(stage=>
+  [linkProofKey('helper0',id,stage),true]))};
+ for(const [i,stage] of ['survey','interpret','route'].entries()){
+  const t=act(s,'p'+i,'a','n',stage,'helper0','LINK_PROOF');
+  assert.equal(t.result.ok,true);s=t.state;
+ }
+ let final=null;
+ for(let i=0;i<12&&!final?.result.committed;i++)for(const stage of ['anchor','align']){
+  const t=act(s,'w'+i+'-'+stage,'a','n',stage,'helper'+i);
+  if(t.result.code==='LINK_ALREADY_COMMITTED')break;
+  assert.equal(t.result.ok,true);
+  s=t.state;
+  if(t.result.committed){final=t;break;}
+ }
+ assert.ok(final?.result.committed);
+ const expected=fieldId('a','r','n');
+ assert.deepEqual(final.result.newFieldIds,[expected]);
+ assert.ok(s.fields[expected]);
+ assert.equal(FIELD_AREA_LUMEN,0);
+ const replay=act(s,'w'+(Number(final.result.stage==='align')||0),'a','n','anchor','helper0');
+ assert.equal(replay.state.fields[expected].id,expected);
+});
