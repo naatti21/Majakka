@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           godot --headless --path native-client --editor --import --quit
           godot --headless --path native-client --script res://tests/smoke.gd
+          godot --headless --path native-client --script res://tests/flintail_smoke.gd
 
       - name: Export Android debug APK
         shell: bash
