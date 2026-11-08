@@ -64,9 +64,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          godot --headless --path native-client --editor --import --quit
-          godot --headless --path native-client --script res://tests/smoke.gd
-          godot --headless --path native-client --script res://tests/flintail_smoke.gd
+          timeout 70s godot --headless --path native-client --editor --import --quit | tee "$RUNNER_TEMP/godot-import.log"
+          timeout 25s godot --headless --path native-client --script res://tests/smoke.gd | tee "$RUNNER_TEMP/prismite-smoke.log"
+          grep -q 'PASS: Majakka Native v0.1' "$RUNNER_TEMP/prismite-smoke.log"
+          timeout 25s godot --headless --path native-client --script res://tests/flintail_smoke.gd | tee "$RUNNER_TEMP/flintail-smoke.log"
+          grep -q FLINTAIL_SMOKE_PASS "$RUNNER_TEMP/flintail-smoke.log"
+          timeout 25s godot --headless --path native-client --script res://tests/world_map_smoke.gd | tee "$RUNNER_TEMP/worldmap-smoke.log"
+          grep -q WORLD_MAP_SMOKE_PASS "$RUNNER_TEMP/worldmap-smoke.log"
 
       - name: Export Android debug APK
         shell: bash
@@ -80,7 +84,7 @@ jobs:
       - name: Upload APK test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: majakka-kaiku-lab-v0.1-android-debug
+          name: majakka-world-map-v0.3-android-debug
           path: native-client/build/majakka-kaiku-lab-debug.apk
           if-no-files-found: error
           retention-days: 7
