@@ -10,8 +10,8 @@ func _run() -> void:
     for original in coords:
         var projected: Vector2 = GEO.project(original.x,original.y,13)
         var actual: Vector2 = GEO.unproject(projected,13)
-        assert(absf(actual.x-original.x)<0.00001, "Mercator latitude round-trip")
-        assert(absf(actual.y-original.y)<0.00001, "Mercator longitude round-trip")
+        assert(absf(actual.x-original.x)<0.00007, "Mercator latitude round-trip (Vector2 float32)")
+        assert(absf(actual.y-original.y)<0.00007, "Mercator longitude round-trip (Vector2 float32)")
     var nodes: Array[Dictionary] = GEO.pilot_nodes()
     assert(nodes.size()==8, "Pilot OSM Node catalog count changed")
     var unique_ids: Dictionary = {}
