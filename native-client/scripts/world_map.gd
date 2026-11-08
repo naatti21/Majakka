@@ -80,7 +80,7 @@ func _create_ui() -> void:
     header.add_theme_constant_override("separation", 1)
     add_child(header)
     header.add_child(_label("MAJAKKA  /  THE LIVING WORLD", 22, CYAN))
-    header.add_child(_label("WORLD MAP  ·  TAMPERE PILOT", 23, Color("f0f3eb")))
+    header.add_child(_label("LIVING MAP  ·  TAMPERE PILOT", 23, Color("f0f3eb")))
     _metrics = _label("FPS —", 14, Color("9abbbf"))
     header.add_child(_metrics)
     header.add_child(_label("LOCATION: DEMO HOME  ·  GPS OFF  ·  NO ACCOUNT", 12, Color("d7b786")))
@@ -127,7 +127,7 @@ func _create_ui() -> void:
     _selection.name = "SelectionLabel"
     _selection.custom_minimum_size.y = 67
     dock_ui.add_child(_selection)
-    _status = _label("Preparing map tiles…", 14, Color("9abbbf"))
+    _status = _label("Preparing stylized world…", 14, Color("9abbbf"))
     _status.name = "MapStatus"
     dock_ui.add_child(_status)
     var tabs := HBoxContainer.new()
@@ -138,8 +138,8 @@ func _create_ui() -> void:
     _map_tab.pressed.connect(func(): _set_inventory(false))
     _inventory_tab.pressed.connect(func(): _set_inventory(true))
     dock_ui.add_child(_label("NODES: OSM pilot sites  ·  KAIKU + STATUS: DEMO FIXTURES", 12, Color("dbbc88")))
-    dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Map tiles: OpenStreetMap", 13, Color("aac3c4")))
-    dock_ui.add_child(_label("Map needs internet; visited tiles cached. No GPS or world sync.", 12, Color("869fa6")))
+    dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Source tiles: OpenStreetMap", 13, Color("aac3c4")))
+    dock_ui.add_child(_label("Custom dark renderer · pilot OSM tiles · GPS OFF.", 12, Color("869fa6")))
     _set_inventory(false)
 
 func _label(s: String, size_px: int, color_value: Color) -> Label:
@@ -201,4 +201,4 @@ func _process(delta: float) -> void:
     if _show_inventory and _card != null:
         _card.scale = Vector2.ONE * (1.0 + 0.009 * sin(_elapsed * 1.75))
     if int(_elapsed * 2.0) != int((_elapsed-delta)*2.0) and _metrics != null:
-        _metrics.text = "FPS %d  ·  engine %.0f MB  ·  zoom %d" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0, _map.zoom]
+        _metrics.text = "FPS %d  ·  engine %.0f MB  ·  dark map · zoom %d" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0, _map.zoom]

@@ -1,6 +1,6 @@
 class_name MajakkaWorldMapCanvas
 extends Control
-## Small, Android-first OSM raster map proof-of-concept. No SDK and no backend.
+## Majakka stylized dark map v0.4: real OSM tile geography, custom palette and Beacon layer. No SDK or backend.
 ## Only current viewport is fetched on user interaction; no prefetch or bulk downloads.
 ## Do NOT use OSMF public tiles for scaled production without a suitable provider.
 
@@ -8,6 +8,7 @@ signal object_selected(data: Dictionary)
 signal map_status(message: String)
 
 const GEO = preload("res://scripts/world_catalog.gd")
+const MAP_STYLE = preload("res://scripts/map_style.gd")
 const FLINTAIL = preload("res://assets/kaiku/flintail/base/map-idle.webp")
 const MAP_TILE_PX := 256.0
 const CACHE_DIR := "user://majakka_map_cache"
@@ -15,7 +16,7 @@ const CACHE_TTL_SECS := 7 * 24 * 3600
 const MAX_MEMORY_TILES := 28
 const MAX_DISK_TILES := 160
 const MAX_CONCURRENT := 2
-const UA := "MajakkaKaikuLab/0.3 (+https://github.com/naatti21/Majakka)"
+const UA := "MajakkaKaikuLab/0.4 (+https://github.com/naatti21/Majakka)"
 
 var zoom := 13
 var center_lat := 61.5018
@@ -184,7 +185,7 @@ func _decode_and_store(key: String, bytes: PackedByteArray) -> bool:
         return false
     if img.get_width() != 256 or img.get_height() != 256:
         return false
-    _textures[key] = ImageTexture.create_from_image(img)
+    _textures[key] = ImageTexture.create_from_image(MAP_STYLE.stylize(img))
     _memory_order.erase(key)
     _memory_order.append(key)
     while _memory_order.size() > MAX_MEMORY_TILES:
@@ -216,7 +217,7 @@ func _dispatch() -> void:
         if err != OK:
             _inflight.erase(key)
             request.queue_free()
-    map_status.emit("OSM tiles: %d loaded · %d fetching" % [_loaded_count, _inflight.size()])
+    map_status.emit("WORLD GEOMETRY · %d styled tiles · %d fetching" % [_loaded_count, _inflight.size()])
 
 func _tile_completed(key: String, request: HTTPRequest, result: int, code: int, body: PackedByteArray) -> void:
     _inflight.erase(key)
@@ -268,45 +269,87 @@ func _draw_tiles() -> void:
             var key := _key(posmod(tx, span), ty)
             var tile_rect := Rect2(Vector2(tx * MAP_TILE_PX, ty * MAP_TILE_PX) - p0, Vector2(256,256))
             if _textures.has(key):
-                draw_texture_rect(_textures[key], tile_rect, false, Color(0.75, 0.88, 0.87, 1.0))
+                draw_texture_rect(_textures[key], tile_rect, false, Color.WHITE)
             else:
-                draw_rect(tile_rect, Color("102630"))
-                draw_rect(tile_rect, Color("27424a"), false, 1.0)
-    draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.075, 0.10, 0.14))
+                draw_rect(tile_rect, Color("081620"))
+                draw_rect(tile_rect, Color("15303d"), false, 1.0)
+    draw_rect(Rect2(Vector2.ZERO, size), Color(0.01, 0.025, 0.05, 0.14))
+    # Screen-local vignette accents, not fabricated geography.
+    draw_line(Vector2(0, 0), Vector2(size.x, 0), Color("345761"), 1.0)
 
 func _draw_markers() -> void:
+    # Layers are kept separate from map geography and do not change Node IDs.
     for node in GEO.pilot_nodes():
         var pos: Vector2 = screen_from_geo(float(node["lat"]), float(node["lon"]))
-        if not Rect2(Vector2(-110,-110), size + Vector2(220,220)).has_point(pos):
+        if not Rect2(Vector2(-100,-110), size + Vector2(200,220)).has_point(pos):
             continue
-        var state: String = str(node["preview_state"])
-        var tint := Color("72d8e3") if state == "Awakened" else Color("e7c58b")
-        if state == "Interference":
-            tint = Color("ce8ced")
-        var pulse: float = 0.65 + 0.17 * sin(_anim_elapsed * 2.0 + pos.x * 0.01)
-        draw_circle(pos + Vector2(0, 5), 28.0, Color(0.0, 0.09, 0.13, 0.32))
-        draw_circle(pos, 25.0 + pulse * 3.0, Color(tint.r,tint.g,tint.b,0.19))
-        draw_arc(pos, 19.0, 0, TAU, 28, Color(tint.r,tint.g,tint.b,0.8), 2.5, true)
-        draw_colored_polygon(PackedVector2Array([pos+Vector2(0,-15),pos+Vector2(10,0),pos+Vector2(0,15),pos+Vector2(-10,0)]), Color("09303c"))
-        draw_colored_polygon(PackedVector2Array([pos+Vector2(0,-10),pos+Vector2(7,0),pos+Vector2(0,10),pos+Vector2(-7,0)]), tint)
-        if zoom >= 13:
-            var label_text: String = str(node["name"])
-            draw_string(ThemeDB.fallback_font, pos+Vector2(23,5), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("0d2731"), TextServer.JUSTIFICATION_NONE)
-            draw_string(ThemeDB.fallback_font, pos+Vector2(22,4), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("f2f7e5"), TextServer.JUSTIFICATION_NONE)
+        _draw_beacon(pos, node)
     for encounter in GEO.preview_encounters():
         var pos: Vector2 = screen_from_geo(float(encounter["lat"]), float(encounter["lon"]))
-        if not Rect2(Vector2(-100,-100),size+Vector2(200,200)).has_point(pos):
-            continue
-        var bob := sin(_anim_elapsed * 2.2 + pos.x * 0.03) * 3.0
-        var width := 90.0 if zoom >= 13 else 66.0
-        draw_circle(pos+Vector2(0,14), 22.0, Color(0,0,0,0.35))
-        draw_arc(pos+Vector2(0,8), 25, 0, TAU, 28, Color(0.24,0.89,0.78,0.64),2.0,true)
-        draw_texture_rect(FLINTAIL, Rect2(pos+Vector2(-width * 0.5,-width*0.80+bob),Vector2(width,width*0.84)),false)
-        draw_string(ThemeDB.fallback_font,pos+Vector2(-30,34),"DEMO KAIKU",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e1fcef"))
+        if Rect2(Vector2(-90,-90),size + Vector2(180,180)).has_point(pos):
+            _draw_wild_kaiku(pos)
     var home: Dictionary = GEO.preview_home()
-    var spot: Vector2 = screen_from_geo(float(home["lat"]),float(home["lon"]))
-    if Rect2(Vector2(-70,-70),size+Vector2(140,140)).has_point(spot):
-        draw_circle(spot,32.0,Color(0.19,0.37,0.92,0.12))
-        draw_arc(spot,21.0,0,TAU,28,Color("5ea5ff"),2.5,true)
-        draw_colored_polygon(PackedVector2Array([spot+Vector2(0,-15),spot+Vector2(11,11),spot,spot+Vector2(-11,11)]),Color("367cdf"))
-        draw_string(ThemeDB.fallback_font,spot+Vector2(24,5),"HOME DEMO",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("ffffff"))
+    var spot: Vector2 = screen_from_geo(float(home["lat"]), float(home["lon"]))
+    if Rect2(Vector2(-80,-80),size + Vector2(160,160)).has_point(spot):
+        _draw_home_marker(spot)
+
+func _draw_beacon(pos: Vector2, node: Dictionary) -> void:
+    var state: String = str(node["preview_state"])
+    var tint := Color("72f2dd") if state == "Awakened" else Color("c6a876")
+    if state == "Interference":
+        tint = Color("cf86f3")
+    var time_shift := sin(_anim_elapsed * 1.75 + pos.x * 0.009)
+    var pulse := 0.84 + 0.12 * time_shift
+    # Elevated floor with sidewall: a lightweight isometric impression.
+    draw_ellipse(pos + Vector2(0, 22), 39.0, 12.0, Color(0, 0, 0, 0.30))
+    draw_colored_polygon(PackedVector2Array([
+        pos + Vector2(-24,13), pos + Vector2(0,24),
+        pos + Vector2(24,13), pos + Vector2(24,24),
+        pos + Vector2(0,34), pos + Vector2(-24,24)]), Color("071b24"))
+    draw_colored_polygon(PackedVector2Array([
+        pos + Vector2(-24,13), pos + Vector2(0,2),
+        pos + Vector2(24,13), pos + Vector2(0,24)]), Color("1e3e48"))
+    draw_arc(pos + Vector2(0,15), 28, 0.0, TAU, 36, Color(tint.r,tint.g,tint.b,0.18 * pulse), 8.0, true)
+    draw_arc(pos + Vector2(0,15), 28, -0.2, 3.7, 28, Color(tint.r,tint.g,tint.b,0.66), 1.8, true)
+    # Prism with three planar faces. Animation changes only height and glow.
+    var float_y := time_shift * 2.0
+    var apex := pos + Vector2(0, -28 + float_y)
+    var left := pos + Vector2(-11, -2 + float_y)
+    var right := pos + Vector2(11, -2 + float_y)
+    var lower := pos + Vector2(0, 13 + float_y)
+    draw_colored_polygon(PackedVector2Array([apex,left,lower,pos + Vector2(-2,-1+float_y)]), tint.darkened(0.48))
+    draw_colored_polygon(PackedVector2Array([apex,pos + Vector2(-2,-1+float_y),lower,right]), tint.darkened(0.15))
+    draw_colored_polygon(PackedVector2Array([apex,right,pos + Vector2(1,-2+float_y)]), tint.lightened(0.23))
+    draw_line(apex, pos + Vector2(0,13+float_y), Color(0.83,0.99,0.97,0.48), 1.2, true)
+    if state == "Awakened":
+        draw_line(pos + Vector2(-3,-30),pos + Vector2(-3,-63),Color(tint.r,tint.g,tint.b,0.24 * pulse),6.0,true)
+        draw_line(pos + Vector2(-3,-30),pos + Vector2(-3,-63),Color(tint.r,tint.g,tint.b,0.33 * pulse),1.5,true)
+    if zoom >= 13:
+        var label_text: String = str(node["name"])
+        draw_string_outline(ThemeDB.fallback_font,pos + Vector2(23,-1),label_text,HORIZONTAL_ALIGNMENT_LEFT,-1,13,3,Color("04101b"))
+        draw_string(ThemeDB.fallback_font,pos + Vector2(23,-1),label_text,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("cde8dd"))
+
+func _draw_wild_kaiku(pos: Vector2) -> void:
+    var bob := sin(_anim_elapsed * 2.0 + pos.x * 0.023) * 2.5
+    var width := 89.0 if zoom >= 13 else 61.0
+    draw_ellipse(pos + Vector2(0,18), 28, 9, Color(0,0,0,0.34))
+    draw_arc(pos + Vector2(0,12),27,0,TAU,32,Color(0.18,0.83,0.75,0.48),2.0,true)
+    draw_texture_rect(FLINTAIL,Rect2(pos + Vector2(-width*0.5,-width*0.82+bob),Vector2(width,width*0.86)),false)
+    if zoom >= 13:
+        draw_string_outline(ThemeDB.fallback_font,pos+Vector2(-33,37),"WILD · DEMO",HORIZONTAL_ALIGNMENT_LEFT,-1,12,2,Color("06121b"))
+        draw_string(ThemeDB.fallback_font,pos+Vector2(-33,37),"WILD · DEMO",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("a0e4d6"))
+
+func _draw_home_marker(pos: Vector2) -> void:
+    var bob := sin(_anim_elapsed*1.8)*2.0
+    draw_ellipse(pos+Vector2(0,22),31.0,11.0,Color(0,0,0,0.40))
+    draw_arc(pos+Vector2(0,15),26,0,TAU,32,Color(0.28,0.68,1.0,0.54),2.0,true)
+    # Tiny avatar projection + facing arrow; orientation is DEMO, not compass.
+    draw_circle(pos+Vector2(0,-10+bob),7.2,Color("9bd9f5"))
+    draw_colored_polygon(PackedVector2Array([
+        pos+Vector2(-12,-2+bob),pos+Vector2(12,-2+bob),
+        pos+Vector2(9,12+bob),pos+Vector2(-9,12+bob)]),Color("28658b"))
+    draw_colored_polygon(PackedVector2Array([
+        pos+Vector2(0,-30+bob),pos+Vector2(8,-20+bob),
+        pos+Vector2(-8,-20+bob)]),Color("6bd3f6"))
+    draw_string_outline(ThemeDB.fallback_font,pos+Vector2(24,3),"HOME · DEMO",HORIZONTAL_ALIGNMENT_LEFT,-1,13,3,Color("07121b"))
+    draw_string(ThemeDB.fallback_font,pos+Vector2(24,3),"HOME · DEMO",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("b7e8f7"))
