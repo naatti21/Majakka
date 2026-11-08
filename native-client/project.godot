@@ -4,7 +4,7 @@ config_version=5
 
 [application]
 config/name="Majakka - Kaiku Lab"
-run/main_scene="res://scenes/flintail_lab.tscn"
+run/main_scene="res://scenes/world_map.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
@@ -23,3 +23,6 @@ textures/vram_compression/import_etc2_astc=true
 
 [physics]
 3d/default_gravity=9.8
+
+[majakka]
+map/tile_url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"

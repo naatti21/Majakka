@@ -67,6 +67,7 @@ jobs:
           godot --headless --path native-client --editor --import --quit
           godot --headless --path native-client --script res://tests/smoke.gd
           godot --headless --path native-client --script res://tests/flintail_smoke.gd
+          godot --headless --path native-client --script res://tests/world_map_smoke.gd
 
       - name: Export Android debug APK
         shell: bash
@@ -80,7 +81,7 @@ jobs:
       - name: Upload APK test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: majakka-kaiku-lab-v0.1-android-debug
+          name: majakka-world-map-v0.3-android-debug
           path: native-client/build/majakka-kaiku-lab-debug.apk
           if-no-files-found: error
           retention-days: 7
