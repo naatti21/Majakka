@@ -93,6 +93,16 @@ Koontikortit ovat hyväksyttyä suunnittelua, eivät todiste valmiista sprite sh
 
 **AVOIN:** käyttäjän uusi Android-v0.6.1 kuvakaappaus (kartta näkyy myös lentotilassa?), eleet, laatu, FPS, kartan rajauksen toiminta. PR pysyy luonnoksena eikä mergetä mainiin ennen hyväksyntää.
 
+## 2026-11-09 — v0.6.1 VISUAALISESTI HYLÄTTY; renderöintiarkkitehtuuri uusiksi
+
+**HYLÄTTY:** Fyysisen Android-kokeen käyttäjäpalaute v0.6.1: “Ihan on sekavaa shaipaa.” Aiempi v0.6 näytti täysin tyhjän kartan; v0.6.1 korjasi datan saatavuuden mutta **ei kartan käytettävyyttä eikä ulkoasua**. Godotin itse tehty OSM→SurfaceTool-karttarenderöinti on tämän projektin kannalta liian heikko perusta. Älä jatka v0.6.1:stä lisäämällä yhä katumerkintöjä, rakennusmeshejä tai kohinaa.
+
+- [PR #15](https://github.com/naatti21/Majakka/pull/15) ja [PR #16](https://github.com/naatti21/Majakka/pull/16) **suljettu ilman mergeä**. Koodi ja CI-historia säilyvät tutkimusta varten.
+- **Uusi suositeltu arkkitehtuurikoe (AVOIN, ei vielä toteutettu):** erillinen mobiilissa toimiva **MapLibre GL JS** -vektorikartta oikealla tile-palvelulla; testipalveluksi tutkitaan **OpenFreeMap** Dark/Fiord, jossa ei tarvita API-avainta. MapLibre hallitsee kartan tiet, vesistöt, nimet, vektoritiilet, kosketuksen ja perspektiivikameran. Lähteet: https://maplibre.org/maplibre-gl-js/docs/ ja https://openfreemap.org/ . Julkisen palvelun käyttöehdot ja mahdollisen kaupallisen käytön vaatimukset tarkistetaan erikseen.
+- **Laatuportti:** yksi laadukas Tampereen karttanäkymä ilman yhtään hahmoa, 3D-rakennusta tai Node-efektiä; tarkat ja luettavat tiet, rannat ja viheralueet, sulava kierto/kallistus/zoom oikealla Androidilla. Käyttäjän visuaalinen hyväksyntä ensin. Vasta sitten 1 todelliseen pisteeseen sidottu 3D-Node/Kaiku.
+- MapLibre GL JS tukee WebGL-custom-layer `renderingMode:"3d"` ja siihen integroitua Three.js-/Babylon.js-mallia, mutta **peliobjektien todellinen kuormitus ja toteutus on validoitava kokeessa**, eikä sitä luvata valmiiksi. Godotin ja MapLibren yhdistäminen voi olla hankalaa; älä lukitse lopullista moottoria ennen prototyyppiä.
+- Säilytä hyväksytty Flintail-identiteetti ja esityskortit; **kaikujen suunnittelu ei ole hylätty**. Muutosta ei tehdä julkaistuun main-PWA:n pelilogiikkaan.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
