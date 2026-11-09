@@ -14,7 +14,16 @@ func _run() -> void:
     assert(map != null, "Vector world scene missing")
     var mesh_root := map.get_node_or_null("PerspectiveViewport/World3DViewport/World3D/GeoreferencedGround/OSMVectorBasemap")
     assert(mesh_root is Node3D, "Vector basemap node missing")
+    # Regression: the previous APK showed *only* Nodes/Kaiku while map status
+    # stayed "loading real Tampere OSM geometry". A missing basemap MUST fail CI.
+    assert(FileAccess.file_exists("res://assets/maps/tampere-vector-pilot.json"), "Bundled real OSM map missing")
+    assert(bool(map.get("_data_ready")), "Real bundled Tampere map failed to render")
+    assert(int(map.get("_elements_loaded")) >= 65, "Bundled OSM ways count too low")
+    assert(int(map.get("_features_loaded")) >= 50, "Real OSM mesh geometry missing")
+    assert(mesh_root.get_child_count() >= 2, "No real roads/areas drawn")
     assert(map.get("_inflight").is_empty(), "Raster network calls must not run")
+    assert(world.get_node_or_null("WorldMapCanvas/VectorDataRequest") == null, "Vector runtime must not query Overpass")
+
     var test_ways: Array = []
     # Test fixture has local relative coordinates only: deliberately synthetic.
     for i in range(25):
