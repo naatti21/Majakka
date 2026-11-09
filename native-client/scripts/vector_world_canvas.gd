@@ -1,20 +1,14 @@
 extends "res://scripts/perspective_world_canvas.gd"
 ## Majakka World v0.6: experimental VECTORIZED OSM pilot ground, NOT raster tiles.
 ## Godot Camera3D, Nodes, Kaiku, and player remain independent 3D layers.
-## Small user-triggered/first-run online Overpass pilot only; not a game tile service.
-## Real OSM geometries are cached locally, never invented from painted pixels.
+## A validated OSM snapshot is BUNDLED inside the APK. No runtime map request.
+## Sourced real geometry, not invented pixels; OSM attribution required.
 
 const PILOT_ORIGIN := Vector2(61.5010, 23.7620)
 const PILOT_ZOOM := 13
 const MAX_ELEMENTS := 9000
 const MAX_GEOMETRY_POINTS := 240000
-const CACHE_PATH := "user://majakka_tampere_vector_v06.json"
-const CACHE_TTL := 7 * 24 * 3600
-const OVERPASS_HOSTS := [
-    "https://overpass.private.coffee/api/interpreter",
-    "https://overpass-api.de/api/interpreter"
-]
-const PILOT_BBOX := "61.493,23.744,61.509,23.785"
+const BUNDLED_DATA := "res://assets/maps/tampere-vector-pilot.json"
 const PALETTE := {
     "water": Color("153d50"),
     "park": Color("17443e"),
@@ -37,14 +31,10 @@ const WIDTH := {"water_line": 1.6, "main": 0.65, "local": 0.36, "foot": 0.16}
 
 var _vector_layer: Node3D
 var _labels_layer: Control
-var _request: HTTPRequest
-var _request_index := 0
-var _elements_loaded := 0
+ var _elements_loaded := 0
 var _features_loaded := 0
 var _vector_status := "Vector map preparing…"
-var _load_failed := false
-var _loading_vector := false
-var _street_labels: Array[Dictionary] = []
+ var _street_labels: Array[Dictionary] = []
 var _label_elapsed := 0.0
 var _data_ready := false
 
@@ -83,83 +73,29 @@ func center_on(lat: float, lon: float) -> void:
 
 
 func retry_vector_map() -> void:
-    if _loading_vector:
-        return
-    _request_index = 0
-    _start_download()
+    # Reloads verified bundled data only; never depends on Overpass on Android.
+    _load_vector_cache_or_fetch()
 
 func _set_vector_status(message: String) -> void:
     _vector_status = message
     map_status.emit(message)
 
 func _load_vector_cache_or_fetch() -> void:
-    # Headless CI must not require internet or query community Overpass servers.
-    if DisplayServer.get_name() == "headless":
-        _set_vector_status("VECTOR WORLD · offline smoke test")
+    # A real map must be present from the first frame and when offline.
+    # Do NOT silently fall back to the previously rejected raster floor.
+    if not FileAccess.file_exists(BUNDLED_DATA):
+        _set_vector_status("ERROR: bundled Tampere map missing from APK")
         return
-    if FileAccess.file_exists(CACHE_PATH):
-        var age := int(Time.get_unix_time_from_system()) - int(FileAccess.get_modified_time(CACHE_PATH))
-        if age <= CACHE_TTL:
-            var cached := FileAccess.get_file_as_string(CACHE_PATH)
-            if _consume_json(cached):
-                _set_vector_status("VECTOR WORLD · %d real OSM features · cached" % _features_loaded)
-                return
-    _start_download()
-
-func _query() -> String:
-    var b := PILOT_BBOX
-    return "[out:json][timeout:25];(" + \
-        "way[highway~\"^(primary|secondary|tertiary|unclassified|residential|living_street|service|pedestrian|footway|cycleway|path)$\"](" + b + ");" + \
-        "way[natural=water](" + b + ");" + \
-        "way[building](" + b + ");" + \
-        "way[waterway~\"^(riverbank|river|canal|stream)$\"](" + b + ");" + \
-        "way[leisure~\"^(park|garden)$\"](" + b + ");" + \
-        "way[landuse~\"^(grass|forest|recreation_ground|meadow)$\"](" + b + ");" + \
-        ");out tags geom;"
-
-func _start_download() -> void:
-    if _request != null:
-        _request.queue_free()
-        _request = null
-    if _request_index >= OVERPASS_HOSTS.size():
-        _loading_vector = false
-        _load_failed = true
-        _set_vector_status("Vector data unavailable · tap RETRY MAP · no fake roads drawn")
+    var source := FileAccess.open(BUNDLED_DATA, FileAccess.READ)
+    if source == null:
+        _set_vector_status("ERROR: bundled vector map cannot be opened")
         return
-    _loading_vector = true
-    _load_failed = false
-    _set_vector_status("VECTOR WORLD · loading real Tampere OSM geometry…")
-    _request = HTTPRequest.new()
-    _request.name = "VectorDataRequest"
-    _request.timeout = 40.0
-    add_child(_request)
-    _request.request_completed.connect(_on_data_loaded)
-    var url: String = str(OVERPASS_HOSTS[_request_index]) + "?data=" + _query().uri_encode()
-    var err := _request.request(url, PackedStringArray(["Accept: application/json", "User-Agent: MajakkaNativeVectorPilot/0.6 (+https://github.com/naatti21/Majakka)"]))
-    if err != OK:
-        _request_index += 1
-        call_deferred("_start_download")
-
-func _on_data_loaded(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
-    if _request != null:
-        _request.queue_free()
-        _request = null
-    var good := result == HTTPRequest.RESULT_SUCCESS and response_code == 200
-    # Limit payload: this experiment does not download a whole city database.
-    if good and body.size() > 0 and body.size() < 7000000:
-        var json_text := body.get_string_from_utf8()
-        good = _consume_json(json_text)
-        if good:
-            var output := FileAccess.open(CACHE_PATH, FileAccess.WRITE)
-            if output != null:
-                output.store_string(json_text)
-                output.close()
-    if good:
-        _loading_vector = false
-        _set_vector_status("VECTOR WORLD · %d OSM features · 3D game markers" % _features_loaded)
-    else:
-        _request_index += 1
-        call_deferred("_start_download")
+    var raw: String = source.get_as_text()
+    source.close()
+    if not _consume_json(raw):
+        _set_vector_status("ERROR: bundled OSM geometry failed validation")
+        return
+    _set_vector_status("VECTOR WORLD · %d real OSM mesh segments · offline ready" % _features_loaded)
 
 func _category(tags: Dictionary, geo: Array) -> String:
     var highway := str(tags.get("highway", ""))
