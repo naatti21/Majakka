@@ -83,6 +83,16 @@ Koontikortit ovat hyväksyttyä suunnittelua, eivät todiste valmiista sprite sh
 - Tunnettu rajaus: Overpass-way-geometria ei yksin tue kaikkia moniosaisia vesistö-/puistoalueita; osa ranta- ja puistogeometriasta voi puuttua. **Älä väitä testialuetta valmiiksi maailmanlaajuiseksi kartaksi.**
 - **PWA main säilyy ennallaan.** Native-kokeilu on GitHubin erillisessä kehityshaarassa eikä sen PR:ää saa yhdistää ennen käyttäjän visuaalista hyväksyntää.
 
+## 2026-11-09 — Android v0.6 tyhjä kartta → v0.6.1 offline-korjaus
+
+**HYLÄTTY:** käyttäjän fyysinen Android-kuva v0.6:sta näyttää ainoastaan 3D-Node/Kaiku/Avatar-merkinnät ja tyhjän karttataustan; status jumiutuu tekstiin `VECTOR WORLD · loading real Tampere OSM geometry…`. Pelkkä CI:n synteettinen mesh-testi ei riittänyt.
+
+**TOTEUTETTU / TESTATTU CI:ssä, EI VIELÄ HYVÄKSYTTY PUHELIMELLA:** [PR #16](https://github.com/naatti21/Majakka/pull/16), haara `feature/native-vector-offline-v061`, korvaa ajonaikaisen Overpass-haun **APK:n sisään pakatulla oikealla OSM-Tampereen kartta-aineistolla**. Data tallennettu `native-client/assets/maps/tampere-vector-pilot.json` ja tuotantotapana toistettava `native-client/tools/build_tampere_osm_snapshot.py`. 9.11.2026 snapshot sisälsi 3 707 lähdeviitteellistä way-kohdetta (2 624 tietä, 53 vesikohdetta, 366 viheralue-/puistokohdetta, 664 rakennuspohjaa; 1 323 261 tavua), lähde OpenStreetMap API `/api/0.6/map`, ODbL-attribuutio. Kartta ei pyydä puhelimella verkosta mitään. Rakennukset ovat litteitä 2D-pohjia, eivät erikseen 3D-mallinnettuja.
+
+**Testit:** [Android-koonti 42652897675](https://github.com/naatti21/Majakka/actions/runs/42652897675) **onnistui**: 6 Godot-smokea ml. oikean pakatun basemapin läsnäolo sekä geometriameshien muodostuminen, Android APK -export läpi. APK-tiedoston sisäisestä ZIP-rakenteesta tarkistettiin erikseen `assets/assets/maps/tampere-vector-pilot.json` (1.3 MB) ja 3707 kohdetta. Tämä varmistaa **tiedoston ja renderöintigeometrian**, ei vielä ulkoasua tai käynnistymistä varsinaisessa Android-grafiikkatilassa.
+
+**AVOIN:** käyttäjän uusi Android-v0.6.1 kuvakaappaus (kartta näkyy myös lentotilassa?), eleet, laatu, FPS, kartan rajauksen toiminta. PR pysyy luonnoksena eikä mergetä mainiin ennen hyväksyntää.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
