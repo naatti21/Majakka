@@ -6,8 +6,8 @@ extends "res://scripts/perspective_world_canvas.gd"
 
 const PILOT_ORIGIN := Vector2(61.5010, 23.7620)
 const PILOT_ZOOM := 13
-const MAX_ELEMENTS := 4300
-const MAX_GEOMETRY_POINTS := 150000
+const MAX_ELEMENTS := 9000
+const MAX_GEOMETRY_POINTS := 240000
 const CACHE_PATH := "user://majakka_tampere_vector_v06.json"
 const CACHE_TTL := 7 * 24 * 3600
 const OVERPASS_HOSTS := [
@@ -49,6 +49,9 @@ var _label_elapsed := 0.0
 var _data_ready := false
 
 func _ready() -> void:
+    # Start in the actual bounded Tampere vector pilot, not at the wide
+    # raster-map zoom that showed too much empty ground.
+    zoom = 14
     # Parent builds camera and game-owned 3D items. Override _visible_tiles()
     # prevents the old PNG tile downloader from running.
     super._ready()
@@ -60,6 +63,7 @@ func _ready() -> void:
     _labels_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
     _labels_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(_labels_layer)
+    center_on(PILOT_ORIGIN.x, PILOT_ORIGIN.y)
     _load_vector_cache_or_fetch()
 
 func _visible_tiles() -> void:
