@@ -80,7 +80,7 @@ func _create_ui() -> void:
     header.add_theme_constant_override("separation", 1)
     add_child(header)
     header.add_child(_label("MAJAKKA  /  THE LIVING WORLD", 22, CYAN))
-    header.add_child(_label("LIVING MAP  ·  TAMPERE PILOT", 23, Color("f0f3eb")))
+    header.add_child(_label("PERSPECTIVE WORLD  ·  TAMPERE PILOT", 23, Color("f0f3eb")))
     _metrics = _label("FPS —", 14, Color("9abbbf"))
     header.add_child(_metrics)
     header.add_child(_label("LOCATION: DEMO HOME  ·  GPS OFF  ·  NO ACCOUNT", 12, Color("d7b786")))
@@ -92,7 +92,7 @@ func _create_ui() -> void:
     map_controls.offset_left = -102
     map_controls.offset_right = -14
     map_controls.offset_top = 150
-    map_controls.offset_bottom = 400
+    map_controls.offset_bottom = 466
     map_controls.add_theme_constant_override("separation", 9)
     add_child(map_controls)
     var zoom_in := _button("+",map_controls,21)
@@ -103,6 +103,8 @@ func _create_ui() -> void:
     home.pressed.connect(func():
         var p: Dictionary = GEO.preview_home()
         _map.center_on(float(p["lat"]), float(p["lon"])))
+    var tilt := _button("TILT",map_controls,14)
+    tilt.pressed.connect(func(): _map.cycle_tilt())
 
     var dock := ColorRect.new()
     dock.name = "WorldDock"
@@ -127,7 +129,7 @@ func _create_ui() -> void:
     _selection.name = "SelectionLabel"
     _selection.custom_minimum_size.y = 67
     dock_ui.add_child(_selection)
-    _status = _label("Preparing stylized world…", 14, Color("9abbbf"))
+    _status = _label("Preparing 3D perspective world…", 14, Color("9abbbf"))
     _status.name = "MapStatus"
     dock_ui.add_child(_status)
     var tabs := HBoxContainer.new()
@@ -139,7 +141,7 @@ func _create_ui() -> void:
     _inventory_tab.pressed.connect(func(): _set_inventory(true))
     dock_ui.add_child(_label("NODES: OSM pilot sites  ·  KAIKU + STATUS: DEMO FIXTURES", 12, Color("dbbc88")))
     dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Source tiles: OpenStreetMap", 13, Color("aac3c4")))
-    dock_ui.add_child(_label("Custom dark renderer · pilot OSM tiles · GPS OFF.", 12, Color("869fa6")))
+    dock_ui.add_child(_label("3D CAMERA · dark georeferenced ground · GPS OFF.", 12, Color("869fa6")))
     _set_inventory(false)
 
 func _label(s: String, size_px: int, color_value: Color) -> Label:
@@ -201,4 +203,4 @@ func _process(delta: float) -> void:
     if _show_inventory and _card != null:
         _card.scale = Vector2.ONE * (1.0 + 0.009 * sin(_elapsed * 1.75))
     if int(_elapsed * 2.0) != int((_elapsed-delta)*2.0) and _metrics != null:
-        _metrics.text = "FPS %d  ·  engine %.0f MB  ·  dark map · zoom %d" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0, _map.zoom]
+        _metrics.text = "FPS %d  ·  engine %.0f MB  ·  3D perspective · zoom %d" % [Engine.get_frames_per_second(), Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0, _map.zoom]
