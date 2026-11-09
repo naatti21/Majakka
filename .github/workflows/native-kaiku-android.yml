@@ -64,12 +64,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          godot --headless --path native-client --editor --import --quit
-          godot --headless --path native-client --script res://tests/smoke.gd
-          godot --headless --path native-client --script res://tests/flintail_smoke.gd
-          godot --headless --path native-client --script res://tests/world_map_smoke.gd
-          godot --headless --path native-client --script res://tests/perspective_map_smoke.gd
-          godot --headless --path native-client --script res://tests/map_style_smoke.gd
+          # A failed GDScript assert can leave a SceneTree test running forever.
+          # Keep CI bounded so the failing test can be identified from logs.
+          timeout 90s godot --headless --path native-client --editor --import --quit
+          for test in smoke flintail_smoke world_map_smoke perspective_map_smoke map_style_smoke; do
+            echo "::group::Godot smoke: ${test}"
+            timeout 45s godot --headless --path native-client --script "res://tests/${test}.gd"
+            echo "::endgroup::"
+          done
 
       - name: Export Android debug APK
         shell: bash
