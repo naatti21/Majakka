@@ -68,6 +68,7 @@ jobs:
           godot --headless --path native-client --script res://tests/smoke.gd
           godot --headless --path native-client --script res://tests/flintail_smoke.gd
           godot --headless --path native-client --script res://tests/world_map_smoke.gd
+          godot --headless --path native-client --script res://tests/perspective_map_smoke.gd
           godot --headless --path native-client --script res://tests/map_style_smoke.gd
 
       - name: Export Android debug APK
