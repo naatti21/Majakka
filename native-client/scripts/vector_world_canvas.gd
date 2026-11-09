@@ -31,10 +31,10 @@ const WIDTH := {"water_line": 1.6, "main": 0.65, "local": 0.36, "foot": 0.16}
 
 var _vector_layer: Node3D
 var _labels_layer: Control
- var _elements_loaded := 0
+var _elements_loaded := 0
 var _features_loaded := 0
 var _vector_status := "Vector map preparing…"
- var _street_labels: Array[Dictionary] = []
+var _street_labels: Array[Dictionary] = []
 var _label_elapsed := 0.0
 var _data_ready := false
 
