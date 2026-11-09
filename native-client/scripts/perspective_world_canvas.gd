@@ -542,7 +542,6 @@ func _sync_geometry(delta: float) -> void:
             var surface := _material(Color.WHITE,false,true)
             surface.albedo_texture = _textures[key]
             surface.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
-            surface.texture_repeat = BaseMaterial3D.TEXTURE_REPEAT_DISABLED
             part.material_override = surface
             _tile_layer.add_child(part)
             _tile_meshes[key] = part
