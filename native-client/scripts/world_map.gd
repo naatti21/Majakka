@@ -102,8 +102,9 @@ func _create_ui() -> void:
     var home := _button("HOME",map_controls,14)
     home.pressed.connect(func():
         var p: Dictionary = GEO.preview_home()
-        _map.center_on(float(p["lat"]), float(p["lon"])))
-    var tilt := _button("TILT",map_controls,14)
+        _map.center_on(float(p["lat"]), float(p["lon"]))
+        _map.reset_view())
+    var tilt := _button("TILT +",map_controls,14)
     tilt.pressed.connect(func(): _map.cycle_tilt())
 
     var dock := ColorRect.new()
@@ -141,7 +142,7 @@ func _create_ui() -> void:
     _inventory_tab.pressed.connect(func(): _set_inventory(true))
     dock_ui.add_child(_label("NODES: OSM pilot sites  ·  KAIKU + STATUS: DEMO FIXTURES", 12, Color("dbbc88")))
     dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Source tiles: OpenStreetMap", 13, Color("aac3c4")))
-    dock_ui.add_child(_label("3D CAMERA · dark georeferenced ground · GPS OFF.", 12, Color("869fa6")))
+    dock_ui.add_child(_label("CAMERA: drag to move · two fingers: pinch, twist, tilt · GPS OFF.", 12, Color("869fa6")))
     _set_inventory(false)
 
 func _label(s: String, size_px: int, color_value: Color) -> Label:
