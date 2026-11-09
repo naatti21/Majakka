@@ -11,13 +11,14 @@ const MAX_GEOMETRY_POINTS := 150000
 const CACHE_PATH := "user://majakka_tampere_vector_v06.json"
 const CACHE_TTL := 7 * 24 * 3600
 const OVERPASS_HOSTS := [
-    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
     "https://overpass-api.de/api/interpreter"
 ]
 const PILOT_BBOX := "61.493,23.744,61.509,23.785"
 const PALETTE := {
     "water": Color("153d50"),
     "park": Color("17443e"),
+    "building": Color("263d47"),
     "water_line": Color("246178"),
     "main": Color("72918d"),
     "local": Color("4d7270"),
@@ -26,6 +27,7 @@ const PALETTE := {
 const LAYER_Y := {
     "water": -0.22,
     "park": -0.18,
+    "building": -0.135,
     "water_line": -0.10,
     "main": -0.06,
     "local": -0.055,
@@ -65,6 +67,17 @@ func _visible_tiles() -> void:
     # geography and is transformed when zoom/pan changes.
     pass
 
+func zoom_by(change: int) -> void:
+    super.zoom_by(change)
+    # Keep the vector layer and its screen labels geographically correct on
+    # immediate zoom calls (buttons/tests), not only the next idle frame.
+    _sync_geometry(0.0)
+
+func center_on(lat: float, lon: float) -> void:
+    super.center_on(lat, lon)
+    _sync_geometry(0.0)
+
+
 func retry_vector_map() -> void:
     if _loading_vector:
         return
@@ -94,6 +107,7 @@ func _query() -> String:
     return "[out:json][timeout:25];(" + \
         "way[highway~\"^(primary|secondary|tertiary|unclassified|residential|living_street|service|pedestrian|footway|cycleway|path)$\"](" + b + ");" + \
         "way[natural=water](" + b + ");" + \
+        "way[building](" + b + ");" + \
         "way[waterway~\"^(riverbank|river|canal|stream)$\"](" + b + ");" + \
         "way[leisure~\"^(park|garden)$\"](" + b + ");" + \
         "way[landuse~\"^(grass|forest|recreation_ground|meadow)$\"](" + b + ");" + \
@@ -117,7 +131,7 @@ func _start_download() -> void:
     add_child(_request)
     _request.request_completed.connect(_on_data_loaded)
     var url: String = str(OVERPASS_HOSTS[_request_index]) + "?data=" + _query().uri_encode()
-    var err := _request.request(url, PackedStringArray(["Accept: application/json"]))
+    var err := _request.request(url, PackedStringArray(["Accept: application/json", "User-Agent: MajakkaNativeVectorPilot/0.6 (+https://github.com/naatti21/Majakka)"]))
     if err != OK:
         _request_index += 1
         call_deferred("_start_download")
@@ -155,6 +169,8 @@ func _category(tags: Dictionary, geo: Array) -> String:
         var last: Dictionary = geo[geo.size() - 1]
         closed = absf(float(first.get("lat", 0)) - float(last.get("lat", 1))) < 0.00000001
         closed = closed and absf(float(first.get("lon", 0)) - float(last.get("lon", 1))) < 0.00000001
+    if closed and tags.has("building"):
+        return "building"
     if closed and (natural == "water" or waterway == "riverbank"):
         return "water"
     if closed and (leisure == "park" or leisure == "garden" or landuse in ["grass", "forest", "recreation_ground", "meadow"]):
@@ -267,7 +283,7 @@ func _consume_json(raw: String) -> bool:
         if kind == "":
             continue
         var count := 0
-        if kind in ["water", "park"]:
+        if kind in ["water", "park", "building"]:
             count = _append_polygon(tools[kind], geom, float(LAYER_Y[kind]))
         else:
             count = _append_line(tools[kind], geom, float(WIDTH[kind]), float(LAYER_Y[kind]))
