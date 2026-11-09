@@ -143,7 +143,7 @@ func _create_ui() -> void:
     _map_tab.pressed.connect(func(): _set_inventory(false))
     _inventory_tab.pressed.connect(func(): _set_inventory(true))
     dock_ui.add_child(_label("NODES: OSM pilot sites  ·  KAIKU + STATUS: DEMO FIXTURES", 12, Color("dbbc88")))
-    dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Source tiles: OpenStreetMap", 13, Color("aac3c4")))
+    dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Vector source: OpenStreetMap · ODbL", 13, Color("aac3c4")))
     dock_ui.add_child(_label("MAP: offline OSM vectors · pan / pinch / orbit / tilt · GPS OFF.", 12, Color("869fa6")))
     _set_inventory(false)
     # The child map may emit its first status while the UI tree is still being
