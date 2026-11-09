@@ -4,7 +4,7 @@ extends RefCounted
 ## a low-cost palette/relief representation. This is intentionally NOT vector
 ## data or a claim of a complete label-free geographic basemap.
 
-const OUTPUT_SIZE := 128
+const OUTPUT_SIZE := 256
 const SEA := Color(0.035, 0.119, 0.178)
 const PARK := Color(0.043, 0.183, 0.157)
 const BUILDING := Color(0.103, 0.178, 0.219)
@@ -35,10 +35,12 @@ static func palette_color(color: Color) -> Color:
     return LAND
 
 static func stylize(source: Image) -> Image:
-    # A smaller output texture reduces GPU residency and softens labels by
-    # construction. Keep original PNG bytes in persistent tile cache.
+    # v0.5.1: preserve ALL native source pixels. The previous 128px downsample
+    # permanently destroyed 75% of map detail before the 3D renderer saw it.
+    # This is an interim raster fix; a licensed vector basemap is still needed.
     var sample: Image = source.duplicate()
-    sample.resize(OUTPUT_SIZE, OUTPUT_SIZE, Image.INTERPOLATE_BILINEAR)
+    if sample.get_width() != OUTPUT_SIZE or sample.get_height() != OUTPUT_SIZE:
+        sample.resize(OUTPUT_SIZE, OUTPUT_SIZE, Image.INTERPOLATE_BILINEAR)
     sample.convert(Image.FORMAT_RGB8)
     var out: Image = Image.create(OUTPUT_SIZE, OUTPUT_SIZE, false, Image.FORMAT_RGBA8)
     for y in range(OUTPUT_SIZE):
@@ -53,4 +55,5 @@ static func stylize(source: Image) -> Image:
                 elif x < OUTPUT_SIZE - 1 and not is_building(sample.get_pixel(x + 1, y)):
                     mapped = Color(0.045, 0.103, 0.138)
             out.set_pixel(x, y, mapped)
+    out.generate_mipmaps() # filter distant oblique tiles without hard nearest-neighbor blocks
     return out
