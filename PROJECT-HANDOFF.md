@@ -73,6 +73,16 @@ Koontikortit ovat hyväksyttyä suunnittelua, eivät todiste valmiista sprite sh
 - **TOTEUTUS AVOIN:** Godot-native Tampereen alueen vector mesh -koe vs tarvittaessa MapLibre Native Android integraatiotesti. Protomaps / PMTiles on mahdollinen paikkatiedon lähdejakelu, ei Godot-karttarendereri.
 - Reaalinen Android-kuva ja eleiden toiminta ovat hyväksyntäportti; automatisoitu APK-koonti ei yksin riitä.
 
+## Työdeltapäivitys 2026-11-09 — ensimmäinen oikea vektorikartan koodikoe
+
+**PROTOTYYPPI / ODOTETAAN ANDROID-KUVATARKISTUSTA:** [PR #15](https://github.com/naatti21/Majakka/pull/15) / haara `feature/native-vector-world-v06` on tehty v0.5.1-kamerakoodin päälle. Se vaihtaa huonon PNG-rasterin väriluokittelun **OSM-paikkatietogeometriasta tehtyihin Godot-mesheihin**. Tiet, vesistöt, viheralueet ja litteät rakennusten pohjat ovat karttatietoa, eivät käsin tehtyä 3D-kaupunkia. Katunimet piirretään erillisinä kameran suuntaisina 2D-teksteinä. Pelin omat 3D-Node/Kaiku/Avatar-objektit ovat edelleen erillisessä kerroksessa.
+
+- Lähde on **pieni Tampereen keskustan OSM Overpass -kysely** (käynnistyksessä, paikallinen JSON-välimuisti, RETRY MAP). Tässä kokeessa ei ole vielä tuotannon karttapalvelinratkaisua.
+- Testattu Godot 4.7.2 -käännös ja kuusi determinististä smoke-testiä, mutta **oikean Overpass-latauksen onnistumista ja visuaalista Android-laatua ei voi vahvistaa CI:llä**.
+- Uusi koodi löytyy `native-client/scripts/vector_world_canvas.gd`. Laatuportin dokumentti on haarassa `native-client/WORLD_MAP_V06_README.md`; yleinen suunnittelutavoite on edelleen [docs/NATIVE-WORLD-V06-MAP-QUALITY.md](docs/NATIVE-WORLD-V06-MAP-QUALITY.md).
+- Tunnettu rajaus: Overpass-way-geometria ei yksin tue kaikkia moniosaisia vesistö-/puistoalueita; osa ranta- ja puistogeometriasta voi puuttua. **Älä väitä testialuetta valmiiksi maailmanlaajuiseksi kartaksi.**
+- **PWA main säilyy ennallaan.** Native-kokeilu on GitHubin erillisessä kehityshaarassa eikä sen PR:ää saa yhdistää ennen käyttäjän visuaalista hyväksyntää.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
