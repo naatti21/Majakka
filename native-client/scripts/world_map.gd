@@ -106,7 +106,7 @@ func _create_ui() -> void:
         _map.reset_view())
     var tilt := _button("TILT +",map_controls,14)
     tilt.pressed.connect(func(): _map.cycle_tilt())
-    var retry := _button("RETRY MAP", map_controls, 13)
+    var retry := _button("RELOAD MAP", map_controls, 13)
     retry.pressed.connect(func(): _map.retry_vector_map())
 
     var dock := ColorRect.new()
@@ -132,7 +132,7 @@ func _create_ui() -> void:
     _selection.name = "SelectionLabel"
     _selection.custom_minimum_size.y = 67
     dock_ui.add_child(_selection)
-    _status = _label("Preparing real vector map of Tampere…", 14, Color("9abbbf"))
+    _status = _label("Loading bundled Tampere vector map…", 14, Color("9abbbf"))
     _status.name = "MapStatus"
     dock_ui.add_child(_status)
     var tabs := HBoxContainer.new()
@@ -144,7 +144,7 @@ func _create_ui() -> void:
     _inventory_tab.pressed.connect(func(): _set_inventory(true))
     dock_ui.add_child(_label("NODES: OSM pilot sites  ·  KAIKU + STATUS: DEMO FIXTURES", 12, Color("dbbc88")))
     dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Source tiles: OpenStreetMap", 13, Color("aac3c4")))
-    dock_ui.add_child(_label("MAP: real OSM vectors · fingers: pan, pinch, orbit, tilt · GPS OFF.", 12, Color("869fa6")))
+    dock_ui.add_child(_label("MAP: offline OSM vectors · pan / pinch / orbit / tilt · GPS OFF.", 12, Color("869fa6")))
     _set_inventory(false)
     # The child map may emit its first status while the UI tree is still being
     # built (especially when cached OSM data loads instantly).
