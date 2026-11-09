@@ -188,9 +188,21 @@ func _decode_and_store(key: String, bytes: PackedByteArray) -> bool:
     _textures[key] = ImageTexture.create_from_image(MAP_STYLE.stylize(img))
     _memory_order.erase(key)
     _memory_order.append(key)
-    while _memory_order.size() > MAX_MEMORY_TILES:
+    # 3D perspective may need more than 28 tiles at once. Evicting a tile
+    # still inside the viewport causes repeated cache reloads and missing patches.
+    # Retain the current visible set; old regions are evicted on next movement.
+    var required_capacity: int = maxi(MAX_MEMORY_TILES, _needed.size() + 8)
+    var protected_checks := 0
+    while _memory_order.size() > required_capacity:
         var oldest: String = _memory_order.pop_front()
-        _textures.erase(oldest)
+        if _needed.has(oldest):
+            _memory_order.append(oldest)
+            protected_checks += 1
+            if protected_checks >= _memory_order.size():
+                break
+        else:
+            _textures.erase(oldest)
+            protected_checks = 0
     _loaded_count += 1
     queue_redraw()
     return true
@@ -217,7 +229,7 @@ func _dispatch() -> void:
         if err != OK:
             _inflight.erase(key)
             request.queue_free()
-    map_status.emit("WORLD GEOMETRY · %d styled tiles · %d fetching" % [_loaded_count, _inflight.size()])
+    map_status.emit("WORLD MAP · %d resident tiles · %d fetching" % [_textures.size(), _inflight.size()])
 
 func _tile_completed(key: String, request: HTTPRequest, result: int, code: int, body: PackedByteArray) -> void:
     _inflight.erase(key)
