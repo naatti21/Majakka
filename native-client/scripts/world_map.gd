@@ -146,6 +146,10 @@ func _create_ui() -> void:
     dock_ui.add_child(_label("© OpenStreetMap contributors  ·  Source tiles: OpenStreetMap", 13, Color("aac3c4")))
     dock_ui.add_child(_label("MAP: real OSM vectors · fingers: pan, pinch, orbit, tilt · GPS OFF.", 12, Color("869fa6")))
     _set_inventory(false)
+    # The child map may emit its first status while the UI tree is still being
+    # built (especially when cached OSM data loads instantly).
+    if _map != null:
+        _on_status(str(_map.get("_vector_status")))
 
 func _label(s: String, size_px: int, color_value: Color) -> Label:
     var label := Label.new()
