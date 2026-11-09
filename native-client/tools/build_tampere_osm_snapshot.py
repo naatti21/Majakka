@@ -44,9 +44,57 @@ def relevant(tags):
     if tags.get("building"): return "building"
     return ""
 
+def fetch_osm_map():
+    """Use the canonical OSM map API for a small one-off build-time rectangle.
+
+    This avoids a heavy ad hoc Overpass search and cannot run on the phone.
+    """
+    import xml.etree.ElementTree as ET
+    # The map API accepts W,S,E,N and includes nodes referenced by each way.
+    west, south, east, north = BBOX[1], BBOX[0], BBOX[3], BBOX[2]
+    url = "https://api.openstreetmap.org/api/0.6/map?bbox=" + ",".join(map(str, (west, south, east, north)))
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "MajakkaNativeVectorSnapshot/0.6.1 (+https://github.com/naatti21/Majakka)",
+        "Accept": "application/xml",
+    })
+    print("Trying canonical OSM map API for bounded snapshot", flush=True)
+    with urllib.request.urlopen(req, timeout=40) as response:
+        body = response.read(20_000_000)
+    if len(body) >= 20_000_000:
+        raise ValueError("OSM map response larger than 20MB limit")
+    root = ET.fromstring(body)
+    nodes = {}
+    for el in root.findall("node"):
+        nodes[el.attrib["id"]] = {
+            "lat": float(el.attrib["lat"]), "lon": float(el.attrib["lon"])
+        }
+    elements = []
+    for way in root.findall("way"):
+        tags = {tag.attrib["k"]: tag.attrib.get("v", "") for tag in way.findall("tag")}
+        if not relevant(tags):
+            continue
+        refs = [nd.attrib.get("ref", "") for nd in way.findall("nd")]
+        if len(refs) < 2 or any(ref not in nodes for ref in refs):
+            continue
+        elements.append({
+            "type": "way", "id": int(way.attrib["id"]),
+            "tags": tags,
+            "geometry": [nodes[ref] for ref in refs],
+        })
+    print("Canonical OSM map response:", len(nodes), "nodes;", len(elements), "candidate ways", flush=True)
+    return {"elements": elements, "osm3s": {"timestamp_osm_base": ""}}, "https://api.openstreetmap.org/api/0.6/map"
+
+
 def fetch():
+    try:
+        source, endpoint = fetch_osm_map()
+        if len(source["elements"]) >= 70:
+            return source, endpoint
+        print("OSM map response insufficient; falling back to Overpass", flush=True)
+    except Exception as exc:
+        print(f"Canonical OSM map API unavailable: {type(exc).__name__}: {exc}", flush=True)
     for endpoint in ENDPOINTS:
-        for attempt in range(2):
+        for attempt in range(1):
             try:
                 req = urllib.request.Request(
                     endpoint,
@@ -58,7 +106,7 @@ def fetch():
                     method="POST",
                 )
                 print(f"Fetching bounded OSM pilot from {endpoint}, attempt {attempt + 1}", flush=True)
-                with urllib.request.urlopen(req, timeout=75) as response:
+                with urllib.request.urlopen(req, timeout=45) as response:
                     blob = response.read(16_000_000)
                     if len(blob) >= 16_000_000:
                         raise ValueError("Source response too large")
