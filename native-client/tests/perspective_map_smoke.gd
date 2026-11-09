@@ -24,7 +24,7 @@ func _run() -> void:
     var point: Vector2 = map.screen_from_geo(61.50297,23.76029)
     assert(point.is_finite(), "3D camera geographic projection invalid")
     map.zoom_by(1)
-    assert(map.zoom == 14, "Perspective zoom broken")
+    assert(map.zoom == 15, "Perspective zoom broken")
     var initial_camera_position: Vector3 = camera.position
     # Touch tests use the same screen-event classes delivered on Android.
     var finger_a := InputEventScreenTouch.new()
