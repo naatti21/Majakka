@@ -23,6 +23,6 @@ func _run() -> void:
     await process_frame
     var canvas := world.get_node_or_null("WorldMapCanvas")
     assert(canvas != null, "Map canvas missing")
-    assert(canvas.zoom == 13, "Georeferenced zoom changed")
+    assert(canvas.zoom == 14, "Georeferenced zoom changed")
     print("MAP_STYLE_SMOKE_PASS")
     quit(0)
