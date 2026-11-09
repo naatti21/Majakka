@@ -76,6 +76,10 @@ func _set_vector_status(message: String) -> void:
     map_status.emit(message)
 
 func _load_vector_cache_or_fetch() -> void:
+    # Headless CI must not require internet or query community Overpass servers.
+    if DisplayServer.get_name() == "headless":
+        _set_vector_status("VECTOR WORLD · offline smoke test")
+        return
     if FileAccess.file_exists(CACHE_PATH):
         var age := int(Time.get_unix_time_from_system()) - int(FileAccess.get_modified_time(CACHE_PATH))
         if age <= CACHE_TTL:
