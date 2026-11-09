@@ -116,7 +116,7 @@ func _start_download() -> void:
     _request.timeout = 40.0
     add_child(_request)
     _request.request_completed.connect(_on_data_loaded)
-    var url := OVERPASS_HOSTS[_request_index] + "?data=" + _query().uri_encode()
+    var url: String = str(OVERPASS_HOSTS[_request_index]) + "?data=" + _query().uri_encode()
     var err := _request.request(url, PackedStringArray(["Accept: application/json"]))
     if err != OK:
         _request_index += 1
