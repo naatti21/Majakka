@@ -51,13 +51,17 @@ Koontikortit ovat hyväksyttyä suunnittelua, eivät todiste valmiista sprite sh
 
 **GitHub main** tarkistettu 9.11.2026: naatti21/Majakka sisältää PWA:n, selainkarttoja ja pelilogiikkaa. Repon README:n ylin versio on **v0.11.1 Place-first Landmark Alpha, 26.10.2026**.
 
-**Native / Godot:** Aiemmassa kehityskeskustelussa viitataan Godot 4.7.2:een, Camera3D:hen, Node Beaconeihin ja v0.5 Perspective World -kokeiluun. Käyttäjän 9.11.2026 kuvassa on tumma 3D-perspektiivinäkymä (mm. FPS 60, 98 styled tiles). Tämä kuvakaappaus ei todista, että sen lähdekoodi on GitHubin main-haarassa. Godot-projektin lähdepaikka ja viimeisin paketti on tarkistettava ennen seuraavaa koodiversiota.
+**Native / Godot:** Todennettu 9.11.2026 **oikea v0.5-lähdehaara** [feature/native-perspective-world-v05](https://github.com/naatti21/Majakka/tree/feature/native-perspective-world-v05) ja sen [native-client](https://github.com/naatti21/Majakka/tree/feature/native-perspective-world-v05/native-client), Godot 4.7.2. Lähdekoodi sisältää `scripts/perspective_world_canvas.gd`, `scripts/map_style.gd`, `scripts/world_map.gd` ja Android CI:n. Tämä Native-prototyyppi on **erillisessä haarassa**, ei main-PWA:n juuressa. v0.5:n rasterikartta käytti 256px OSM-tilestä 128px tyyliteltyä tekstuuria, joka on selvä tarkkuushäviön syy, ja kamerassa oli vain 42°/53°/64° TILT-presetit. Käyttäjän 9.11.2026 kuvassa on tumma perspektiivimaailma, jossa FPS 60 ja 98 styled tiles ovat kuvakaappauksen tilannelukuja eivätkä suorituskykytodistus.
 
 **Älä sekoita:**
 - hyväksytty suunnitelma
 - keskustelussa tehty prototyyppi
 - GitHub mainissa oleva koodi
 - Android-laitteella oikeasti testattu ominaisuus.
+
+## Työdeltapäivitys 2026-11-09 — Native v0.5.1
+
+**PROTOTYYPPI / TESTAUS KESKEN:** Luotu [PR #14](https://github.com/naatti21/Majakka/pull/14), luonnos, joka kohdistuu v0.5:n Native-haaraan eikä PWA-mainiin. Kehityshaara `feature/native-map-clarity-free-camera-v051` säilyttää täyden 256px karttatarkkuuden, lisää mipmap-/anisotrooppisen suodatuksen, sovittaa 3D-viewportin kartta-alueeseen ja lisää mobiiliin yhden sormen panoroinnin sekä kahden sormen zoomin, kierron ja jatkuvan kallistuksen. UI:n HOME palauttaa sijainnin ja kameran. `native-client/WORLD_MAP_V051_README.md` sisältää tarkemman QA-portin. CI/Android-laitteen hyväksyntä tarkistettava erikseen; mitään ei saa kutsua valmiiksi puhelintestiksi ennen näyttöä.
 
 ## Prioriteetit seuraavaan työvaiheeseen
 
