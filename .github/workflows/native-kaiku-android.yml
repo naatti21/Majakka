@@ -10,7 +10,7 @@ on:
       - ".github/workflows/native-kaiku-android.yml"
 
 permissions:
-  contents: read
+  contents: write # bounded snapshot commit to this development branch only
 
 jobs:
   android-debug:
@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -59,6 +61,33 @@ jobs:
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$RUNNER_TEMP/majakka-debug.keystore" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
+
+      - name: Acquire and commit bounded OSM Tampere vector snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s native-client/assets/maps/tampere-vector-pilot.json ]; then
+            python3 native-client/tools/build_tampere_osm_snapshot.py
+            # Persist the actual OSM snapshot as a reviewed file in the branch,
+            # not only in a transient APK / job environment.
+            if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add native-client/assets/maps/tampere-vector-pilot.json
+              git commit -m "data(native): pin verified Tampere OSM vector pilot snapshot"
+              git push origin "HEAD:${{ github.head_ref }}"
+            fi
+          fi
+          test -s native-client/assets/maps/tampere-vector-pilot.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("native-client/assets/maps/tampere-vector-pilot.json")
+          data=json.loads(p.read_text(encoding="utf-8"))
+          assert len(data["elements"]) >= 65
+          assert data["metadata"]["license"] == "ODbL-1.0"
+          print("BUNDLED_OSM_DATA_OK", len(data["elements"]), "ways", p.stat().st_size, "bytes")
+          PY
 
       - name: Import project and test logic
         shell: bash
