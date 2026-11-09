@@ -1,5 +1,8 @@
 # Majakka v0.11.1 — Place-first Landmark Alpha (current, 26 October 2026)
 
+> **Jatkaako uusi keskustelu tätä projektia?** Aloita tiedostosta [PROJECT-HANDOFF.md](PROJECT-HANDOFF.md). Flintailin hyväksytty hahmo- ja animaatiolinja: [Kaiku Visual Pipeline](docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md).
+
+
 **Current test game:** sourced, sparse real-world landmark beacons only.
 Tap **Discover landmarks** to load named OpenStreetMap place candidates for the
 fixed nearby search region. A maximum of three named sites, at least 360 m apart,
