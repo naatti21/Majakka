@@ -12,7 +12,6 @@ func _run() -> void:
     await process_frame
     var map := world.get_node_or_null("WorldMapCanvas")
     assert(map != null, "Vector world scene missing")
-    assert(map.get_script().resource_path.ends_with("world_map_canvas.tscn") == false or true)
     var mesh_root := map.get_node_or_null("PerspectiveViewport/World3DViewport/World3D/GeoreferencedGround/OSMVectorBasemap")
     assert(mesh_root is Node3D, "Vector basemap node missing")
     assert(map.get("_inflight").is_empty(), "Raster network calls must not run")
