@@ -63,11 +63,21 @@ Koontikortit ovat hyväksyttyä suunnittelua, eivät todiste valmiista sprite sh
 
 **PROTOTYYPPI / TESTAUS KESKEN:** Luotu [PR #14](https://github.com/naatti21/Majakka/pull/14), luonnos, joka kohdistuu v0.5:n Native-haaraan eikä PWA-mainiin. Kehityshaara `feature/native-map-clarity-free-camera-v051` säilyttää täyden 256px karttatarkkuuden, lisää mipmap-/anisotrooppisen suodatuksen, sovittaa 3D-viewportin kartta-alueeseen ja lisää mobiiliin yhden sormen panoroinnin sekä kahden sormen zoomin, kierron ja jatkuvan kallistuksen. UI:n HOME palauttaa sijainnin ja kameran. `native-client/WORLD_MAP_V051_README.md` sisältää tarkemman QA-portin. Godot 4.7.2 CI **LÄPI** 9.11.2026: viisi headless smoke-testiä (logic, Flintail, world map, perspective map, map style) sekä Android debug APK -export; [onnistunut Actions-ajo](https://github.com/naatti21/Majakka/actions/runs/42635806102). **Fyysinen Android-laaduntarkastus PUUTTUU**: kartan terävyys, vapaat kosketuseleet, FPS/muisti, latautuvat tiilet sekä Kaiku/Node-kohdistus on testattava puhelimessa. Buildin onnistuminen ei ole käyttäjän hyväksyntä eikä lupa mergeen.
 
+## Päätösdelta 2026-11-09 — v0.5.1 Android-kuva hylätty
+
+**HYLÄTTY / VISUAALINEN LAATUPORTTI:** käyttäjä asensi Native v0.5.1 APK:n ja toimitti kuvakaappauksen. 60 FPS -tilalukemasta huolimatta näkymä jäi kelvottoman pikselöityneeksi ja rasterimaiseksi. Kadut, rakennukset ja nimet piirtyvät osaksi viistoksi venytettyä tekstuuria. Parannettu 256 px / mipmap -versio ei poistanut rakenteellista ongelmaa. **Älä rakenna seuraavaa versiota samaa rasteriväriluokittelua paikkaamalla.**
+
+- [PR #14](https://github.com/naatti21/Majakka/pull/14) **suljettu ilman mergeä** 9.11.2026. Sen kameran liikekoodia saa käyttää uudessa kokeilussa vasta testauksen kautta.
+- Uusi laatumäärittely: [docs/NATIVE-WORLD-V06-MAP-QUALITY.md](docs/NATIVE-WORLD-V06-MAP-QUALITY.md).
+- **Seuraava toteutuksen tutkimussuunta:** todelliseen paikkatietoon perustuva vektorirenderöinti (selkeät tiet, puistot, vedet, nimet), erillisinä pelin 3D-Node/Kaiku/pelaaja. Ei kaupungin rakennusten käsin 3D-mallintamista.
+- **TOTEUTUS AVOIN:** Godot-native Tampereen alueen vector mesh -koe vs tarvittaessa MapLibre Native Android integraatiotesti. Protomaps / PMTiles on mahdollinen paikkatiedon lähdejakelu, ei Godot-karttarendereri.
+- Reaalinen Android-kuva ja eleiden toiminta ovat hyväksyntäportti; automatisoitu APK-koonti ei yksin riitä.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
-2. Korjaa Tampereen kartan luettavuus ja tarkkuus.
-3. Toteuta/varmenna vapaa kamera ja mobiilieleet.
+2. Rakenna uusi Tampereen vektorikarttapohjan kokeilu; rasterivärikartan v0.5.1 on hylätty.
+3. Siirrä/testaa vapaan kameran mobiilieleet uuteen karttarendereriin.
 4. Koeaja yksi laadukas Node ja Flintail-karttaesitys; vertaa 2.5D:tä ja kevyttä 3D:tä.
 5. Mittaa suorituskyky oikealla Android-laitteella.
 6. Kehitä loput animaatiot, kokoelmakortit, Guardian- ja Reveal-esitykset asteittain.
