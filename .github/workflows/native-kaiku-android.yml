@@ -85,7 +85,7 @@ jobs:
       - name: Upload APK test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: majakka-world-map-v0.3-android-debug
+          name: majakka-vector-world-v0.6-android-debug
           path: native-client/build/majakka-kaiku-lab-debug.apk
           if-no-files-found: error
           retention-days: 7
