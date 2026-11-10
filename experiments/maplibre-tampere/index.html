@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#06121a">
+<meta name="description" content="Majakka MapLibre Tampere - itsenäinen, mobiilikäyttöinen vektorikartan ja kameran laatukoe.">
+<title>MAJAKKA — Tampere Vector Map Lab</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#eaf3f4;background:#07121b;font-synthesis:none}
+*{box-sizing:border-box}
+html,body{height:100%;height:100dvh;margin:0;overflow:hidden}
+button,select{font:inherit;color:inherit}
+#map{position:fixed;inset:0;background:#0a1d29;touch-action:none}
+#map:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,13,20,.34),transparent 18%,transparent 75%,rgba(4,13,20,.18))}
+.top{position:fixed;top:0;left:0;right:0;z-index:3;padding:calc(env(safe-area-inset-top) + 13px) 16px 15px;background:linear-gradient(180deg,rgba(3,14,22,.96) 0%,rgba(3,14,22,.85) 75%,rgba(3,14,22,0) 100%);pointer-events:none}
+.brand{color:#79e7de;letter-spacing:.20em;font-weight:750;font-size:12px}
+.title{font-size:19px;font-weight:600;margin:4px 0 4px;letter-spacing:.015em}
+.subtitle{font-size:11px;color:#b0cacf;line-height:1.5}
+.side{position:fixed;right:12px;top:calc(env(safe-area-inset-top) + 141px);display:flex;flex-direction:column;gap:8px;z-index:4}
+button,.choice{min-height:46px;background:rgba(6,23,34,.90);border:1px solid rgba(118,216,209,.30);border-radius:12px;box-shadow:0 3px 16px rgba(0,0,0,.22);cursor:pointer}
+.side button{width:54px;padding:9px 3px;text-align:center;font-weight:650}
+.side .wide{font-size:11px}
+button:focus-visible,select:focus-visible{outline:2px solid #72eee4;outline-offset:2px}
+.bottom{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 12px);left:12px;right:12px;z-index:4;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.panel{pointer-events:auto;background:rgba(5,21,31,.92);border:1px solid rgba(121,220,213,.23);border-radius:14px;padding:12px 13px;box-shadow:0 6px 24px rgba(0,0,0,.18);backdrop-filter:blur(10px)}
+.panel .head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+.panel label{font-size:11px;font-weight:650;letter-spacing:.05em;color:#bddfdd}
+small{color:#9eb7bc;font-size:10px}
+select{display:block;width:100%;padding:9px;background:#122c36;color:#ecfafa;border:1px solid #426c75;border-radius:9px;font-size:14px}
+.status{font-size:12px;line-height:1.5;min-height:20px;color:#c0e1df}
+.status.error{color:#ffd5ad}
+.meta{display:flex;justify-content:space-between;gap:10px;color:#a7c0c4;font-size:10px;font-variant-numeric:tabular-nums}
+.note{font-size:11px;color:#91adb4;line-height:1.35}
+.maplibregl-control-container .maplibregl-ctrl-bottom-right{bottom:0;right:0}
+.maplibregl-ctrl-attrib.maplibregl-compact{background:rgba(3,12,19,.72)!important;border-radius:6px}
+.maplibregl-ctrl-attrib a,.maplibregl-ctrl-attrib{color:#16232b!important}
+#blocking{display:none;position:fixed;inset:24% 18px auto;z-index:6;padding:18px;background:#101f2c;border:1px solid #bd8a5e;border-radius:14px;color:#f8d6b9;font-size:14px;line-height:1.5;box-shadow:0 10px 40px #0008}
+#blocking.show{display:block}
+@media (min-width:780px){.top{padding-left:26px}.bottom{max-width:385px;left:20px}.side{right:20px}.title{font-size:23px}}
+@media (max-height:650px){.side{top:calc(env(safe-area-inset-top) + 90px)}.panel{padding:9px}.note{display:none}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Tampereen interaktiivinen vektorikartta"></div>
+<header class="top">
+  <div class="brand">MAJAKKA / MAP LAB</div>
+  <div class="title">Tampere — Vector World</div>
+  <div class="subtitle">Karttamoottorin laatutesti v0.1 · ei peliä, ei GPS:ää, ei hahmoja</div>
+</header>
+<div class="side" aria-label="Kameran ohjaus">
+  <button id="zoomIn" aria-label="Lähennä">+</button>
+  <button id="zoomOut" aria-label="Loitonna">−</button>
+  <button id="home" class="wide" aria-label="Keskitä takaisin Tampereelle">HOME</button>
+  <button id="view" class="wide" aria-label="Vaihda 2D- ja 3D-kamerakulmaa">2D</button>
+  <button id="north" class="wide" aria-label="Palauta pohjoinen ylös">N ↑</button>
+</div>
+<div class="bottom">
+  <div class="panel">
+    <div class="head"><label for="style">KARTTATYYLI</label><small>Vaihda suoraan ajossa</small></div>
+    <select id="style" aria-label="Valitse karttatyyli">
+      <option value="fiord">Fiord · tumma</option>
+      <option value="dark">Dark · tumma kontrasti</option>
+      <option value="liberty">Liberty · kirkas vertailu</option>
+    </select>
+    <p id="status" class="status" role="status" aria-live="polite">Avataan karttamoottoria…</p>
+    <div class="meta"><span id="camera">—</span><span>OSM · OpenFreeMap · MapLibre</span></div>
+  </div>
+  <div class="note">1 sormi: siirrä · 2 sormea: lähennä, kierrä ja kallista. Tämä testaa vain karttaa. Verkkoyhteys tarvitaan.</div>
+</div>
+<div id="blocking" role="alert"></div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+const $ = (id) => document.getElementById(id);
+const status = $('status');
+const blocking = $('blocking');
+const styleUrls = Object.freeze({
+  fiord:'https://tiles.openfreemap.org/styles/fiord',
+  dark:'https://tiles.openfreemap.org/styles/dark',
+  liberty:'https://tiles.openfreemap.org/styles/liberty'
+});
+const TAMPERE = [23.7606,61.4982]; // city center, longitude first
+let map;
+let styleReady = false;
+let loadWatch;
+let errorCount = 0;
+let shownFailure = false;
+const setStatus = (message, error=false) => {
+  status.textContent = message;
+  status.classList.toggle('error',error);
+};
+function fail(message) {
+  shownFailure = true;
+  clearTimeout(loadWatch);
+  setStatus(message,true);
+  blocking.textContent = message + ' Tarkista verkkoyhteys ja selaimen WebGL-tuki. Uudelleenlataus yrittää uudestaan.';
+  blocking.classList.add('show');
+}
+function armWatchdog() {
+  clearTimeout(loadWatch);
+  loadWatch = setTimeout(() => { if (!styleReady) fail('Karttatyyli tai karttatiilet eivät lataudu.'); }, 22000);
+}
+function cameraInfo() {
+  if (!map) return;
+  $('camera').textContent = 'zoom ' + map.getZoom().toFixed(1) + ' · kallistus ' + Math.round(map.getPitch()) + '° · suunta ' + Math.round((map.getBearing()+360)%360) + '°';
+  $('view').textContent = map.getPitch() < 10 ? '3D' : '2D';
+}
+function setStyle(which) {
+  if (!map || !Object.hasOwn(styleUrls,which)) return;
+  styleReady = false; errorCount = 0; shownFailure = false;
+  blocking.classList.remove('show');
+  setStatus('Ladataan ' + which + '-vektorikarttaa…');
+  armWatchdog();
+  map.setStyle(styleUrls[which]);
+}
+if (!maplibregl.supported()) {
+  fail('Tämä selain ei tue MapLibre-kartan vaatimaa WebGL2-grafiikkaa.');
+} else {
+  try {
+    map = new maplibregl.Map({
+      container:'map',
+      style:styleUrls.fiord,
+      center:TAMPERE,
+      zoom:13.65,
+      minZoom:9,
+      maxZoom:19,
+      pitch:45,
+      maxPitch:70,
+      bearing:-16,
+      antialias:true,
+      attributionControl:true,
+      dragRotate:true,
+      touchZoomRotate:true,
+      touchPitch:true,
+      cooperativeGestures:false,
+      renderWorldCopies:false,
+      failIfMajorPerformanceCaveat:false
+    });
+    armWatchdog();
+    map.on('load', () => { styleReady = true; clearTimeout(loadWatch); setStatus('Kartta valmis · kierrä, kallista ja zoomaa vapaasti.'); cameraInfo(); });
+    map.on('styledata', () => {
+      if (map.isStyleLoaded()) {
+        styleReady = true;
+        clearTimeout(loadWatch);
+        if (!shownFailure) setStatus('Vektorikartta näkyy · arvioi katujen ja veden selkeys.');
+      }
+    });
+    map.on('error', (event) => {
+      errorCount += 1;
+      console.error('MapLibre map error', event?.error || event);
+      if (errorCount === 1) setStatus('Karttadatan latauksessa virhe. Tarkista yhteys.',true);
+      if (errorCount >= 8 && !styleReady) fail('Karttatyylin tai karttadatan lataus epäonnistui.');
+    });
+    map.on('move', cameraInfo);
+    map.on('idle', () => {
+      if (!shownFailure && styleReady) setStatus('Kartta ladattu · arvioi maiseman luettavuus myös kallistettuna.');
+    });
+    $('style').addEventListener('change', (event) => setStyle(event.target.value));
+    $('zoomIn').addEventListener('click', () => map.zoomTo(Math.min(19,map.getZoom()+1),{duration:320}));
+    $('zoomOut').addEventListener('click', () => map.zoomTo(Math.max(9,map.getZoom()-1),{duration:320}));
+    $('home').addEventListener('click', () => map.flyTo({center:TAMPERE,zoom:13.65,pitch:45,bearing:-16,essential:true,duration:850}));
+    $('view').addEventListener('click', () => map.easeTo({pitch:map.getPitch()<10?48:0,duration:500,essential:true}));
+    $('north').addEventListener('click', () => map.easeTo({bearing:0,duration:480,essential:true}));
+    cameraInfo();
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) map.resize(); });
+  } catch (err) {
+    console.error('MapLibre initialization failed',err);
+    fail('Karttamoottorin käynnistys epäonnistui.');
+  }
+}
+</script>
+</body>
+</html>
