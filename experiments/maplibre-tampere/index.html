@@ -12,6 +12,7 @@
 *{box-sizing:border-box}
 html,body{height:100%;height:100dvh;margin:0;overflow:hidden}
 button,select{font:inherit;color:inherit}
+button[aria-pressed="true"]{border-color:#6ee6d5;color:#9bfff3;background:#14353c}
 #map{position:fixed;inset:0;background:#0a1d29;touch-action:none}
 #map:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,13,20,.34),transparent 18%,transparent 75%,rgba(4,13,20,.18))}
 .top{position:fixed;top:0;left:0;right:0;z-index:3;padding:calc(env(safe-area-inset-top) + 13px) 16px 15px;background:linear-gradient(180deg,rgba(3,14,22,.96) 0%,rgba(3,14,22,.85) 75%,rgba(3,14,22,0) 100%);pointer-events:none}
@@ -50,7 +51,7 @@ select{display:block;width:100%;padding:9px;background:#122c36;color:#ecfafa;bor
 <header class="top">
   <div class="brand">MAJAKKA / MAP LAB</div>
   <div class="title">Tampere — Vector World</div>
-  <div class="subtitle">Karttamoottorin laatutesti v0.1 · ei peliä, ei GPS:ää, ei hahmoja</div>
+  <div class="subtitle">Majakka Nocturne v0.2 · kartta + valonlähteiden DEMO, ei GPS:ää</div>
 </header>
 <div class="side" aria-label="Kameran ohjaus">
   <button id="zoomIn" aria-label="Lähennä">+</button>
@@ -58,19 +59,21 @@ select{display:block;width:100%;padding:9px;background:#122c36;color:#ecfafa;bor
   <button id="home" class="wide" aria-label="Keskitä takaisin Tampereelle">HOME</button>
   <button id="view" class="wide" aria-label="Vaihda 2D- ja 3D-kamerakulmaa">2D</button>
   <button id="north" class="wide" aria-label="Palauta pohjoinen ylös">N ↑</button>
+  <button id="lights" class="wide" aria-label="Näytä tai piilota demo-valonlähteet" aria-pressed="true">VALOT ✓</button>
 </div>
 <div class="bottom">
   <div class="panel">
     <div class="head"><label for="style">KARTTATYYLI</label><small>Vaihda suoraan ajossa</small></div>
     <select id="style" aria-label="Valitse karttatyyli">
-      <option value="fiord">Fiord · tumma</option>
-      <option value="dark">Dark · tumma kontrasti</option>
+      <option value="majakka" selected>Majakka · oma tumma</option>
+      <option value="dark">Dark · alkuperäinen</option>
+      <option value="fiord">Fiord · alkuperäinen</option>
       <option value="liberty">Liberty · kirkas vertailu</option>
     </select>
     <p id="status" class="status" role="status" aria-live="polite">Avataan karttamoottoria…</p>
     <div class="meta"><span id="camera">—</span><span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a> · OpenFreeMap</span></div>
   </div>
-  <div class="note">1 sormi: siirrä · 2 sormea: lähennä, kierrä ja kallista. Tämä testaa vain karttaa. Verkkoyhteys tarvitaan.</div>
+  <div class="note">1 sormi: siirrä · 2 sormea: lähennä, kierrä ja kallista. Sininen Node ja vaaleanvioletti Kaiku ovat pelkkiä DEMO-valopisteitä, eivät oikeita pelihahmoja tai paikkoja. VALOT-painikkeella näet kartan myös ilman niitä. Verkko tarvitaan.</div>
 </div>
 <div id="blocking" role="alert"></div>
 <script type="module">
@@ -80,11 +83,24 @@ const $ = (id) => document.getElementById(id);
 const status = $('status');
 const blocking = $('blocking');
 const styleUrls = Object.freeze({
+  majakka:'https://tiles.openfreemap.org/styles/dark',
   fiord:'https://tiles.openfreemap.org/styles/fiord',
   dark:'https://tiles.openfreemap.org/styles/dark',
   liberty:'https://tiles.openfreemap.org/styles/liberty'
 });
 const TAMPERE = [23.7606,61.4982]; // city center, longitude first
+// Fixed *fictional* demonstration lights, not verified Nodes/Kaiku sightings.
+// Local pixels never substitute for actual OSM / map geometry.
+const DEMO_LIGHTS = {
+  type:'FeatureCollection',
+  features:[
+    {type:'Feature',geometry:{type:'Point',coordinates:[23.7603,61.4991]},properties:{kind:'node',label:'Node · DEMO'}},
+    {type:'Feature',geometry:{type:'Point',coordinates:[23.7684,61.4969]},properties:{kind:'kaiku',label:'Kaiku · DEMO'}}
+  ]
+};
+const LIGHT_LAYERS = ['majakka-glow-wide','majakka-glow-near','majakka-light-core','majakka-light-label'];
+let activeStyle = 'majakka';
+let lightsEnabled = true;
 let map;
 let styleReady = false;
 let loadWatch;
@@ -110,13 +126,103 @@ function cameraInfo() {
   $('camera').textContent = 'zoom ' + map.getZoom().toFixed(1) + ' · kallistus ' + Math.round(map.getPitch()) + '° · suunta ' + Math.round((map.getBearing()+360)%360) + '°';
   $('view').textContent = map.getPitch() < 10 ? '3D' : '2D';
 }
+function applyMajakkaPalette() {
+  // Safe layer-specific recoloring of the EXISTING Dark vector style.
+  // This is a deliberate dark-teal variant, not an exact pixel-average
+  // of the Fiord/Dark styles (their source layer structures may differ).
+  let changed = 0;
+  for (const layer of map.getStyle().layers || []) {
+    const id = layer.id.toLowerCase();
+    let prop, color;
+    if (layer.type === 'background') { prop='background-color'; color='#0a1820'; }
+    else if (layer.type === 'fill') {
+      prop='fill-color';
+      if (/water|lake|ocean|sea/.test(id)) color='#15323e';
+      else if (/park|wood|forest|grass|landcover|green|garden/.test(id)) color='#1b3430';
+      else if (/building/.test(id)) color='#20323a';
+    } else if (layer.type === 'line') {
+      prop='line-color';
+      if (/waterway|river|stream/.test(id)) color='#305969';
+      else if (/bridge|motorway|trunk|primary/.test(id)) color='#61747a';
+      else if (/road|highway|transportation|street|path|secondary|tertiary/.test(id)) color='#455e65';
+    } else if (layer.type === 'symbol' && /label|place|road|street|settlement/.test(id)) {
+      // Don't recolor every symbol: maintain readable data labels.
+      prop='text-color'; color='#b5c9c9';
+    }
+    if (prop && color) {
+      try { map.setPaintProperty(layer.id, prop, color); changed++; }
+      catch (err) { console.debug('Palette layer skipped',layer.id,err); }
+    }
+  }
+  console.info('Majakka Nocturne palette applied to',changed,'map layers');
+}
+function attachDemoLights() {
+  if (map.getSource('majakka-demo-lights')) return;
+  map.addSource('majakka-demo-lights',{type:'geojson',data:DEMO_LIGHTS});
+  const source='majakka-demo-lights';
+  const color=['match',['get','kind'],'node','#41ebdc','kaiku','#e4a7ff','#41ebdc'];
+  const firstSymbol=(map.getStyle().layers || []).find(layer=>layer.type==='symbol')?.id;
+  const before=firstSymbol || undefined;
+  map.addLayer({
+    id:'majakka-glow-wide',type:'circle',source,
+    paint:{
+      'circle-color':color,
+      'circle-radius':['interpolate',['linear'],['zoom'],10,20,13,80,16,150,19,220],
+      'circle-blur':1.05,'circle-opacity':0.17,
+      'circle-pitch-alignment':'map','circle-pitch-scale':'map'
+    }
+  },before);
+  map.addLayer({
+    id:'majakka-glow-near',type:'circle',source,
+    paint:{
+      'circle-color':color,
+      'circle-radius':['interpolate',['linear'],['zoom'],10,10,13,28,16,58,19,90],
+      'circle-blur':0.9,'circle-opacity':0.28,
+      'circle-pitch-alignment':'map','circle-pitch-scale':'map'
+    }
+  },before);
+  map.addLayer({
+    id:'majakka-light-core',type:'circle',source,
+    paint:{
+      'circle-color':color,'circle-radius':7,'circle-opacity':0.91,
+      'circle-stroke-color':'#dcfff9','circle-stroke-width':1.5,
+      'circle-pitch-alignment':'map'
+    }
+  });
+  map.addLayer({
+    id:'majakka-light-label',type:'symbol',source,
+    layout:{
+      'text-field':['get','label'],
+      'text-size':11,
+      'text-offset':[0,1.9],
+      'text-anchor':'top',
+      'text-allow-overlap':false
+    },
+    paint:{
+      'text-color':'#d8f6ed','text-halo-color':'#071720',
+      'text-halo-width':1.5
+    }
+  });
+  updateLights();
+}
+function updateLights() {
+  if (!map) return;
+  for (const id of LIGHT_LAYERS) {
+    if (map.getLayer(id)) map.setLayoutProperty(id,'visibility',lightsEnabled?'visible':'none');
+  }
+  $('lights').textContent=lightsEnabled?'VALOT ✓':'VALOT ×';
+  $('lights').setAttribute('aria-pressed',String(lightsEnabled));
+}
 function setStyle(which) {
   if (!map || !Object.hasOwn(styleUrls,which)) return;
+  activeStyle = which;
   styleReady = false; errorCount = 0; shownFailure = false;
   blocking.classList.remove('show');
   setStatus('Ladataan ' + which + '-vektorikarttaa…');
   armWatchdog();
-  map.setStyle(styleUrls[which]);
+  // diff:false guarantees the unmodified Dark returns after the Majakka
+  // palette, and all light layers are reattached on style.load.
+  map.setStyle(styleUrls[which],{diff:false});
 }
 const hasWebGL2 = (() => {
   try { return !!document.createElement('canvas').getContext('webgl2'); }
@@ -128,7 +234,7 @@ if (!hasWebGL2) {
   try {
     map = new maplibregl.Map({
       container:'map',
-      style:styleUrls.fiord,
+      style:styleUrls.majakka,
       center:TAMPERE,
       zoom:13.65,
       minZoom:9,
@@ -146,7 +252,16 @@ if (!hasWebGL2) {
       failIfMajorPerformanceCaveat:false
     });
     armWatchdog();
-    map.on('load', () => { styleReady = true; clearTimeout(loadWatch); setStatus('Kartta valmis · kierrä, kallista ja zoomaa vapaasti.'); cameraInfo(); });
+    map.on('style.load', () => {
+      try {
+        if (activeStyle === 'majakka') applyMajakkaPalette();
+        attachDemoLights();
+      } catch (err) {
+        console.error('Majakka palette / demo-light setup failed',err);
+        setStatus('Kartta toimii, mutta Majakka-valotehoste ei latautunut.',true);
+      }
+    });
+    map.on('load', () => { styleReady = true; clearTimeout(loadWatch); setStatus('Kartta valmis · kokeile Nocturne-tyyliä ja VALOT-painiketta.'); cameraInfo(); });
     map.on('styledata', () => {
       if (map.isStyleLoaded()) {
         styleReady = true;
@@ -162,9 +277,10 @@ if (!hasWebGL2) {
     });
     map.on('move', cameraInfo);
     map.on('idle', () => {
-      if (!shownFailure && styleReady) setStatus('Kartta ladattu · arvioi maiseman luettavuus myös kallistettuna.');
+      if (!shownFailure && styleReady) setStatus('Kokeile tyyliä ja VALOT-painiketta · valot ovat prototyyppi, eivät oikeaa 3D-valaistusta.');
     });
     $('style').addEventListener('change', (event) => setStyle(event.target.value));
+    $('lights').addEventListener('click', () => { lightsEnabled = !lightsEnabled; updateLights(); });
     $('zoomIn').addEventListener('click', () => map.zoomTo(Math.min(19,map.getZoom()+1),{duration:320}));
     $('zoomOut').addEventListener('click', () => map.zoomTo(Math.max(9,map.getZoom()-1),{duration:320}));
     $('home').addEventListener('click', () => map.flyTo({center:TAMPERE,zoom:13.65,pitch:45,bearing:-16,essential:true,duration:850}));
