@@ -115,7 +115,11 @@ function setStyle(which) {
   armWatchdog();
   map.setStyle(styleUrls[which]);
 }
-if (!maplibregl.supported()) {
+const hasWebGL2 = (() => {
+  try { return !!document.createElement('canvas').getContext('webgl2'); }
+  catch { return false; }
+})();
+if (!hasWebGL2) {
   fail('Tämä selain ei tue MapLibre-kartan vaatimaa WebGL2-grafiikkaa.');
 } else {
   try {
