@@ -126,6 +126,14 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **SEURAAVA LAATUPORTTI:** käyttäjän Android-testissä arvioidaan erityisesti oman tumman tyylin luettavuutta ja valoefektin hillittyä vaikuttavuutta, sekä verrataan vaihtoehtoon Dark. Jos toimiva, sen jälkeen yksi laadukas 3D-Node/Kaiku geokoordinaattiin sidottuna. Lisäohje ja tekninen status: [experiments/maplibre-tampere/README.md](experiments/maplibre-tampere/README.md).
 
+## 2026-11-10 — Android-kuvapohjainen Nocturne v0.3 -kontrastilukko
+
+**KÄYTTÄJÄPALAUTE:** Majakka Nocturne v0.2 on käyttökelpoisempi karttapohja kuin alkuperäinen Dark, mutta **yleistä maapohjaa halutaan vielä tummemmaksi**, jotta pelin omien Nodejen ja Kaikujen hehkut erottuvat. Alkuperäinen Dark kadottaa tiet ja nimet liikaa. Violetin Kaiku-DEMO-hehkun vaikutus on käyttäjän mielestä lupaava. Kartan luettavuus ei saa kadota pimeään.
+
+**TOTEUTETTU SELAINKOKEESEEN / ANDROID-UUSINTA-ARVIO AVOIN:** [MapLibre-kokeilu](https://naatti21.github.io/Majakka/experiments/maplibre-tampere/) Nocturne v0.3 tummentaa eri maastoluokat yksitellen, mutta vahvistaa nimenomaan teiden ja paikannimien kontrastia; text-halo korjattu. Valikossa oma **Dark · tiet ja tekstit näkyviin** -vertailu sekä alkuperäinen Dark ja Fiord. Tyylinvaihdon vanha jumiutunut `Ladataan ...` -tilaviesti korjattu `style.load`-käsittelyllä. DEMO-Node-/Kaiku-hehkut säilyvät erillisinä karttaan sidottuina kerroksina. Karttatyylin kerros-ID:t on tarkistettu OpenFreeMapin Dark-lähde-JSON:sta ja JavaScript tarkistettu syntaksiltaan; lopullista puhelimen visuaalista hyväksyntää ei vielä ole.
+
+**TUOTANTOPERIAATE:** tumma pohja, **omien peliobjektien tuoma valo** ja **aina luettavat kadut/nimet**. Älä ratkaise tunnelmaa himmentämällä kaikkia kartan kerroksia samalla suotimella. Ei koko ruudun brightness-filtteriä, joka tummentaisi myös tekstit ja valonlähteet.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
