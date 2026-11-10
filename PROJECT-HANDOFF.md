@@ -103,6 +103,21 @@ Koontikortit ovat hyväksyttyä suunnittelua, eivät todiste valmiista sprite sh
 - MapLibre GL JS tukee WebGL-custom-layer `renderingMode:"3d"` ja siihen integroitua Three.js-/Babylon.js-mallia, mutta **peliobjektien todellinen kuormitus ja toteutus on validoitava kokeessa**, eikä sitä luvata valmiiksi. Godotin ja MapLibren yhdistäminen voi olla hankalaa; älä lukitse lopullista moottoria ennen prototyyppiä.
 - Säilytä hyväksytty Flintail-identiteetti ja esityskortit; **kaikujen suunnittelu ei ole hylätty**. Muutosta ei tehdä julkaistuun main-PWA:n pelilogiikkaan.
 
+## 2026-11-10 — MapLibre Tampere -erillinen selainkokeilu
+
+**TOTEUTETTU / ODOTTAA PUHELIMEN KUVALLISTA HYVÄKSYNTÄÄ:** Uusi karttamoottorin kokeilu julkaistu GitHub Pagesissa:
+
+**https://naatti21.github.io/Majakka/experiments/maplibre-tampere/**
+
+Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/index.html), ohje: [experiments/maplibre-tampere/README.md](experiments/maplibre-tampere/README.md).
+
+- **MapLibre GL JS 6.15.0**, OpenFreeMapin oikeat OSM-vektoritiilet; tyylit Fiord / Dark / Liberty, oletuksena tumma Fiord.
+- Käyttöliittymä mobiili edellä: pan, pinch, rotate, tilt, HOME, 2D/3D ja kompassin suunta, ladataan verkon yli. Ei tilipyyntöjä eikä GPS:ää.
+- Ei vielä Nodeja, Kaikuja, pelaajaa eikä Godot-3D-integraatiota; testin tarkoitus on **karttapohjan laatu ennen hahmoja**.
+- Ero aiempiin hylättyihin toteutuksiin: ei rasterin pikseliväriluokittelua, ei omia karttameshejä, ei Overpass-hakuja Androidissa, vaan karttakäyttöön suunniteltu valmis moottori.
+- Testi on **erillisessä alihakemistossa**, julkaistua pääpelin logiikkaa ei muutettu. Kartta on **online-only**, eikä demo itsessään lupaa offline-välimuistia.
+- **Laatuportti auki:** käyttäjän oikean Androidin kuvakaappaus, teiden ja rantojen selkeys, kaunis yötyyli, vapaa kamera sekä käytettävyys. Ei luvata valmiiksi testaamatta. Jos kartta on hyvä, seuraava koe on yksi geokoordinaatteihin sidottu 3D-pelielementti. Ei kokonaista hahmoarmeijaa tähän vaiheeseen.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
