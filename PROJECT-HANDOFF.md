@@ -118,6 +118,14 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 - Testi on **erillisessä alihakemistossa**, julkaistua pääpelin logiikkaa ei muutettu. Kartta on **online-only**, eikä demo itsessään lupaa offline-välimuistia.
 - **Laatuportti auki:** käyttäjän oikean Androidin kuvakaappaus, teiden ja rantojen selkeys, kaunis yötyyli, vapaa kamera sekä käytettävyys. Ei luvata valmiiksi testaamatta. Jos kartta on hyvä, seuraava koe on yksi geokoordinaatteihin sidottu 3D-pelielementti. Ei kokonaista hahmoarmeijaa tähän vaiheeseen.
 
+## 2026-11-10 — Majakka Nocturne -paletti ja Node/Kaiku-valon suunta
+
+**KÄYTTÄJÄN PALAUTE / HYVÄKSYTTY TAIDESUUNTA:** MapLibre-kokeilun Fiord ja Dark ovat molemmat käyttökelpoisia vertailuja; mieluisin karttapohja on **niiden välissä oleva tumma, selkeä tyyli**. Jos oma välimuoto ei onnistu, **Dark** on varavalinta. Pelin omat **Nodet ja Kaikut valaisevat kartan**. Tämä ei tarkoita pimeyttä, jossa kartan tiet ja rannat lakkaavat näkymästä. Ei rakennusten käsin 3D-mallinnusta.
+
+**TOTEUTETTU KOKEILUSIVULLE, VIELÄ AVOIN PUHELINTARKISTUS:** [MapLibre-karttakoe](https://naatti21.github.io/Majakka/experiments/maplibre-tampere/) v0.2 käyttää oletuksena **Majakka Nocturne** -palettia (Dark-pohja, sinivihreät vesistöt, metsäalueet, tiet ja hillityt rakennuspohjat). Alkuperäiset Dark, Fiord ja Liberty ovat edelleen vertailutyylejä. Kartalla kaksi erikseen **DEMO**-merkittyä Node-/Kaiku-valoa (turkoosi/violetti), pehmeä karttaan sidottu sädekehä, ja **VALOT**-kytkin vertailemaan karttapohjaa ennen ja jälkeen. Tämä on tarkoituksella kevyt **2D/2.5D-hehkukerros**, ei oikea 3D-valonlaskenta, animoitu hahmo eikä tosiasiallinen Nodejen paikkatietorekisteri. Hyväksytyt Flintail-kortit säilyvät erillään.
+
+**SEURAAVA LAATUPORTTI:** käyttäjän Android-testissä arvioidaan erityisesti oman tumman tyylin luettavuutta ja valoefektin hillittyä vaikuttavuutta, sekä verrataan vaihtoehtoon Dark. Jos toimiva, sen jälkeen yksi laadukas 3D-Node/Kaiku geokoordinaattiin sidottuna. Lisäohje ja tekninen status: [experiments/maplibre-tampere/README.md](experiments/maplibre-tampere/README.md).
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
