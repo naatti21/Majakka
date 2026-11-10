@@ -1,8 +1,23 @@
-# MAJAKKA — MapLibre Tampere / kartan laatukoe v0.2
+# MAJAKKA — MapLibre Tampere / kartan laatukoe v0.3
 
 **Päiväys:** 2026-11-10  
 **Status:** Selainkokeilu julkaistu, visuaalinen Android-käyttäjätesti vielä auki.  
 **Mobiililinkki:** https://naatti21.github.io/Majakka/experiments/maplibre-tampere/
+
+## Päivitys 2026-11-10 — Nocturne v0.3: syvempi maa, luettavat nimet ja tiet
+
+**Käyttäjän Android-kuvapalaute:** Nocturne v0.2:n yleispohja saisi olla vielä tummempi, jotta Kaiku-/Node-valot erottuvat. Sen sijaan OpenFreeMapin alkuperäinen Dark on **liian tumma viivoille ja nimille**: kadut ja kadunnimet katoavat. V0.2:n violetti DEMO-hehku oli käyttäjän mielestä onnistunut.
+
+**TOTEUTETTU KARTTAKOKEESEEN (Androidin uutta visuaalista hyväksyntää odotetaan):**
+- Oletuksena Majakka Nocturne v0.3: ympäristön värit erikseen tummentuneet (maa #071016, vesistöt #0e2530, viheralueet #132822, talopohjat #16262e).
+- Teiden viivat väritetään erikseen tumman vaaleansinisiksi (#46616b ja pääväylät #5f7881), niin että kartta ei muutu harmaaksi valoisaksi laataksi.
+- Tiennimet, paikannimet ja vesistönimet käsitellään omissa kerroksissaan: vaalea teksti ja tumma tekstihalo, ei läpinäkymätöntä tummaa tekstiä tummaa maata vasten.
+- Valikossa myös **Dark – tiet ja tekstit näkyviin**: alkuperäisen Darkin lähes musta maapohja, mutta korjatut teiden ja nimien kontrastit. Alkuperäinen Dark säilyy testivertailuna, samoin Fiord ja Liberty.
+- Käytetään MapLibren todellisia Dark-tyylin layer-ID:itä; tarkistettu 22/22 maasto-/tiekerrosta ja 13 nimikerrosta OpenFreeMap Darkin lähdetyylimäärittelystä.
+- Korjattu tilaviestilogiikkaa tyylinvaihdossa: `style.load` kuittaa karttatyylin ladatuksi, ettei UI jää virheellisesti tekstiin `Ladataan majakka-vektorikarttaa…`.
+- DEMO-Node ja DEMO-Kaiku sekä pehmeät maastoon sidotut valokeilat säilyvät entisellään; eivät ole 3D-hahmoja tai oikeaa dynaamista valonlaskentaa.
+
+**LAATUPORTTI:** varmista oikean Android-laitteen kuvasta, että kadut ja nimet luetaan zoomilla noin 13–17 ja kallistuksella 0–70°, ettei valo peitä mitään ja että maailma pysyy halutun tummana. Jos tumma paletti on hyvä, vasta seuraavaksi rakennetaan pelin oikea Node/Kaiku.
 
 ## Päivitys 2026-11-10 — Majakka Nocturne ja valopisteet
 
