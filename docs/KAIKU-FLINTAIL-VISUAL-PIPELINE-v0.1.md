@@ -118,6 +118,21 @@ Polut ovat **ehdotuksia**, eivät vielä olemassa olevia tiedostoja tai päätö
 
 **Versionhallinnan sääntö:** Kunkin hyväksytyn hahmopiirteen tai pelimekaniikkapäätöksen jälkeen päivitetään vastaava Markdown sekä lähdeassetit, jos ne ovat saatavilla. Merkitse aina **HYVÄKSYTTY / PROTOTYYPPI / AVOIN / TOTEUTETTU / TESTATTU**; älä sotke statuksia.
 
+## 8A. Päätöspäivitys 2026-11-11 — tarkat looppaavat Kaiku-kokoelmakortit
+
+**HYVÄKSYTTY SUUNNITTELUVAATIMUS:** Käyttäjä vahvisti uudelleen, että jokaisella Kaikulla on **visuaalisesti tarkka, viimeistelty ja jatkuvasti saumattomasti looppaava animaatiokortti** Inventory / Collection -näkymässä. Käyttäjä kutsui efektiä aiemmin GIFiksi; **GIF tarkoittaa tässä käyttökokemusta, ei pakollista GIF-tiedostomuotoa.**
+
+- **Laatu:** korkeatasoinen master-kuvitus / 3D-renderöity tai muuten laadukas hahmo, tarkat piirteet, värit, karva-/pintayksityiskohdat, lajikohtainen valaistus ja kehystys. Ei karkeaa karttahahmon venytystä korttiin.
+- **Jatkuvuus:** sama `Species → Form → Instance → Presentation` -identiteetti. Flintailin hyväksytyt korvatupsut, kaksiosainen valohäntä, etujalan merkki ja turkin/Resonancen värilukot tarkistetaan Art Masterista. Yksityiskohtien muuntelua ei sallita animaation eri vaiheissa.
+- **Elävä loop:** noin **4–6 sekuntia** alkuperäisen kortin tavoitteen mukaisesti. Esimerkiksi rauhallinen hengitys, katseen muutos, korvien ja hännän pieni liike sekä Resonance-kuvioiden hillitty sykintä. Ensimmäinen ja viimeinen ruutu/asento täsmäävät ilman näkyvää nykäystä. Ei pakollista jatkuvaa suurta hahmoliikettä.
+- **Kuvajärjestelmä:** kortille riittävästi tarkkuutta myös suuremmassa Inspect-käytössä; alkuperäinen **720p** on *vähimmäiskokeilun vertailutaso*, ei kokoelman lopullinen laadun yläraja. Valitaan responsiivinen esityskoko ja mitataan oikean puhelimen kuvanlaatu.
+- **Formaatti:** ensisijainen koe on **äänetön, autoplay-looppaava video (WebM ja/tai MP4 yhteensopivuuden mukaan)**, jossa on `muted`, `loop`, `playsinline`, staattinen `poster` ja toimiva varakuva; vaihtoehtona korkealaatuinen sprite sheet / muu tehokas kuvasarjarenderöinti. **Älä käytä raskasta animoitua GIFiä oletuksena**, jos sama laatu saadaan kevyemmin.
+- **Mobiilitehokkuus:** alkuperäinen alustava tavoite oli noin **1–3 Mt per video tai 0,5–1 Mt per sprite sheet**, mutta näitä ei pidä luvata, ennen kuin todellinen kortti ja laatu on testattu. Lataa vain näkyvät kortit, keskeytä animaatio näkymän ulkopuolella, huomioi `prefers-reduced-motion` ja säilytä täysin luettava still-versio.
+- **Kortin rakenne:** hahmo + tarkka kehys + nimi, forma, resonanssi-/harvinaisuustiedot ja muu pelin jo määrittelemä tieto. Kortin tekstin ja käyttöliittymän pitää pysyä terävänä; älä pakkaa kaikkea korttitekstiä videopikseleihin. Animoitu taide voidaan asettaa kerrokseksi sen alle.
+- **Erota käyttötapaukset:** `Map 3D Kaiku` on optimoitu suorituskykyyn ja karttasidontaan; `Animated Collection Card` visuaaliseen laatutasoon; `Reveal` voi olla erillinen harvinainen näyttävä sisääntulo; `Inspect` voi myöhemmin käyttää interaktiivista 3D-mallia. Yksi hahmoidentiteetti, mutta kaikkea ei tarvitse renderöidä samalla tavalla.
+
+**Tuotantoportti:** ensin **yksi Flintailin masteriin perustuva täysin valmis animaatiokortti**, joka testataan fyysisellä Androidilla: kuvanlaatu, 4–6 s saumaton toisto, lataus, akkukulutus, muistin käyttö ja käytettävyys. **Ei tämän dokumentin perusteella toteutettu** eikä hyväksytty lopulliseksi videoksi.
+
 ## 9. Avoin tarkistettava ennen tuotantoa
 
 - Alkuperäiset kaksi referenssi-PNG:tä tulee vielä viedä repon asset-kansioon, jotta kuvat säilyvät keskusteluista riippumatta.
