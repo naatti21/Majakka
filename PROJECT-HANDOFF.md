@@ -134,6 +134,14 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **TUOTANTOPERIAATE:** tumma pohja, **omien peliobjektien tuoma valo** ja **aina luettavat kadut/nimet**. Älä ratkaise tunnelmaa himmentämällä kaikkia kartan kerroksia samalla suotimella. Ei koko ruudun brightness-filtteriä, joka tummentaisi myös tekstit ja valonlähteet.
 
+## 2026-11-11 — World v0.4: oikeat 3D-Node/Kaiku ja orgaaninen 3D-verkosto
+
+**KÄYTTÄJÄN HYVÄKSYMÄ SUUNTA:** Valittu karttapohja on **Dark · tiet ja tekstit näkyviin**; sen päälle rakennetaan **aidot, elävät 3D-Nodet ja 3D-Kaikut**. Nodejen väliset linjat leijuvat **orgaanisina 3D-säikeinä maanpinnan yläpuolella**, ei suorina viivoina karttapinnassa. Jos Nodejen yhdistäminen muodostaa pelilogiikan mukaisen peittoalueen, se leijuu **läpinäkyvänä, orgaanisena pilvenä maan yllä**, ei maalattuna karttapolygoniin. Kartan maantiede pysyy MapLibren vastuulla; **ei rakennusten käsinmallinnusta**. Pelin oma valo valaisee tummaa mutta luettavaa maailmaa.
+
+**SPEC TALLENNETTU:** [docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md](docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md).
+
+**VERSIOJÄRJESTYS:** v0.4:n pieni koe = valittu karttapohja + kevyempi käyttöliittymä + yksi aito geosidottu 3D-Node + yksi 3D-Flintailin prototyyppi. v0.5 = kahden Noden orgaaninen ilmassa kulkeva 3D-yhteyssäie. v0.6+ = peittoalueen pelisäännön mukainen orgaaninen kelluva pilvikenttä. **TILAT:** konseptisuunta hyväksytty, implementointi ja mobiili-hyväksyntä auki. Testejä ei saa sekoittaa hyväksyttyihin valmiisiin hahmo-3D-assetteihin.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
