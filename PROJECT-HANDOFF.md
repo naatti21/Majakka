@@ -148,6 +148,19 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **TILANNE:** Tämä on **hyväksytty suunnittelumäärittely**, ei väite valmiiksi tuotetuista videokorteista. Päivitetty yksityiskohtainen ohje: [docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md](docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md) kohdassa 8A.
 
+## 2026-11-11 — World v0.4 ensimmäinen oikea 3D-Node koodattu
+
+**TOTEUTETTU KARTTAKOKEESEEN / ANDROIDIN KUVALLINEN TESTI AVOIN:** [World v0.4 testisivu](https://naatti21.github.io/Majakka/experiments/maplibre-world-v04/) ja [lähdekoodi](experiments/maplibre-world-v04/) on lisätty erillisenä kokeena. Käyttäjän hyväksymä **Dark · tiet ja tekstit näkyviin** on oletuskartta, aiemmin hyväksyttyä v0.3-kokeilua ei korvattu.
+
+- **Aito geosidottu 3D-Node:** Three.js:llä generoitu moniulotteinen turkoosi Node (oktaedri, kuoriverkko, rengaskehät, animaatio) MapLibre GL JS:n `custom` WebGL2-kerroksessa `renderingMode:'3d'`, jaettu karttakamera, `MercatorCoordinate` ja metrimittakaava. Vain yksi fiktiivinen **DEMO-koordinaatti** Tampereella, ei käyttäjän sijaintia tai live-peliohjausta.
+- Karttatiet, katujen ja paikannimien kontrasti säilyy. Maaperän Node-hehku on erillinen kevyt 2D-efekti **3D-Noden lisänä**, eikä sitä väitetä maaston fyysiseksi valaistukseksi.
+- Käyttöliittymä: pienennetty kartan testi-HUD, HOME, 2D/3D, kameraohjaus ja NODE näkyviin/pois.
+- Mukana erillinen `tests/world-v04.test.mjs` (JS-syntaksit, luettava karttatyyli, aidon 3D-geometrian ja geokoordinaattimuunnoksen läsnäolo, virhetilan karttafallback). GitHub Actions kooditestit ovat laadun ensimmäinen portti, **eivät todellinen Android-kuva- tai suorituskykytesti**.
+- Ohjeistus ja tunnetut puutteet: [experiments/maplibre-world-v04/README.md](experiments/maplibre-world-v04/README.md).
+- **Ei vielä toteutettu:** hyväksyttyihin Flintail-referensseihin perustuva 3D-Kaiku, sen tarkka looppaava 4–6 s animoitu kokoelmakortti, orgaaniset ilmassa leijuvat Node-yhteyssäikeet tai aluepilvi. Näiden järjestys pysyy hyväksytyn [v0.4-suunnitelman](docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md) mukaisena.
+
+**SEURAAVA PORTTI:** käyttäjä avaa World v0.4:n puhelimella, varmistaa 3D-Noden oikean geosidonnan ja grafiikan sekä antaa palautteen. Vasta tämän jälkeen tehdään Kaikun varsinainen 3D-ratkaisu hyväksytyn hahmodesignin mukaisesti.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
