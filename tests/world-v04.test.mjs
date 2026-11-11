@@ -35,7 +35,7 @@ test('Node is true georeferenced 3D geometry, not a billboard', () => {
   assert.match(model, /WebGLRenderer/);
   assert.match(model, /renderer\.autoClear\s*=\s*false/);
   assert.doesNotMatch(model, /THREE\.Sprite|CanvasTexture|Billboard/);
-  assert.match(page, /import\('\.\/node-3d\.js'\)/);
+  assert.match(page, /import\('\.\/node-3d\.js\?v=041'\)/);
 });
 
 test('an isolated 3D failure leaves MapLibre map available', () => {
@@ -44,4 +44,15 @@ test('an isolated 3D failure leaves MapLibre map available', () => {
   assert.match(page, /nodeToggle/);
   assert.match(model, /onRemove\(\)/);
   assert.match(model, /renderer\?\.dispose\(\)/);
+});
+
+test('v0.4.1 Node has a genuinely opaque faceted 3D body, not just glow', () => {
+  assert.match(model, /const crystal = new THREE\.Mesh\(/);
+  assert.match(model, /new THREE\.MeshBasicMaterial\(\{\s*vertexColors: true/);
+  assert.match(model, /transparent: false, opacity: 1, depthTest: true, depthWrite: true/);
+  assert.match(model, /Float32BufferAttribute\(colorAttr, 3\)/);
+  assert.match(model, /this\.core\.position\.y = 34 \+ Math\.sin/);
+  assert.match(model, /const glow = new THREE\.Mesh/);
+  assert.match(model, /opacity: 0\.028/);
+  assert.match(page, /Nocturne · 3D World v0\.4\.1/);
 });
