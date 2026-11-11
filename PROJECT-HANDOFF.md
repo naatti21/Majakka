@@ -142,6 +142,12 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **VERSIOJÄRJESTYS:** v0.4:n pieni koe = valittu karttapohja + kevyempi käyttöliittymä + yksi aito geosidottu 3D-Node + yksi 3D-Flintailin prototyyppi. v0.5 = kahden Noden orgaaninen ilmassa kulkeva 3D-yhteyssäie. v0.6+ = peittoalueen pelisäännön mukainen orgaaninen kelluva pilvikenttä. **TILAT:** konseptisuunta hyväksytty, implementointi ja mobiili-hyväksyntä auki. Testejä ei saa sekoittaa hyväksyttyihin valmiisiin hahmo-3D-assetteihin.
 
+## 2026-11-11 — Kaiku-kortit laadukkaina saumattomasti looppaavina animaatioina
+
+**KÄYTTÄJÄN VAHVISTAMA VAATIMUS:** Kaikujen Inventory / Collection -kortit ovat **erittäin tarkkoja, korkealaatuisia ja animaatioltaan saumattomasti looppaavia**. Käyttäjä sanoi aluksi “GIF”, mutta ei vaadi vanhaa GIF-tiedostomuotoa. Suositeltava tekninen kokeilu on lyhyt **mykistetty WebM/MP4-loop + staattinen poster** tai tarvittaessa tehokas sprite sheet; tarkista mobiili-yhteensopivuus ja tiedostokoot. Aiemmin hyväksytyn Flintail Visual Pipelinen kortin tavoite **4–6 s ja lähtötasona 720p** säilyy, mutta kortin lopullinen laatu voidaan tehdä korkeammaksi jos se on tarpeen. Kartan 3D-Kaiku ja kokoelman huipputarkka animoitu kortti ovat **eri esityskerrokset samalle hahmoidentiteetille**, eivät kaksi eri hahmoa. Ei animaatiossa vaihtelevia korvatupsuja/häntää/merkkejä. Mobiilissa näkyvät kortit toistetaan, näkymän ulkopuoliset keskeytetään, liikkeen vähentämistoive huomioidaan.
+
+**TILANNE:** Tämä on **hyväksytty suunnittelumäärittely**, ei väite valmiiksi tuotetuista videokorteista. Päivitetty yksityiskohtainen ohje: [docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md](docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md) kohdassa 8A.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
