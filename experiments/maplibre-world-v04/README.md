@@ -5,6 +5,21 @@
 
 **Avaa:** https://naatti21.github.io/Majakka/experiments/maplibre-world-v04/
 
+## 2026-11-11 — v0.4.1: liian läpinäkyvän Noden korjaus
+
+**Käyttäjän fyysiset Android-kuvat v0.4:stä:** kartta, kamera ja geosidottu Node näkyivät, mutta Node oli **liian läpinäkyvä ja heikkokontrastinen**. Keskimmäinen ydin näytti haalealta, ja wireframe-renkaat sekä puoliläpinäkyvä valopylväs kilpailivat sen kanssa. Tämä on **visuaalinen hylkäys / korjauspyyntö**, ei v0.4:n hyväksyntä.
+
+**TOTEUTETTU v0.4.1, ANDROID-VISUAALITESTI AVOIN:**
+- Noden pääydin on nyt `MeshBasicMaterial`-materiaalia, jossa `transparent:false`, `opacity:1`, `depthWrite:true` ja `depthTest:true`. Kahdeksan tahkoa on toteutettu itsenäisillä, näkyvän turkoosin eri sävyisillä vertex-väreillä. Tämä on edelleen **aitoa kolmiulotteista geometrianäyttöä**, ei kuvatiedosto tai litteä marker.
+- Uusi kiinteä kirkas sisäkide tukee siluettia; kaksi paksumpaa rengasta on myös läpinäkymätöntä geometriaa.
+- Hento ulkokuori jää läpikuultavaksi tukiefektiksi (`opacity:0.40`), mutta etualan ydin ei.
+- Valokeila `opacity:0.12`, maahan piirtyvä rengas `opacity:0.19`, ympäröivä 3D-aura `opacity:0.028`. Valot eivät enää saa peittää itse esinettä.
+- Korkeus madallettu 42 metristä 34 metriin ja leijuntaliikkeen amplitudi 2,3 metristä 1,6 metriin, jotta ydin ja sen valo pysyvät yhtenäisenä kokonaisuutena.
+- Karttatyyli, geosidottu piste, MapLibre-kamera ja perus-NODE-kytkin pysyvät ennallaan. HTML-vahvistus `World v0.4.1` ja 3D-moduulille uusi cache-versio `?v=041`.
+- `tests/world-v04.test.mjs` sisältää uuden varmistuksen kiinteästä kristallimateriaalista. GitHub-kooditestit menivät läpi, **mutta tämä ei todista vielä puhelimella näkyvää 3D-laatua**.
+
+**Laatuportti:** tärkein tarkistus seuraavassa Android-kuvassa on kiinteä luettava kristallisiluetti kallistuksilla 0–70° ja kameran pyörityksen aikana. Läpikuultaviksi jätetään vain halo/valopilari, ei koko Nodea. Kun laatu on oikea, edetään suunniteltuun Flintailin 3D-prototyyppiin ja myöhemmin tarkkaan looppaavaan Kaiku-korttiin.
+
 ## Mikä on oikeasti toteutettu
 
 - **Kartta**: käyttäjän valitsema `Dark · tiet ja tekstit näkyviin` oletustyyli, MapLibre GL JS 6.15.0 + OpenFreeMap Dark, alkuperäisen v0.3-kokeen kanssa sama katu- ja nimikontrastin määritys.
