@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#070d12">
+<meta name="description" content="Majakka World v0.4 — oikea geosidottu kolmiulotteinen Node, sulava MapLibre-kartta.">
+<title>MAJAKKA — World v0.4 / 3D Node</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#070d12;color:#e3f3f3;font-synthesis:none}
+*{box-sizing:border-box}html,body{height:100%;height:100dvh;overflow:hidden;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+#map{position:fixed;inset:0;background:#0c0c0c;touch-action:none}
+.top{position:fixed;left:0;right:0;top:0;z-index:3;pointer-events:none;padding:calc(env(safe-area-inset-top) + 14px) 15px 40px;background:linear-gradient(180deg,rgba(4,12,17,.93),rgba(4,12,17,.60) 56%,transparent)}
+.brand{font-size:11px;letter-spacing:.22em;font-weight:800;color:#7be2db}
+.title{font-size:17px;font-weight:660;margin:4px 0 0}
+.top small{font-size:10px;color:#a5bbc0}
+.controls{position:fixed;z-index:4;right:12px;top:calc(env(safe-area-inset-top) + 128px);display:flex;flex-direction:column;gap:8px}
+.controls button{min-height:46px;min-width:51px;border:1px solid #48787a;border-radius:12px;background:rgba(5,22,30,.91);box-shadow:0 4px 12px #0005;font-size:15px;font-weight:700}
+.controls .small{font-size:11px}
+.controls button[aria-pressed="false"]{border-color:#34464d;color:#91a6af}
+button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
+.bottom{position:fixed;z-index:4;bottom:calc(env(safe-area-inset-bottom) + 11px);left:12px;right:12px;pointer-events:none}
+.panel{pointer-events:auto;padding:12px 14px;border:1px solid #315258;border-radius:14px;background:rgba(6,19,27,.90);box-shadow:0 5px 18px #0006;backdrop-filter:blur(10px)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-head strong{letter-spacing:.08em;color:#9be5df;font-size:11px}
+.chip{font-size:10px;color:#bbcad0;border:1px solid #46646b;padding:3px 7px;border-radius:20px}
+#status{font-size:12px;color:#d4e6e6;min-height:18px;line-height:1.4;margin:7px 0}
+#status.error{color:#ffd9a6}
+.hint{color:#9eb6b9;font-size:10px;line-height:1.5}
+.camera{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:7px;color:#92b0b5;font-size:10px}
+.camera a{color:#b0deda}
+.maplibregl-ctrl-bottom-right,.maplibregl-ctrl-bottom-left{bottom:calc(env(safe-area-inset-bottom) + 156px)!important}
+.maplibregl-ctrl-attrib.maplibregl-compact{background:#091821b8!important}
+@media(min-width:700px){.bottom{width:390px;left:16px}.controls{right:18px;top:130px}.title{font-size:21px}.maplibregl-ctrl-bottom-right{bottom:8px!important}}
+@media(max-height:650px){.controls{top:calc(env(safe-area-inset-top) + 95px)}.hint{display:none}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Tampereen kartta ja geosidottu 3D-Node"></div>
+<div class="top">
+  <div class="brand">MAJAKKA / WORLD LAB</div>
+  <div class="title">Nocturne · 3D World v0.4</div>
+  <small>Dark · tiet ja tekstit näkyviin · vain yksi DEMO-Node</small>
+</div>
+<div class="controls" aria-label="Kamera ja 3D-testin valinnat">
+ <button id="zoomIn" aria-label="Lähennä">+</button>
+ <button id="zoomOut" aria-label="Loitonna">−</button>
+ <button id="home" class="small" aria-label="Palaa demo-Nodeen">HOME</button>
+ <button id="pitch" class="small" aria-label="Vaihda kartan kallistusta">2D</button>
+ <button id="north" class="small" aria-label="Palauta pohjoinen ylös">N ↑</button>
+ <button id="nodeToggle" class="small" aria-label="Kytke 3D-Node päälle tai pois" aria-pressed="true">NODE ✓</button>
+</div>
+<div class="bottom">
+ <section class="panel" aria-label="Karttakokeen tila">
+  <div class="panel-head"><strong>3D NODE / GEO-ANCHOR</strong><span class="chip">PROTOTYYPPI</span></div>
+  <p id="status" role="status" aria-live="polite">Ladataan karttaa…</p>
+  <div class="hint">Yksi sormi: siirrä · kaksi: nipistä, kierrä ja kallista. Valaiseva turkoosi Node on oikeaa 3D-geometriaa, mutta sen paikka on vain DEMO. Ei GPS:ää.</div>
+  <div class="camera"><span id="camera">—</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
+ </section>
+</div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+const $ = id => document.getElementById(id);
+const NODE_COORDS = [23.7603, 61.4991]; // fixed DEMO point; NOT a verified place or player location
+const center = NODE_COORDS;
+const styleURL = 'https://tiles.openfreemap.org/styles/dark';
+let map, nodeLayer, nodeVisible = true, mapReady = false, nodeUnavailable = false;
+const setStatus = (value, bad=false) => { $('status').textContent=value; $('status').classList.toggle('error',bad); };
+function cameraInfo() {
+ if(!map)return;
+ $('camera').textContent = 'z '+map.getZoom().toFixed(1)+' · kallistus '+Math.round(map.getPitch())+'° · suunta '+Math.round((map.getBearing()+360)%360)+'°';
+ $('pitch').textContent = map.getPitch()<10?'3D':'2D';
+}
+const ROAD_PAINT = {
+ 'highway_path':{'line-color':'#38535c','line-opacity':0.83},
+ 'highway_minor':{'line-color':'#46616b','line-opacity':0.90},
+ 'highway_major_casing':{'line-color':'#2b414a','line-opacity':0.95},
+ 'highway_major_inner':{'line-color':'#5f7881','line-opacity':0.95},
+ 'highway_major_subtle':{'line-color':'#445d65','line-opacity':0.93},
+ 'highway_motorway_casing':{'line-color':'#324751','line-opacity':0.97},
+ 'highway_motorway_inner':{'line-color':'#657f87','line-opacity':0.94},
+ 'highway_motorway_subtle':{'line-color':'#47616b','line-opacity':0.92},
+ 'road_pier':{'line-color':'#29404a'},
+ 'waterway':{'line-color':'#2c5361'},
+ 'railway':{'line-color':'#465a61'},
+ 'railway_minor':{'line-color':'#40545a'},
+ 'railway_transit':{'line-color':'#40545a'}
+};
+function applyReadableDark() {
+ const paint = {...ROAD_PAINT};
+ const road = {'text-color':'#bdced0','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.35};
+ const place = {'text-color':'#abbfc2','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.2};
+ const water = {'text-color':'#87afbb','text-opacity':0.93,'text-halo-color':'#071119','text-halo-width':1.2};
+ for(const layer of map.getStyle().layers||[]){
+  if(layer.type!=='symbol')continue;
+  if(layer.id.startsWith('highway_name_'))paint[layer.id]=road;
+  else if(layer.id.startsWith('place_'))paint[layer.id]=place;
+  else if(layer.id==='water_name')paint[layer.id]=water;
+ }
+ for(const [id,properties] of Object.entries(paint)){
+  if(!map.getLayer(id))continue;
+  for(const [key,value] of Object.entries(properties)){
+   try{map.setPaintProperty(id,key,value);}catch(error){console.debug('Unapplied paint',id,key,error);}
+  }
+ }
+}
+function addGroundGlow() {
+ map.addSource('majakka-node-demo',{type:'geojson',data:{type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:NODE_COORDS},properties:{name:'Node / DEMO'}}]}});
+ const firstLabel=(map.getStyle().layers||[]).find(layer=>layer.type==='symbol')?.id;
+ map.addLayer({
+  id:'node-glow-ground',type:'circle',source:'majakka-node-demo',
+  paint:{
+   'circle-color':'#40dccf',
+   'circle-radius':['interpolate',['linear'],['zoom'],12,18,15,50,17,88,19,115],
+   'circle-blur':1.05,'circle-opacity':0.18,
+   'circle-pitch-alignment':'map','circle-pitch-scale':'map'
+  }
+ },firstLabel);
+ map.addLayer({
+  id:'node-glow-inner',type:'circle',source:'majakka-node-demo',
+  paint:{
+   'circle-color':'#9cfbf0',
+   'circle-radius':['interpolate',['linear'],['zoom'],12,8,15,23,17,37,19,55],
+   'circle-blur':1.0,'circle-opacity':0.18,
+   'circle-pitch-alignment':'map','circle-pitch-scale':'map'
+  }
+ },firstLabel);
+}
+function updateNodeVisible(){
+ const visible=nodeVisible?'visible':'none';
+ for(const layer of ['node-glow-ground','node-glow-inner']){
+  if(map?.getLayer(layer))map.setLayoutProperty(layer,'visibility',visible);
+ }
+ nodeLayer?.setEnabled(nodeVisible);
+ $('nodeToggle').textContent=nodeVisible?'NODE ✓':'NODE ×';
+ $('nodeToggle').setAttribute('aria-pressed',String(nodeVisible));
+}
+function addTrue3DNode() {
+ import('./node-3d.js').then(({createNode3DLayer})=>{
+  if(!map || map.getLayer('majakka-georeferenced-node-3d'))return;
+  const layer=createNode3DLayer(maplibregl,NODE_COORDS,(error)=>{
+   nodeUnavailable=true;
+   setStatus('3D-renderöinnissä virhe. Kartta toimii edelleen.',true);
+  });
+  const firstLabel=(map.getStyle().layers||[]).find(l=>l.type==='symbol')?.id;
+  try{
+   map.addLayer(layer,firstLabel);
+   nodeLayer=layer;
+   updateNodeVisible();
+   if(mapReady)setStatus('3D-Node ladattu · pyöritä ja kallista karttaa.');
+  }catch(error){
+   console.error('3D Node layer failed',error);
+   nodeUnavailable=true;
+   setStatus('3D-kerros ei käynnistynyt. Kartta toimii edelleen.',true);
+  }
+ }).catch(error=>{
+  console.error('Node 3D module failed',error);
+  nodeUnavailable=true;
+  setStatus('3D-moduulia ei saatu ladattua. Tarkista verkkoyhteys.',true);
+ });
+}
+const webgl2=(()=>{
+ try{return Boolean(document.createElement('canvas').getContext('webgl2'));}
+ catch{return false;}
+})();
+if(!webgl2){
+ setStatus('WebGL2 ei ole käytettävissä tällä selaimella.',true);
+}else{
+ try{
+  map=new maplibregl.Map({
+   container:'map',style:styleURL,center,zoom:16.0,minZoom:10,maxZoom:19,
+   pitch:55,maxPitch:70,bearing:-15,
+   antialias:true,canvasContextAttributes:{antialias:true},
+   dragRotate:true,touchZoomRotate:true,touchPitch:true,
+   cooperativeGestures:false,renderWorldCopies:false
+  });
+  const timeout=setTimeout(()=>{if(!mapReady)setStatus('Karttatiilien lataus kestää. Tarkista yhteys.',true);},22000);
+  map.on('style.load',()=>{
+   try{
+    applyReadableDark();
+    addGroundGlow();
+    addTrue3DNode();
+    mapReady=true;
+    clearTimeout(timeout);
+    setStatus('Kartta näkyy · ladataan 3D-Nodea…');
+   }catch(error){
+    console.error('MapLibre style setup failed',error);
+    setStatus('Karttatasojen käyttöönotossa virhe.',true);
+   }
+  });
+  map.on('error',event=>{
+   console.error('MapLibre error',event?.error||event);
+   if(!mapReady)setStatus('Karttadatan latauksessa ongelma.',true);
+  });
+  map.on('move',cameraInfo);
+  map.on('idle',()=>{
+   if(mapReady && !nodeUnavailable && nodeLayer && nodeVisible){
+    setStatus('Oikea 3D-Node näkyy kartalla · testaa kameran liikkeet.');
+   }
+  });
+  $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
+  $('zoomOut').onclick=()=>map.zoomTo(Math.max(10,map.getZoom()-1),{duration:300});
+  $('home').onclick=()=>map.flyTo({center,zoom:16,pitch:55,bearing:-15,duration:750,essential:true});
+  $('pitch').onclick=()=>map.easeTo({pitch:map.getPitch()<10?55:0,duration:450,essential:true});
+  $('north').onclick=()=>map.easeTo({bearing:0,duration:430,essential:true});
+  $('nodeToggle').onclick=()=>{nodeVisible=!nodeVisible;updateNodeVisible();};
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)map.resize();});
+  cameraInfo();
+ }catch(error){
+  console.error('MapLibre initialization failed',error);
+  setStatus('Karttamoottori ei käynnistynyt.',true);
+ }
+}
+</script>
+</body>
+</html>
