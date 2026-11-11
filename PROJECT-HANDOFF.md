@@ -161,6 +161,14 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **SEURAAVA PORTTI:** käyttäjä avaa World v0.4:n puhelimella, varmistaa 3D-Noden oikean geosidonnan ja grafiikan sekä antaa palautteen. Vasta tämän jälkeen tehdään Kaikun varsinainen 3D-ratkaisu hyväksytyn hahmodesignin mukaisesti.
 
+## 2026-11-11 — World v0.4.1: Noden läpinäkyvyyskorjaus Android-palautteesta
+
+**KÄYTTÄJÄN VISUAALIPALAUTE v0.4:** Android-kuvissa turkoosi geosidottu 3D-Node näkyi ja kartta säilyi luettavana, mutta itse Node vaikutti **liian läpinäkyvältä**. Tämä ei ole lopullisen 3D-Noden hyväksyntä.
+
+**TOTEUTETTU KOKEILUSIVULLE v0.4.1 / UUSI ANDROID-LAATUPORTTI AUKI:** [MapLibre World v0.4.1](https://naatti21.github.io/Majakka/experiments/maplibre-world-v04/?v=041) muuttaa 3D-kristalliytimen oikeasti **läpinäkymättömäksi** (`transparent:false`, `depthWrite:true`, täysi opacity), erottelee kirkkaat kiinteät pinnat facet-värein, vahvistaa renkaiden geometriaa ja heikentää läpikuultavaa valokeilaa/maakehää. Noden keskus on lähempänä maata ja leijunta rauhallisempi. Kartan Dark-readable-tyyli, geosidonta ja MapLibre-kamera säilyvät. Koodin regressiotestit sisältävät nimenomaan kiinteän 3D-ytimen tarkistuksen. **Fyysisen Androidin arvio v0.4.1:stä puuttuu edelleen.**
+
+**LUKITTU LAATUPERIAATE:** Noden ja myöhemmin Kaikun varsinainen 3D-ruumis tulee nähdä kiinteänä, luettavana siluettina joka kulmasta. Glow, energiavirrat, peittoaluepilvet ja ympäröivät elementit voivat olla läpikuultavia, **itse pelin olio ei näytä hologrammivarjolta** ellei kyse ole tarkoituksellisesta erikoismuodosta. [World v0.4 README / QA](experiments/maplibre-world-v04/README.md).
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
