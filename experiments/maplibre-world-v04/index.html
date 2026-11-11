@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#070d12">
-<meta name="description" content="Majakka World v0.4 — oikea geosidottu kolmiulotteinen Node, sulava MapLibre-kartta.">
-<title>MAJAKKA — World v0.4 / 3D Node</title>
+<meta name="description" content="Majakka World v0.4.1 — kiinteä geosidottu kolmiulotteinen Node, sulava MapLibre-kartta.">
+<title>MAJAKKA — World v0.4.1 / Solid 3D Node</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#070d12;color:#e3f3f3;font-synthesis:none}
@@ -41,8 +41,8 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
 <div id="map" role="application" aria-label="Tampereen kartta ja geosidottu 3D-Node"></div>
 <div class="top">
   <div class="brand">MAJAKKA / WORLD LAB</div>
-  <div class="title">Nocturne · 3D World v0.4</div>
-  <small>Dark · tiet ja tekstit näkyviin · vain yksi DEMO-Node</small>
+  <div class="title">Nocturne · 3D World v0.4.1</div>
+  <small>Dark · luettava kartta · kiinteä 3D-Node / DEMO</small>
 </div>
 <div class="controls" aria-label="Kamera ja 3D-testin valinnat">
  <button id="zoomIn" aria-label="Lähennä">+</button>
@@ -56,7 +56,7 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
  <section class="panel" aria-label="Karttakokeen tila">
   <div class="panel-head"><strong>3D NODE / GEO-ANCHOR</strong><span class="chip">PROTOTYYPPI</span></div>
   <p id="status" role="status" aria-live="polite">Ladataan karttaa…</p>
-  <div class="hint">Yksi sormi: siirrä · kaksi: nipistä, kierrä ja kallista. Valaiseva turkoosi Node on oikeaa 3D-geometriaa, mutta sen paikka on vain DEMO. Ei GPS:ää.</div>
+  <div class="hint">Yksi sormi: siirrä · kaksi: nipistä, kierrä ja kallista. Turkoosin Noden ydin on läpinäkymätön 3D-esine; renkaat ja valo ovat erillisiä. Paikka on vain DEMO. Ei GPS:ää.</div>
   <div class="camera"><span id="camera">—</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
  </section>
 </div>
@@ -139,7 +139,7 @@ function updateNodeVisible(){
  $('nodeToggle').setAttribute('aria-pressed',String(nodeVisible));
 }
 function addTrue3DNode() {
- import('./node-3d.js').then(({createNode3DLayer})=>{
+ import('./node-3d.js?v=041').then(({createNode3DLayer})=>{
   if(!map || map.getLayer('majakka-georeferenced-node-3d'))return;
   const layer=createNode3DLayer(maplibregl,NODE_COORDS,(error)=>{
    nodeUnavailable=true;
@@ -150,7 +150,7 @@ function addTrue3DNode() {
    map.addLayer(layer,firstLabel);
    nodeLayer=layer;
    updateNodeVisible();
-   if(mapReady)setStatus('3D-Node ladattu · pyöritä ja kallista karttaa.');
+   if(mapReady)setStatus('Kiinteä 3D-Node ladattu · vertaa pyörittämällä ja kallistamalla.');
   }catch(error){
    console.error('3D Node layer failed',error);
    nodeUnavailable=true;
@@ -198,7 +198,7 @@ if(!webgl2){
   map.on('move',cameraInfo);
   map.on('idle',()=>{
    if(mapReady && !nodeUnavailable && nodeLayer && nodeVisible){
-    setStatus('Oikea 3D-Node näkyy kartalla · testaa kameran liikkeet.');
+    setStatus('Kiinteä 3D-ydin + kevyt valokeila · testaa kameran liikkeet.');
    }
   });
   $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
