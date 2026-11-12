@@ -210,7 +210,7 @@ if(!webgl2){
 }else{
  try{
   map=new maplibregl.Map({
-   container:'map',style:styleURL,center,zoom:16.0,minZoom:10,maxZoom:19,
+   container:'map',style:styleURL,center,zoom:17.1,minZoom:10,maxZoom:19,
    pitch:55,maxPitch:70,bearing:-15,
    antialias:true,canvasContextAttributes:{antialias:true},
    dragRotate:true,touchZoomRotate:true,touchPitch:true,
@@ -242,7 +242,7 @@ if(!webgl2){
   });
   $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
   $('zoomOut').onclick=()=>map.zoomTo(Math.max(10,map.getZoom()-1),{duration:300});
-  $('home').onclick=()=>map.flyTo({center,zoom:16,pitch:55,bearing:-15,duration:750,essential:true});
+  $('home').onclick=()=>map.flyTo({center,zoom:17.1,pitch:55,bearing:-15,duration:750,essential:true});
   $('pitch').onclick=()=>map.easeTo({pitch:map.getPitch()<10?55:0,duration:450,essential:true});
   $('north').onclick=()=>map.easeTo({bearing:0,duration:430,essential:true});
   $('nodeToggle').onclick=()=>{nodeVisible=!nodeVisible;updateNodeVisible();};
