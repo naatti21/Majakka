@@ -207,6 +207,19 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **TOTEUTUSTILAN ERITTELY:** kaksi uutta dokumenttia ovat suunnittelun talteenotto; päähaaran nykyinen PWA ei sisällä valmista 24+12 Talent Web -moottoria, player/Kaiku-talent-UI:ta eikä live-hybriditalentteja.
 
+## 2026-11-12 — Node Art Direction v0.1 / Relay-muotovertailu toteutettu
+
+**VANHAN PELISUUNNITELMAN MUKAINEN UUSI KOKEILU:** User hyväksyi teknisesti ehjän 3D-Noden v0.4.2:n mutta **ei geneerisen kristallin lopullista ulkoasua**; kuusi suunniteltua Node-tyyppiä ominaisuuksineen ovat Prism, Archive, Grove, **Relay**, Observer, Commons. Ensin kannattaa muotoilla Relay, koska sillä on pelin ilmaan leijuvan säieverkon haarautumistoiminto.
+
+**TOTEUTETTU erillinen 3D-art lab / Android-laatuarvio AVOIN:** [Relay Concept Lab](https://naatti21.github.io/Majakka/experiments/relay-concept-lab/) sisältää kolme **oikean 3D-geometrian vaihtuvaa** Relay-konseptia samassa DEMO-koordinaatissa ja Dark-readable-kartassa:
+- **A · Haara:** paksu runko jakautuu kolmeen orgaaniseen valoa kuljettavaan haaraan (riski muistuttaa Grovea).
+- **B · Portti:** kolme katkonaiseksi muotoiltua avointa rengaskaarta (riski liian geneerinen sci-fi-energia).
+- **C · Kudos:** kolme ilmassa punoutuvaa, kiinteää spiraalinauhaa (riski liian sekava pienellä zoomilla).
+
+A/B/C-painikkeet vaihtavat mallia ilman kartan uutta latausta. Hyväksytty v0.4.2 MapLibre/custom 3D layer, `clearDepth()`, renderöinti viimeisenä, geosidonta ja karttaluettavuus säilytetään. Varjojen/viivojen ja puhelinsuorituskyvyn testaaminen on seuraava portti. **Mikään kolmesta muodoista EI ole vielä käyttäjän hyväksymä**, eivätkä Nodejen todelliset Relay-kyvyt ole tässä kokeessa toteutettuja. Alkuperäinen geneerinen 3D-karttatesti ja pääpelin PWA jätettiin muuttamatta.
+
+**Suunnitelma:** [MAJAKKA_NODE_ART_DIRECTION_v0.1.md](docs/MAJAKKA_NODE_ART_DIRECTION_v0.1.md). Kuuden tyypin ulkonäkö johdetaan niiden aiemmin määritellystä toiminnosta; Relaylla oltava selvät yhteyspisteet tulevalle orgaaniselle 3D-säikeelle. **Seuraava portti:** käyttäjän A/B/C-vertailu puhelimella ja yhden suunnan valinta tai yhdistely, sitten yksi todellinen Node-tapahtuma ja 3D-yhteyssäie. Ei kuutta valmista mallia tai 24 talenttia heti.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
