@@ -183,6 +183,14 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **Testausperiaate jatkossa:** renderöinnin kriittisille muutoksille myös kuvallinen WebGL-testi ennen puhelimelle tarjoamista. Vain fyysisen Androidin kuvapalaute lukitsee seuraavan portin; v0.4.2 on vielä kokeilu.
 
+## 2026-11-12 — v0.4.2 hyväksytty tekniseksi 3D-pohjaksi; Noden visuaalinen identiteetti AVOIN
+
+**HYVÄKSYTTY KÄYTTÄJÄN ANDROID-PALAUTTEELLA:** käyttäjä v0.4.2:sta: *"No mutta nythän se on hyvä."* Ydinhavainto: MapLibre + Three.js:n 3D-Noden päällepiirtymisvirhe on saatu käyttäjän mielestä kuntoon. Tätä renderöintipohjaa kannattaa säilyttää; ei enää paluuta aiempiin rikkinäisiin kerrosjärjestyksiin.
+
+**ERIKSEEN AVOIN:** käyttäjän jatko: *"Nodejen ulkomuotoon ei olla vielä menty. Sekin täytyy kyllä miettiä."* Nykyinen läpinäkymätön kristalli renkaineen on **tekninen DEMO-malli, ei hyväksytty lopullinen Node-design**. Muotokieli, materiaali, valon dramaturgia, vaihtelut ja yhteys myöhempiin orgaanisiin säikeisiin suunnitellaan erillisessä taidesuuntavaiheessa, eikä sovelluksen tämänhetkistä mallia saa kanonisoida vahingossa.
+
+**SEURAAVA TYÖ:** tutki 2–3 selvästi erilaista Node-ulkoasukonseptia ja arvioi ne saman toimivan, Dark-readable-karttaisen mobiili-3D-pohjan päällä. Pidä Flintailin jo hyväksytty identiteetti ja hienot looppaavat Kaiku-kortit erillisinä tuotantovaatimuksina. Päivitetty suunnitelma: [docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md](docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md).
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
