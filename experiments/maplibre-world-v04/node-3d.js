@@ -1,4 +1,4 @@
-// Majakka World v0.4.1 — a true georeferenced 3D Node on the MapLibre map.
+// Majakka World v0.4.2 — a true georeferenced 3D Node on the MapLibre map.
 // Prototype geometry only; no real POI, GPS, Kaiku asset or fake "3D" billboard.
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
 
@@ -159,7 +159,15 @@ export function createNode3DLayer(maplibregl, coords, onFault = () => {}) {
         // apply to the same 3D Node without recalculating pixels.
         projection.fromArray(args.defaultProjectionData.mainMatrix);
         this.camera.projectionMatrix.copy(projection).multiply(model);
+        // MapLibre and Three share the same WebGL canvas. The basemap has
+        // already populated the depth buffer with roads, fills and labels.
+        // Give this final 3D layer a clean depth range for self-occlusion,
+        // preserving the existing map *colors*. Otherwise dark basemap
+        // fragments can punch through even the fully opaque crystal.
+        // Deliberate world-lab behavior: Nodes draw in front of the map.
+        // Later terrain/building occlusion needs its own explicit design.
         this.renderer.resetState();
+        this.renderer.clearDepth();
         this.renderer.render(this.scene, this.camera);
         if (!reducedMotion && !document.hidden) this.map.triggerRepaint();
       } catch (error) {
