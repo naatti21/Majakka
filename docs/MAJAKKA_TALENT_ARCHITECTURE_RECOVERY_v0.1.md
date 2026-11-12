@@ -30,7 +30,7 @@ Pääsuunnat ja merkitys (merkitykset tulkitaan nimien sekä aiemman pelirakente
 3. **Weaving** — Node-verkoston yhteydet, orgaaniset säikeet, vaikutusalueet.
 4. **Veilcraft** — häiriöt, hämärtyneet/peitetyt ilmiöt, vaihtoehtoiset ratkaisut.
 
-Nämä neljä ovat talent-suuntia, eivät pakollisia pelihahmoluokkia. `Phantom Trail` on keskustelussa esiintynyt **Hybrid Talent -esimerkki**, mutta sen täsmällinen pelivaikutus ja avausvaatimus ovat vielä **AVOIN**. Älä merkitse sitä tuotantoon valmiiksi.
+Nämä neljä ovat talent-suuntia, eivät pakollisia pelihahmoluokkia. `Phantom Trail` oli keskustelussa **Hybrid Talent -esimerkki**: **Player Deep Tracking + Kaiku Echo Sense → Phantom Trail**. Tarkka vaikutus, prerequisite-tasot ja avausehto ovat **AVOIN**; esimerkki ei ole hyväksytty toteutettu taito.
 
 ## 3. Kaiku Talent Tree — alkuperäinen luonnos
 
@@ -43,7 +43,7 @@ Nämä neljä ovat talent-suuntia, eivät pakollisia pelihahmoluokkia. `Phantom 
 | Hahmoluokka | Ei peruuttamattomia Companion/Guardian/Explorer-lukituksia |
 | Reset | Ehdollinen Undo / Full Reset -mahdollisuus |
 
-- Flintail on **Trailborn / Aera** ja sen jo dokumentoidut piirteet ovat **Agile / Tracker / Field Sense**. Tämä ohjaa Flintailin talent-tyyliä; ei vielä nimeä tai määritä uusia vahvistamattomia talent-sopimuksia.
+- Flintail on **Trailborn / Aera** ja sen jo dokumentoidut piirteet ovat **Agile / Tracker / Field Sense**. Tämä ohjaa Flintailin talent-tyyliä. Vanhan keskustelun esimerkkipuiden nimiä olivat **Flintail Adaptive**, **Mosswake Rooted** ja **Veilmoth Convergence**. Nämä ovat aiempia talent-konsepteja, eivät todiste Mosswaken tai Veilmothin hyväksytyistä malleista, rigistä tai pelikoodista.
 - Kaikuilla voi olla erilaiset animaatiot, liikkumismekanismit ja talent-puuston painotukset. **Samat keskeiset pelitavoitteet pitää voida saavuttaa eri taktiikoilla**, jotta yksi species ei muutu ainoaksi järkeväksi valinnaksi.
 - Kaiku Talent, speciesin luontainen taitoprofiili, `Form/Hybrid`, `Guardian`-tehtävä ja `Animated Card` ovat **eri tietomallin käsitteitä**. Älä yhdistä niitä yhdeksi muodonmuutos-valikoksi.
 
@@ -53,9 +53,20 @@ Nämä neljä ovat talent-suuntia, eivät pakollisia pelihahmoluokkia. `Phantom 
 - **1 tai enintään 3 aktiivista Kaikua**; asistentsuunnitelmassa **1 Primary Companion + 2 Support**.
 - **Ylimääräisiä Kaikuja voi asettaa Node Guardianeiksi**, joista tulee Nodea vahvistava, tyypin/kyvyn mukainen pieni vaikutus.
 - **Ei suoraa Kaikujen Trading-järjestelmää.**
-- Esiintyi **esimerkkimalli “10 Kaikua nostaa levelin 1 → 2”** ylimääräisten Kaikujen hyödyntämisestä. Muistissa on tämä suunta ja esimerkkiluku, **ei tarkka duplikaattien kulutus-/fuusio-/kokemusmekaniikka**. Näitä ei saa lukita ilman alkuperäisen päätöksen varmistusta.
+- Aiempi käyttäjän esimerkki oli **noin 10 ylimääräisen Kaikun avulla Evolutionin nostaminen 1–2 tasoa**. Tämä **ei ole tavallinen XP/Level-nousu**. Täsmällinen duplikaattien muunnos, kulutus ja kustannus ovat **AVOIN**.
 
 **Avoin:** mikä tarkalleen tekee Guardianista hyvän johonkin Nodeen; pinoamiskatot, Guardian-paikkojen määrä, takaisin kutsuminen, bondin pysyvyys, aktiivisen party-koon vaihtaminen, mahdollinen 10 Kaikun käyttötapa, ja mitä kukin nostotaso antaa.
+
+## 4A. Kaikun eteneminen on useampi erillinen akseli
+
+**XP / Level ja Evolution olivat aiemmassa keskustelussa erilliset.** Niitä ei saa sekoittaa:
+
+- **XP / Level:** kokemuspohjainen tasokehitys. Täsmälliset XP-lähteet ja level-cap ovat avoimia.
+- **Evolution:** erillinen, Kaikun muotoa/kehitysastetta koskeva järjestelmä. Käyttäjän 10 ylimääräisen Kaikun esimerkki koski tätä (1–2 Evolution-tason nousua), ei tavallista levutusta.
+- **Echo Imprints:** assistentin aiemmin ehdottama mahdollinen resurssi, jonka ylimääräiset/duplicate-kaikut voisivat tuottaa Evolutionia varten. **Ei lukittu nimi tai vaihtosuhde.**
+- **Talent Web:** oma valintojen ja kykyjen rakenteensa. Pisteiden ansainta, tasorajojen suhde ja palautuksen kustannukset avoimia.
+
+**UX-laatuportti myöhemmin:** aktiivisen Companionin tai Guardianin pitäisi erottua selvästi ylimääräisistä yksilöistä, eikä vahvistetussa Evolution-toiminnossa saa huomaamatta käyttää arvokasta Kaikua. Tämä on toteutusturvan ehdotus, ei väite valmiista pelitoiminnosta.
 
 ## 5. Tiedossa oleva pelikonteksti — ei automaattinen talent-spesifikaatio
 
@@ -72,7 +83,7 @@ Nämä neljä ovat talent-suuntia, eivät pakollisia pelihahmoluokkia. `Phantom 
 | Classless + respec mahdollinen | **KÄYTTÄJÄN HYVÄKSYMÄ PERIAATE** |
 | Phantom Trail | **AIEMPI ESIMERKKI**, ei lukittua vaikutusta |
 | 1–3 aktiivista, ylimääräiset Guardianiksi | **KÄYTTÄJÄN SUUNTA**, party-UI ja efektit toteuttamatta |
-| “10 Kaikua → Level 1–2” | **MUISTETTU ESIMERKKI**, täsmällinen sääntö avoin |
+| “10 ylimääräistä Kaikua → Evolution +1–2 tasoa” | **KÄYTTÄJÄN AIEMPI ESIMERKKI**, tarkka sääntö avoin |
 | Tarkat talent-sisällöt, prerequisite-grafit, pisteiden earning, level-capit, unlockit, respec-kustannukset | **AVOIN** |
 | Talent-puiden UI, persistence, multiplayer-synkronointi, varsinainen gameplay-kytkentä | **EI TOTEUTETTU / ei löydetty main-PWA:n koodista 12.11.2026** |
 
