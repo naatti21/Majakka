@@ -175,7 +175,7 @@ function updateNodeVisible(){
  $('nodeToggle').setAttribute('aria-pressed',String(nodeVisible));
 }
 function addTrue3DNode() {
- import('./relay-3d.js?v=001').then(({createRelay3DLayer})=>{
+ import('./relay-3d.js?v=002').then(({createRelay3DLayer})=>{
   if(!map || map.getLayer('majakka-relay-art-lab'))return;
   const layer=createRelay3DLayer(maplibregl,NODE_COORDS,selected,(error)=>{
    nodeUnavailable=true;
