@@ -32,6 +32,31 @@ Käyttäjän 11.11.2026 vahvistama maailmavisio:
 
 **Seuraava portti:** tee erillinen Node Art Direction -vertailu 2–3 selvästi toisistaan eroavasta konseptista ennen lopullisen 3D-mallin muotoilua; käytä toimivaa v0.4.2-renderöintipohjaa näyttämiseen. Flintailin hyväksyttyä identiteettiä ei muuteta Noden ulkomuodon suunnittelussa.
 
+## Päätöspäivitys 2026-11-12 — palautetaan alkuperäinen KUUDEN Node-tyypin järjestelmä
+
+**LÄHDE / SUUNNITELMA OLI JO TEHTY:** [NODE-ATLAS-v0.1.md](NODE-ATLAS-v0.1.md) määrittelee kuusi erilaista **pelillistä Node-toimintoa**, eikä vain eri värisiä tai eri näköisiä objekteja. Sama luokittelu on mukana toteutetun [atlas-autogen.js](../atlas-autogen.js) -luokittelun `nodeType`-kentässä. Käyttäjä muistutti, että niillä oli eri ominaisuudet. AI:n 12.11. ehdottamat kolme abstraktia ulkomuotoa eivät ole korvaava Node-luokitus tai hyväksytty lore.
+
+| Alkuperäinen tyyppi | Paikkakategoria | Suunnitelmassa määritelty toiminta |
+| --- | --- | --- |
+| **Prism** | Taide / muraali | Taittaa valosäikeitä ja avaa taajuus-/väritehtäviä |
+| **Archive** | Historia / muistomerkki | Paljastaa muisto-fragmentteja, valintoja ja mysteerejä |
+| **Grove** | Puisto / luontokohde | Rauhoittaa häiriöitä, orgaaninen juurivalaistus |
+| **Relay** | Reitin opaste / risteys | Välittää ja haaroittaa valoa sekä vaihtoehtoisia yhteyksiä |
+| **Observer** | Näköalapaikka | Paljastaa kaukaisia heikkoja Kaiku-signaaleja |
+| **Commons** | Kirjasto / kulttuurikohde | Kollektiiviset muistot ja myöhempi yhteistoiminta |
+
+**TÄRKEÄ EROTUS:** `atlas-core.js` käyttää erikseen **neljää karkeaa paikkakategoriaa** `art / history / nature / culture`. Ne eivät ole sama asia kuin kuusi yllä kuvattua Node-pelityyppiä. Kaiku / Echo -nimityksiä on lisäksi käytetty sekä fiktiivisistä etätehtävistä että 3D-olennoista — älä sekoita näitä tietomalleissa.
+
+**TOTEUTUSTILAT:**
+- **Suunniteltu:** kuusi tyyppiä sekä niiden perusroolit (Node Atlas).
+- **Koodattu osittain:** `atlas-autogen.js` tunnistaa kategorioista `nodeType`-arvon ja valitsee ehdokkaita sääntöjen mukaan.
+- **Ei todistettu valmiiksi:** kuuden tyypin oikeat yksilölliset 3D-mallit, animaatiot, vaikutussäännöt, äänet ja integroidut yhteydet uudessa MapLibre 3D -maailmassa.
+- **Testattu:** MapLibre v0.4.2:n **yksi geneerinen DEMO-3D-Node** toimii renderöinnin kannalta fyysisellä Androidilla; ei edusta mitään kuudesta virallisesta Node-tyypistä.
+
+**VISUAALINEN JATKOTYÖ:** suunnitellaan **kullekin kuudelle tyypille oma 3D-siluetti ja vaikutuksen animaatiokieli** nimenomaan toimintaa heijastaen. Esimerkiksi Prism taittaa valoa ja Relay näyttää yhteyksien haarautumisen — nämä vaikutukset ovat alkuperäisestä suunnitelmasta. Tarkka materiaalin väri, geometria ja liike ovat **avoimia designratkaisuja**, joita ei saa esittää jo lukittuina. Ei tehdä geneeristä yhtä kristallia kuudessa värissä. Seuraavaksi tehdään Node-tyyppikohtainen visuaalinen suunnittelukortti ja **yhden** tyypin uusi 3D-prototyyppi toimivalle kartalle.
+
+**GLOBAALI ATLAS:** lopullinen Node-verkko muodostetaan turvallisuussuodatetuista ja julkisesti lähestyttävistä oikeista paikoista, käyttäen automaattista lähdepohjaista valintaa [NODE-ATLAS-AUTOGEN-v0.1.md](NODE-ATLAS-AUTOGEN-v0.1.md). Tämä suunnitelma ei muuta pelin DEMO-koordinaatteja julkisiksi turvallisiksi kohteiksi.
+
 ## 2. Tekninen suunta (kokeiltava, ei vielä pysyvästi lukittu)
 
 Peruskartta on **MapLibre GL JS** + OSM-vektoritiilet. Ensimmäinen 3D-kokeilu tehdään kartan koordinaatistoon sidottuna kerroksena. Suositeltava kokeiltava tapa on MapLibren **custom layer, renderingMode: "3d"**, jossa voidaan käyttää kevyitä Three.js-malleja ja WebGL-geometrya. Tarkista MapLibre v6 -API, kameraprojektiot ja mobiilin GPU-käyttö ennen kuin menetelmä julistetaan valmiiksi. **Älä rakenna karttaa uudelleen Godotin omilla mesheillä tai rasteripikseleistä.**
