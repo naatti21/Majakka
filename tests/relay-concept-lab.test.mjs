@@ -46,5 +46,11 @@ test('Relay is prototype and DEMO only, no GPS or live Node data',()=>{
  assert.doesNotMatch(page,/navigator\.geolocation|getCurrentPosition|watchPosition/);
  assert.match(model,/setEnabled\(value\)/);
  assert.match(model,/onRemove\(\)/);
- assert.match(page,/import\('\.\/relay-3d\.js\?v=001'\)/);
+ assert.match(page,/import\('\.\/relay-3d\.js\?v=002'\)/);
+});
+
+test('contrast tuning exposes Relay edges rather than burying bright geometry',()=>{
+ assert.match(model,/color:0x164d5a/);
+ assert.match(model,/new THREE\.TorusGeometry\(24\.2,1\.1/);
+ assert.match(model,/points\.map\(\(\[x,y,z\]\)=>\[x,y\+3\.6,z\]\)/);
 });
