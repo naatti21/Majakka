@@ -177,6 +177,12 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **TIEDOSTETTU RAJAUS:** 3D-Node piirtyy tässä prototyypissä kaikkien karttatasojen päälle ja voi peittää katunimiä, jos osuu niiden kohdalle; valmiin pelin todellinen maasto-/rakennuspeittyminen ratkaistaan myöhemmin erikseen. Tämä on tarkoituksellinen välietappi ehjän 3D-olion ja geosidonnan varmistamiseksi.
 
+## 2026-11-12 — v0.4.2 kromiselainkuvalla varmistettu, Android-testi auki
+
+**KUVA-ARVIO TEHTY (ei pelkkä kooditesti):** GitHub Actions [visual smoke 43298859081](https://github.com/naatti21/Majakka/actions/runs/43298859081) avasi julkaistun v0.4.2 MapLibre/Three.js-kartan aidossa headless Chromium -selaimessa (720 × 1500, oletuskamera zoom 16, kallistus 55°, suunta −15°), tallensi kuvan ja julkaisi ZIP-artifactin `world-v042-chromium-screenshot`. Katsotussa kuvassa 3D-kristalliydin ja renkaat näkyvät **yhtenäisinä ilman aiemman Android-v0.4.1:n suuria mustia päällepiirtymisviiltoja**. Tämä on ensimmäinen graafinen tarkistus, mutta **ei vielä Android-/GPU-hyväksyntä** eikä osoita kaikkia zoom/kulmayhdistelmiä toimiviksi.
+
+**Testausperiaate jatkossa:** renderöinnin kriittisille muutoksille myös kuvallinen WebGL-testi ennen puhelimelle tarjoamista. Vain fyysisen Androidin kuvapalaute lukitsee seuraavan portin; v0.4.2 on vielä kokeilu.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
