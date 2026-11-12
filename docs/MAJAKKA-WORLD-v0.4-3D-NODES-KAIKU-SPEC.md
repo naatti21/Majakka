@@ -16,6 +16,22 @@ Käyttäjän 11.11.2026 vahvistama maailmavisio:
 - Valot ja heijasteet herättävät ympäristön eloon, mutta **tiet, paikat, vesistöt ja katunimet säilyvät luettavina**.
 - **EI käsin mallinnettua 3D-kaupunkia.** Valmis MapLibre kartta vastaa maantiedosta; 3D-resurssit käytetään pelin omiin asioihin.
 
+## Päätöspäivitys 2026-11-12 — tekninen Node hyväksytty, ulkomuoto avoin
+
+**HYVÄKSYTTY FYYSISELLÄ ANDROIDILLA:** Käyttäjä vahvisti World v0.4.2 -testin jälkeen: *"No mutta nythän se on hyvä."* Tämä koskee **renderöinnin eheyttä ja geosidottua 3D-Noden näyttämistä kartalla** aiemman mustien karttaviiltojen vian jälkeen. Se ei tarkoita koko tuotantomoottorin, suorituskyvyn tai pelivalmiuden loppuhyväksyntää.
+
+**AVOIN DESIGN:** Käyttäjä huomautti samassa palautteessa, että **Nodejen varsinaista ulkomuotoa ei ole vielä suunniteltu tai hyväksytty**. Nykyinen turkoosi oktaedri, renkaita sisältävä kristallikehikko ja valopilari on **tekninen paikkamerkki**, ei kanoninen Node eikä varsinainen hahmo.
+
+**Muodon suunnittelun lähtökriteerit (ehdotuksia, ei päätöksiä):**
+- **Oma tunnistettava siluetti:** erotuttava tavallisesta sci-fi-kristallista/loot-beaconista; tunnistettava myös kauempaa ja eri kamerakulmista.
+- **Elävä rakenne:** orgaaninen liike tai materiaalin syke, ei pelkkää jäykkää pyörivää geometriaa. Node on maailman osa, jolla on yhteys Resonanceen, Kaikuihin ja myöhempään säieverkkostoon.
+- **Valaiseva mutta kiinteä:** itse Node näkyy ehjänä, valo/energia voi olla läpikuultavaa. Sijainti maantieteeseen sidottuna ja pieni leijunta sallittu.
+- **Yhteyssäikeen lähtökohta:** tulevalle orgaaniselle ilmassa leijuvalle Node–Node-säikeelle pitää löytyä visuaalisesti luonteva kiinnittymiskohta; peittoalue syntyy vasta todellisesta pelilogiikasta.
+- **Mobiili ensin:** siluetti, kontrasti, osittainen peittyminen, animaation rytmi ja GPU-kuorma testattava Tampereen tummalla kartalla, ei vain irrallisessa taidekuvassa.
+- **Muotokieli vasta arvioinnin jälkeen:** vertaillaan esimerkiksi elollista siemen-/kudosrakennetta, muinaista resonanssireliikkiä ja kerrostunutta energiarakennetta. Näistä **mitään ei ole valittu**, eivätkä esimerkit ole uusia lukittuja lore-päätöksiä.
+
+**Seuraava portti:** tee erillinen Node Art Direction -vertailu 2–3 selvästi toisistaan eroavasta konseptista ennen lopullisen 3D-mallin muotoilua; käytä toimivaa v0.4.2-renderöintipohjaa näyttämiseen. Flintailin hyväksyttyä identiteettiä ei muuteta Noden ulkomuodon suunnittelussa.
+
 ## 2. Tekninen suunta (kokeiltava, ei vielä pysyvästi lukittu)
 
 Peruskartta on **MapLibre GL JS** + OSM-vektoritiilet. Ensimmäinen 3D-kokeilu tehdään kartan koordinaatistoon sidottuna kerroksena. Suositeltava kokeiltava tapa on MapLibren **custom layer, renderingMode: "3d"**, jossa voidaan käyttää kevyitä Three.js-malleja ja WebGL-geometrya. Tarkista MapLibre v6 -API, kameraprojektiot ja mobiilin GPU-käyttö ennen kuin menetelmä julistetaan valmiiksi. **Älä rakenna karttaa uudelleen Godotin omilla mesheillä tai rasteripikseleistä.**
