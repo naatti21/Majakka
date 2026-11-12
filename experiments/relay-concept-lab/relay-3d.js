@@ -6,10 +6,10 @@ import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
 
 export const RELAY_CONCEPTS = Object.freeze(['haara', 'portti', 'kudos']);
 
-const dark = () => new THREE.MeshBasicMaterial({color:0x0c3442, side:THREE.DoubleSide});
-const mid = () => new THREE.MeshBasicMaterial({color:0x167f8b, side:THREE.DoubleSide});
-const light = () => new THREE.MeshBasicMaterial({color:0x66ecdc, side:THREE.DoubleSide});
-const bright = () => new THREE.MeshBasicMaterial({color:0xb8fff1, side:THREE.DoubleSide});
+const dark = () => new THREE.MeshBasicMaterial({color:0x164d5a, side:THREE.DoubleSide});
+const mid = () => new THREE.MeshBasicMaterial({color:0x218c9a, side:THREE.DoubleSide});
+const light = () => new THREE.MeshBasicMaterial({color:0x80f7e4, side:THREE.DoubleSide});
+const bright = () => new THREE.MeshBasicMaterial({color:0xc8fff6, side:THREE.DoubleSide});
 const haze = () => new THREE.MeshBasicMaterial({
   color:0x55dccb, transparent:true, opacity:0.16, side:THREE.DoubleSide,
   depthWrite:false, blending:THREE.AdditiveBlending
@@ -57,7 +57,7 @@ function buildHaara(parent){
     const dx=Math.cos(theta),dz=Math.sin(theta);
     const points=[[0,0,0],[dx*7,7,dz*8],[dx*17,10,dz*17],[dx*25,5,dz*25]];
     const path=tube(g,points,3.45,dark());
-    tube(g,points.map(([x,y,z])=>[x,y+1.5,z]),1.35,light());
+    tube(g,points.map(([x,y,z])=>[x,y+3.6,z]),1.35,light());
     socket(g,points.at(-1),4.7);
     const bead=orb(g,2.1,points[0],bright());
     pulses.push({path,bead,offset:i/3});
@@ -80,7 +80,7 @@ function buildPortti(parent){
     const outer=new THREE.Group();outer.rotation.y=i*(Math.PI*2/3);g.add(outer);
     const arch=solid(outer,new THREE.TorusGeometry(21,3.6,8,62,Math.PI*1.48),dark());
     arch.rotation.z=i*.16+0.20;
-    const edge=solid(outer,new THREE.TorusGeometry(21,1.05,7,62,Math.PI*1.48),light());
+    const edge=solid(outer,new THREE.TorusGeometry(24.2,1.1,7,62,Math.PI*1.48),light());
     edge.rotation.z=arch.rotation.z;
     arch.position.y=3;
     edge.position.y=3;
