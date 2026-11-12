@@ -1,0 +1,37 @@
+name: Majakka 3D Node - visual smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/maplibre-world-v04/**"
+      - "tests/world-v04.test.mjs"
+      - ".github/workflows/world-v04-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  chromium-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture real WebGL MapLibre and Three.js page (Android-size viewport)
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome >/dev/null 2>&1 && CHROME="$(command -v google-chrome)" || CHROME="$(command -v chromium || true)"
+          if [ -z "$CHROME" ]; then
+            echo "No Chromium-based browser on runner" >&2
+            exit 1
+          fi
+          mkdir -p visual-smoke
+          echo "Chromium: $CHROME"
+          timeout 110s "$CHROME"             --headless=new --no-sandbox --disable-dev-shm-usage             --enable-webgl --enable-unsafe-swiftshader             --use-gl=angle --use-angle=swiftshader             --hide-scrollbars --window-size=720,1500             --virtual-time-budget=25000             --screenshot="visual-smoke/world-v042.png"             "https://naatti21.github.io/Majakka/experiments/maplibre-world-v04/?visual-smoke=042"             > visual-smoke/chromium.log 2>&1 || true
+          ls -lh visual-smoke/
+          test -s visual-smoke/world-v042.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: world-v042-chromium-screenshot
+          path: visual-smoke/
+          retention-days: 4
