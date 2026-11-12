@@ -29,8 +29,11 @@ jobs:
           done
           curl -fsSL -o /tmp/relay-page.html "$URL"
           grep -q 'choose-kudos' /tmp/relay-page.html
+          grep -q 'zoom:17.1' /tmp/relay-page.html
+          rm -rf /tmp/relay-chrome-cache
           for concept in haara portti kudos; do
-            timeout 95s "$CHROME"               --headless=new --no-sandbox --disable-dev-shm-usage               --enable-webgl --enable-unsafe-swiftshader               --use-gl=angle --use-angle=swiftshader               --hide-scrollbars --window-size=720,1500               --virtual-time-budget=22000               --screenshot="visual-relay/$concept.png"               "$URL?concept=$concept&qa=001"               > "visual-relay/$concept.log" 2>&1 || true
+            timeout 95s "$CHROME"               --headless=new --no-sandbox --disable-dev-shm-usage               --enable-webgl --enable-unsafe-swiftshader               --use-gl=angle --use-angle=swiftshader               --hide-scrollbars --window-size=720,1500 \
+              --user-data-dir=/tmp/relay-chrome-cache               --virtual-time-budget=35000               --screenshot="visual-relay/$concept.png"               "$URL?concept=$concept&qa=001"               > "visual-relay/$concept.log" 2>&1 || true
             test -s "visual-relay/$concept.png"
           done
           ls -lh visual-relay/
