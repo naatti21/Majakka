@@ -1,0 +1,41 @@
+name: Relay 3D designs - visual smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/relay-concept-lab/**"
+      - "tests/relay-concept-lab.test.mjs"
+      - ".github/workflows/relay-lab-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture all three concepts in real headless WebGL
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p visual-relay
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          URL="https://naatti21.github.io/Majakka/experiments/relay-concept-lab/"
+          for retry in $(seq 1 24); do
+            if curl -fsSL "$URL?ready=$retry" | grep -q 'choose-kudos'; then break; fi
+            sleep 5
+          done
+          curl -fsSL "$URL" | grep -q 'choose-kudos'
+          for concept in haara portti kudos; do
+            timeout 95s "$CHROME"               --headless=new --no-sandbox --disable-dev-shm-usage               --enable-webgl --enable-unsafe-swiftshader               --use-gl=angle --use-angle=swiftshader               --hide-scrollbars --window-size=720,1500               --virtual-time-budget=22000               --screenshot="visual-relay/$concept.png"               "$URL?concept=$concept&qa=001"               > "visual-relay/$concept.log" 2>&1 || true
+            test -s "visual-relay/$concept.png"
+          done
+          ls -lh visual-relay/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-relay-3d-concept-qa
+          path: visual-relay/
+          retention-days: 5
