@@ -197,6 +197,16 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **ÄLÄ KORVAA TÄTÄ SUUNNITELMAA** uusilla geneerisillä kategorioilla kuten “elävä ydin / muinainen reliikki / resonanssisolmu”. Ne olivat vain irrallisia art direction -ideoita, eivät sovittuja pelirooleja. Jokaiselle Node-tyypille suunnitellaan oma tunnistettava **3D-muoto, animaatio ja vaikutus** sen alkuperäisen roolin mukaisesti; tarkka muotokieli on vielä avoin. v0.4.2:n geneerinen 3D-kristalli on **vain teknisesti hyväksytty testiesine**. Yksittäisten tyypin mukaisten kykyjen toteutusta uudessa MapLibre-maailmassa ei ole vielä vahvistettu. Tarkennettu [World v0.4 -suunnitelma](docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md).
 
+## 2026-11-12 — rikki menneestä keskustelusta palautetut Kaiku Presentation ja Talent -arkkitehtuurit
+
+**PALAUTETTU AIEMMASTA CHATISTA (8.11.2026, käyttäjän 12.11.2026 katkelma):**
+- [**MAJAKKA_TALENT_ARCHITECTURE_RECOVERY_v0.1.md**](docs/MAJAKKA_TALENT_ARCHITECTURE_RECOVERY_v0.1.md): **Player Talent Web 24 solmua / 14 pistettä**, neljä suuntaa **Tracking, Bonding, Weaving, Veilcraft**; **Kaiku Talent Tree 12 solmua / 7 pistettä**; ei lukittuja class-rooleja tai ylivoimaista meta-buildia; ehdollinen Undo/Full Reset; hybriditalentti-esimerkki **Phantom Trail = Player Deep Tracking + Kaiku Echo Sense**; Kaiku-puuesimerkit **Flintail Adaptive, Mosswake Rooted, Veilmoth Convergence**. Nämä ovat suunniteltuja, eivät nykykoodin toteutettuja talent-puita.
+- **Party & Guardians:** käyttäjän suunta 1–3 aktiivista Kaikua (aiempi ehdotus yksi Primary + kaksi Support), ylimääräisiä Guardianiksi vahvistamaan Nodea; ei suoraa Kaiku-tradingiä. **XP/Level ja Evolution ovat erillisiä**: käyttäjän esimerkkimalli n. **10 ylimääräistä/duplikaatti-Kaikua → Evolution +1–2 tasoa**, ei XP-Level. Ehdotettu `Echo Imprints` -resurssi ja tarkka kulutus **eivät ole lukittuja**.
+- [**MAJAKKA_KAIKU_PRESENTATION_ARCHITECTURE_v0.1.md**](docs/MAJAKKA_KAIKU_PRESENTATION_ARCHITECTURE_v0.1.md): sama Kaiku-identiteetti, eri tarkoitukseen optimoidut assetit: **Map kevyt sprite / aktiivinen Companion kevyt oikea 3D / Inventory tarkka saumaton 4–6 s Animated Card / Inspect tarkempi yksi 3D / Reveal harvinainen pre-rendered-animaatio**. Varsinainen GIF-formaatti ei ole oletus. Kartan 3D-Nodet ja orgaaninen verkko pysyvät suunnitelmassa.
+- **Älä lukitse tai keksi puuttuvia spesifikaatioita:** tarkat talent-vaikutukset, pisteiden earning, prerequisitet, resetin ehdot, Evolutionin duplikaattikurssi, Hybrid/Form-säännöt sekä Mosswake/Veilmothin ulkomuodot ovat vielä **AVOIN**. Näin palautettu tieto ei muutu vahingossa valmiiksi pelimekaniikaksi.
+
+**TOTEUTUSTILAN ERITTELY:** kaksi uutta dokumenttia ovat suunnittelun talteenotto; päähaaran nykyinen PWA ei sisällä valmista 24+12 Talent Web -moottoria, player/Kaiku-talent-UI:ta eikä live-hybriditalentteja.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
