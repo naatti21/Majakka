@@ -35,7 +35,7 @@ test('Node is true georeferenced 3D geometry, not a billboard', () => {
   assert.match(model, /WebGLRenderer/);
   assert.match(model, /renderer\.autoClear\s*=\s*false/);
   assert.doesNotMatch(model, /THREE\.Sprite|CanvasTexture|Billboard/);
-  assert.match(page, /import\('\.\/node-3d\.js\?v=041'\)/);
+  assert.match(page, /import\('\.\/node-3d\.js\?v=042'\)/);
 });
 
 test('an isolated 3D failure leaves MapLibre map available', () => {
@@ -54,5 +54,17 @@ test('v0.4.1 Node has a genuinely opaque faceted 3D body, not just glow', () => 
   assert.match(model, /this\.core\.position\.y = 34 \+ Math\.sin/);
   assert.match(model, /const glow = new THREE\.Mesh/);
   assert.match(model, /opacity: 0\.028/);
-  assert.match(page, /Nocturne · 3D World v0\.4\.1/);
+  assert.match(page, /Nocturne · 3D World v0\.4\.2/);
+});
+
+test('v0.4.2 Node is drawn AFTER all map layers with isolated depth buffer', () => {
+  const page3D = page.slice(page.indexOf('function addTrue3DNode()'));
+  assert.match(page3D, /map\.addLayer\(layer\);/);
+  assert.doesNotMatch(page3D, /map\.addLayer\(layer\s*,\s*firstLabel\)/);
+  assert.match(model, /renderer\.resetState\(\);\s*this\.renderer\.clearDepth\(\);\s*this\.renderer\.render\(this\.scene, this\.camera\);/);
+  assert.match(model, /renderingMode:\s*'3d'/);
+  assert.match(model, /transparent: false, opacity: 1, depthTest: true, depthWrite: true/);
+  // Ground glows remain below ordinary map labels; 3D crystal is now last.
+  assert.match(page, /id:'node-glow-ground'/);
+  assert.match(page, /\},firstLabel\);/);
 });
