@@ -20,6 +20,20 @@
 
 **Laatuportti:** tärkein tarkistus seuraavassa Android-kuvassa on kiinteä luettava kristallisiluetti kallistuksilla 0–70° ja kameran pyörityksen aikana. Läpikuultaviksi jätetään vain halo/valopilari, ei koko Nodea. Kun laatu on oikea, edetään suunniteltuun Flintailin 3D-prototyyppiin ja myöhemmin tarkkaan looppaavaan Kaiku-korttiin.
 
+## 2026-11-12 — v0.4.2 / Render Clean — mustat karttaviillot Noden päällä
+
+**Vika todettu käyttäjän Android-kuvassa v0.4.1:** Noden läpinäkymätön turkoosi runko on jo aiempaa parempi, mutta **mustat kartan muodot / viillot peittävät sen keskeltä**. Tämän korjaaminen on ehdoton portti ennen Kaikujen 3D-renderöintiä. Screenshot ei yksin todista täsmällistä GPU-mekanismia, mutta koodista löytyi kaksi renderöinnin riskikohtaa.
+
+**TOTEUTETTU v0.4.2 / fyysisen Androidin kuvatesti AVOIN:**
+1. `map.addLayer(layer, firstLabel)` korvattiin `map.addLayer(layer)`-kutsulla. 3D-Node piirretään **viimeisenä MapLibre-tyylitasona, myös karttanimien jälkeen**. Maanpinnan DEMO-hehku on edelleen alempana.
+2. Three.js:n renderöintiin lisättiin `renderer.clearDepth()` heti `renderer.resetState()`-kutsun jälkeen ja **ennen** `renderer.render()`-kutsua. Tämä tyhjentää kartan aiemmin kirjoittaman **syvyyden, ei kartan värejä**, jolloin kristalli ja sen 3D-renkaat voivat käyttää omaa ehjää syvyysjärjestystään.
+3. HTML-otsikko `v0.4.2`, moduuliviittaus `node-3d.js?v=042` pakottaa Android-selaimen lataamaan korjatun koodin vanhan välimuistin sijasta.
+4. `tests/world-v04.test.mjs` varmistaa, ettei 3D-Nodea työnnetä enää ennen kartan nimiä ja että syvyyspuskuri nollataan ennen Three.js-piirtoa.
+
+**Tietoinen kompromissi:** Tässä prototyypissä 3D-Node on aina karttatasojen **edessä**. Tällä saadaan ehjä ja luettava 3D-siluetti ilman mustia karttaviiltoja. Tämä **ei vielä ratkaise** oikeaa maasto-/rakennuspeittymistä eli sitä, että katveen pitäisi joskus piilottaa Node. Pelin valmiissa maailmassa peittyminen ratkaistaan erillisellä hallitulla 3D-depth-polulla, ei palauttamalla mustat viillot.
+
+**Laatuportti:** testaa sama geokoordinaatti oikealla Androidilla: 55° ja 70° kallistus, 360° kierto, zoom 15–18, sekä NODE päälle/pois. Runko ja renkaat eivät saa rikkoutua mustiin paloihin. Karttatekstit ja tiet säilyvät muualla luettavina. **Pelkkä vihreä CI ei todista, että grafiikkavirhe olisi poistunut puhelimella.**
+
 ## Mikä on oikeasti toteutettu
 
 - **Kartta**: käyttäjän valitsema `Dark · tiet ja tekstit näkyviin` oletustyyli, MapLibre GL JS 6.15.0 + OpenFreeMap Dark, alkuperäisen v0.3-kokeen kanssa sama katu- ja nimikontrastin määritys.
