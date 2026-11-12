@@ -169,6 +169,14 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **LUKITTU LAATUPERIAATE:** Noden ja myöhemmin Kaikun varsinainen 3D-ruumis tulee nähdä kiinteänä, luettavana siluettina joka kulmasta. Glow, energiavirrat, peittoaluepilvet ja ympäröivät elementit voivat olla läpikuultavia, **itse pelin olio ei näytä hologrammivarjolta** ellei kyse ole tarkoituksellisesta erikoismuodosta. [World v0.4 README / QA](experiments/maplibre-world-v04/README.md).
 
+## 2026-11-12 — v0.4.2 Render Clean / Node peittyi mustiin karttaviiltoihin
+
+**KÄYTTÄJÄN ANDROID-PALAUTE v0.4.1: HYLÄTTY 3D-RENDERÖINTI:** Kristalliydin on kiinteämpi, mutta mustat karttatasot / viillot menevät selvästi sen päälle. **Älä aloita vielä 3D-Flintailia, yhteyssäikeitä tai peittoaluetta** ennen Noden ehjää 3D-siluettia.
+
+**KORJAUS TOTEUTETTU SELAINKOKEILUUN v0.4.2 / PUHELIMEN UUDELLEENTESTI AVOIN:** [World v0.4.2](https://naatti21.github.io/Majakka/experiments/maplibre-world-v04/?v=042) piirtää **3D-Noden MapLibren viimeisenä tyylikerroksena** (`map.addLayer(layer)`, ei enää `map.addLayer(layer, firstLabel)`) ja kutsuu **Three.js:n `renderer.clearDepth()` ennen 3D-olion renderöintiä**; syvyyspuskuri nollataan, ei kartan värikuvaa. Noden oma 3D-depth säilyy, ja kiinteä kristalli sekä sen renkaat eivät saa rikkoontua kartan mustiin palasiin. Alapuolen karttahehku pysyy erillisessä tasossa. Kooditestit tarkistavat uuden järjestyksen ja depth-nollauksen; **fyysisen Androidin näkymää ei ole vielä vahvistettu**. Dokumentaatio: [experiments/maplibre-world-v04/README.md](experiments/maplibre-world-v04/README.md).
+
+**TIEDOSTETTU RAJAUS:** 3D-Node piirtyy tässä prototyypissä kaikkien karttatasojen päälle ja voi peittää katunimiä, jos osuu niiden kohdalle; valmiin pelin todellinen maasto-/rakennuspeittyminen ratkaistaan myöhemmin erikseen. Tämä on tarkoituksellinen välietappi ehjän 3D-olion ja geosidonnan varmistamiseksi.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
