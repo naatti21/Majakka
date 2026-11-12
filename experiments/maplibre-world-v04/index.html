@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#070d12">
-<meta name="description" content="Majakka World v0.4.1 — kiinteä geosidottu kolmiulotteinen Node, sulava MapLibre-kartta.">
-<title>MAJAKKA — World v0.4.1 / Solid 3D Node</title>
+<meta name="description" content="Majakka World v0.4.2 — ehjä geosidottu kolmiulotteinen Node, sulava MapLibre-kartta.">
+<title>MAJAKKA — World v0.4.2 / Render Clean</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#070d12;color:#e3f3f3;font-synthesis:none}
@@ -41,7 +41,7 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
 <div id="map" role="application" aria-label="Tampereen kartta ja geosidottu 3D-Node"></div>
 <div class="top">
   <div class="brand">MAJAKKA / WORLD LAB</div>
-  <div class="title">Nocturne · 3D World v0.4.1</div>
+  <div class="title">Nocturne · 3D World v0.4.2</div>
   <small>Dark · luettava kartta · kiinteä 3D-Node / DEMO</small>
 </div>
 <div class="controls" aria-label="Kamera ja 3D-testin valinnat">
@@ -139,18 +139,21 @@ function updateNodeVisible(){
  $('nodeToggle').setAttribute('aria-pressed',String(nodeVisible));
 }
 function addTrue3DNode() {
- import('./node-3d.js?v=041').then(({createNode3DLayer})=>{
+ import('./node-3d.js?v=042').then(({createNode3DLayer})=>{
   if(!map || map.getLayer('majakka-georeferenced-node-3d'))return;
   const layer=createNode3DLayer(maplibregl,NODE_COORDS,(error)=>{
    nodeUnavailable=true;
    setStatus('3D-renderöinnissä virhe. Kartta toimii edelleen.',true);
   });
-  const firstLabel=(map.getStyle().layers||[]).find(l=>l.type==='symbol')?.id;
   try{
-   map.addLayer(layer,firstLabel);
+   // Render solid 3D objects AFTER every basemap layer, including labels.
+   // Previously adding before the first symbol let subsequent map layers
+   // cover the crystal with black geometric/text fragments at steep pitch.
+   // The translucent ground-glow circles remain in a separate lower layer.
+   map.addLayer(layer);
    nodeLayer=layer;
    updateNodeVisible();
-   if(mapReady)setStatus('Kiinteä 3D-Node ladattu · vertaa pyörittämällä ja kallistamalla.');
+   if(mapReady)setStatus('3D-Node etualalla · kokeile kallistusta ja kiertoa.');
   }catch(error){
    console.error('3D Node layer failed',error);
    nodeUnavailable=true;
@@ -198,7 +201,7 @@ if(!webgl2){
   map.on('move',cameraInfo);
   map.on('idle',()=>{
    if(mapReady && !nodeUnavailable && nodeLayer && nodeVisible){
-    setStatus('Kiinteä 3D-ydin + kevyt valokeila · testaa kameran liikkeet.');
+    setStatus('3D-Node erillään karttatasoista · testaa kierto ja kallistus.');
    }
   });
   $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
