@@ -191,6 +191,12 @@ Koodi: [experiments/maplibre-tampere/index.html](experiments/maplibre-tampere/in
 
 **SEURAAVA TYÖ:** tutki 2–3 selvästi erilaista Node-ulkoasukonseptia ja arvioi ne saman toimivan, Dark-readable-karttaisen mobiili-3D-pohjan päällä. Pidä Flintailin jo hyväksytty identiteetti ja hienot looppaavat Kaiku-kortit erillisinä tuotantovaatimuksina. Päivitetty suunnitelma: [docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md](docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md).
 
+## 2026-11-12 — alkuperäiset kuusi erilaista Node-toimintoa löydetty
+
+**KÄYTTÄJÄN MUISTUTUS OLI OIKEA.** [docs/NODE-ATLAS-v0.1.md](docs/NODE-ATLAS-v0.1.md) sisältää jo suunnitellut **kuusi Node-tyyppiä** ominaisuuksineen: **Prism** (valosäikeen taitto / taajuus), **Archive** (muistofragmentit / historia), **Grove** (häiriön rauhoittaminen / luonto), **Relay** (yhteyksien välittäminen ja haaroittaminen), **Observer** (heikkojen kauko-Kaikujen paljastaminen), **Commons** (kollektiiviset muistot / yhteistoiminnan mahdollisuus). `atlas-autogen.js` sisältää jo näiden `nodeType`-luokittelun paikkakategorioista. Neljä yleistä `art/history/nature/culture` -luokkaa `atlas-core.js`-tiedostossa ovat **eri luokittelutaso**, eivät kuuden Node-tyypin korvike.
+
+**ÄLÄ KORVAA TÄTÄ SUUNNITELMAA** uusilla geneerisillä kategorioilla kuten “elävä ydin / muinainen reliikki / resonanssisolmu”. Ne olivat vain irrallisia art direction -ideoita, eivät sovittuja pelirooleja. Jokaiselle Node-tyypille suunnitellaan oma tunnistettava **3D-muoto, animaatio ja vaikutus** sen alkuperäisen roolin mukaisesti; tarkka muotokieli on vielä avoin. v0.4.2:n geneerinen 3D-kristalli on **vain teknisesti hyväksytty testiesine**. Yksittäisten tyypin mukaisten kykyjen toteutusta uudessa MapLibre-maailmassa ei ole vielä vahvistettu. Tarkennettu [World v0.4 -suunnitelma](docs/MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md).
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
