@@ -220,6 +220,17 @@ A/B/C-painikkeet vaihtavat mallia ilman kartan uutta latausta. Hyväksytty v0.4.
 
 **Suunnitelma:** [MAJAKKA_NODE_ART_DIRECTION_v0.1.md](docs/MAJAKKA_NODE_ART_DIRECTION_v0.1.md). Kuuden tyypin ulkonäkö johdetaan niiden aiemmin määritellystä toiminnosta; Relaylla oltava selvät yhteyspisteet tulevalle orgaaniselle 3D-säikeelle. **Seuraava portti:** käyttäjän A/B/C-vertailu puhelimella ja yhden suunnan valinta tai yhdistely, sitten yksi todellinen Node-tapahtuma ja 3D-yhteyssäie. Ei kuutta valmista mallia tai 24 talenttia heti.
 
+## 2026-11-15 — kolme käyttäjän pelivertailukuvaa: elävä kartta, Kaiku-kokoelma ja 150 m
+
+**KÄYTTÄJÄN 3 KUVAA JA KOMMENTIT TALLETTU DOKUMENTAATIOON** (lähdekuvat annettu chatissa; itse kuvabittejä **ei ole** tallennettu GitHubiin):
+- Vertailupelin kartalla **selvät yksilölliset hahmosiluetit elävät**: hengittävät, liikahtelevat, joidenkin lyhyt paikallinen patrol. Majakan maailmaan kevyt 2.5D/3D-mobiilioptimoitu idle-liike ja vain tarvittaessa aktiiviselle Companionille aito 3D; ei täyttä reaaliaikaista creature-simulaatiota kaikille.
+- **Collection Grid = korkealaatuiset staattiset kortit**, jotta suuri ruudukko pysyy kevyenä. **Korttia napauttamalla = suuri animointiesitys** (saumaton noin 4–6 s loop), mieluummin Kaikun omassa luonto-/resonanssiympäristössä kuin steriilissä laboratoriossa. Kortin taide/teema jatkuu detail-ympäristöön. Tämä **tarkentaa** aiemman ”kaikilla animated card” -vaatimuksen käyttötilannekohtaiseksi: animaatio säilyy, ei välttämättä toistu gridissa. Erillinen Inspect voi myöhemmin tarjota yhden interaktiivisen 3D-mallin. Älä kopioi vertailupelin hahmo- tai UI-grafiikkaa.
+- **Käyttäjä suosii 150 m kokeiluarvoa** vuorovaikutussäteeksi pelaajasta (vertailupelin 200 m tuntui mukavalta, Ingressin liian lyhyt vaikutusetäisyys ja yhden Noden ~15 min drone toisto turhauttava kotona). **150 m ei ole kotipelaamisen ainoa tapa**: etä-Echot, Kaikun kehitys ja verkon suunnittelu pysyvät merkityksellisinä ilman GPS:ää/lähi-Nodea. Vanhassa `APP-SPEC`issa mainittu **70 m etualakävelyn laskenta on eri muuttuja**, ei korvaudu 150 m vuorovaikutusetäisyydellä.
+
+**KIRJATTU:** [Kaiku Presentation Architecture v0.1 — 15.11 delta](docs/MAJAKKA_KAIKU_PRESENTATION_ARCHITECTURE_v0.1.md) ja [APP-SPEC — 150 m radius kokeilu](APP-SPEC.md).
+
+**TILAT:** inspiroiva vertailu ja hyväksytty keskustelusuunta / **EI toteutettu** Majakan live-peliin. Visual Relay A/B/C -vertailu on oma edelleen avoin art-direction-portti, jota ei tarvitse sekoittaa Kaiku-esitykseen. Seuraava konkreettinen pelillinen laatukoe: testaa ensin yksi Flintailin kartta-idle + staattinen collection-kortti + sama hahmo suuressa teeman mukaisessa loopatussa esityksessä, sekä erikseen demoversion 150 m vuorovaikutuksen mielekkyys.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
