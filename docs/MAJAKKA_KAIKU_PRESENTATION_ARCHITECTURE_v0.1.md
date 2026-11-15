@@ -67,3 +67,26 @@ Kaikki assetit eivät ole sama tiedosto. Tärkeintä on **laji- ja Form-identite
 Kokoelmakortin ja Inspectin on voitava **esittää** Kaikun talentit, mutta esityskerros ei itsessään määritä talent-pisteitä tai tasapainotusta. Palautettu pelaajan ja Kaikun talent-suunnitelma: [MAJAKKA_TALENT_ARCHITECTURE_RECOVERY_v0.1.md](MAJAKKA_TALENT_ARCHITECTURE_RECOVERY_v0.1.md).
 
 **Laatuportti:** yksi näyttävä Flintail-kortti ja yksi mobiilikartan aktiivinen Kaiku; ei satunnaista uusia spesieseitä tai koko maailman live-3D-olioita ennen tätä.
+
+
+## Päätösdelta 2026-11-15 — käyttäjän 3 vertailukuvaa: elävä kartta, staattinen grid, ympäristöön sidottu Kaiku-esittely
+
+**LÄHDE:** käyttäjän toimittamat kolme Jurassic World Alive -pelin mobiilikuvakaappausta ja hänen oma palautteensa. Kuvakaappaukset toimivat **UX- ja tuotantoarkkitehtuurin inspiraationa, eivät kopioitavina grafiikka-, hahmo- tai UI-assetteina**. Kuvien varsinaisia bittitiedostoja **ei ole siirretty GitHub-repoon**; kirjalliset havainnot on talletettu tähän.
+
+**Kuvakohtaiset havainnot:**
+1. **Kartta:** useita toisistaan selvästi erottuvia olentoja liikkuu karttamaailmassa. Pelaajan näkökulmasta hengitys, pieni liike, katseen muutos ja joidenkin hahmojen lyhyt paikallinen patrol tuovat elävyyttä; pelkkä hohtava kiinteä ikoni ei riitä. Kartan HUD ja elementtien tiheys **eivät ole Majakalle kopiointimalli**.
+2. **Collection grid:** tarkat, terävät, hyvin erotettavat **staattiset korttikuvat** toimivat isossakin kokoelmassa. Korttia napauttamalla siirrytään yhden Kaikun tarkkaan animoituun esitykseen. Tämä on aiemman “kaikki kortit looppaavat” -vaatimuksen **käyttötilanteen tarkennus**, ei korttianimaatioista luopuminen.
+3. **Detail / character stage:** yksi huomattavasti suurempi, elävä, animoitu hahmo. Käyttäjä **ei halua Majakkaan geneeristä laboratoriota**. Jokainen Kaiku avataan sen luonteeseen sopivassa pienessä maailmassa: metsä, tuuli, sammal, kalliot, resonanssi tai muu lajille hyväksyttävä teema. Myös pienessä korttikuvassa näkyvät taustan värit/motiivit jatkuvat samaan detail-ympäristöön.
+
+**UUSI SUOSITELTU ESITYSJÄRJESTYS:**
+- **World Map:** pieni tunnistettava animoitu Kaiku, idle/hengitys/huomio/pienet asentomuutokset; osalle lyhyt paikallinen partiointi. Kaukaiset hahmot sprite-/2.5D-versioina, aktiivinen Companion voi olla kevyt aito 3D. Animaatio pysähtyy tai harvenee näkymän ulkopuolella; useita täysiä 3D-malleja ei ajeta samanaikaisesti.
+- **Collection grid:** laadukkaat, **lähtökohtaisesti staattiset** kortit. Yksittäinen korostus/hover voidaan tarvittaessa animioida kevyesti, mutta grid ei ole videoseinä.
+- **Focused card / detail stage:** yksi Kaiku esitetään suuressa koossa **4–6 s saumattomalla loopilla**, laadukkaana, sen oman maailman tunnelmassa; kortin ja avautuvan ympäristön visuaalinen jatkuvuus. Esitys voi olla esirenderöity video/sprite-animaatio, ja erillinen napautettava **Inspect** voi tarjota aidosti kierrettävän 3D-mallin myöhemmin.
+- **Reveal:** erillinen näyttävä harvinaisempi animaatio, ei toistuva raskas ruudukkotekniikka.
+- **Flintail-vertailu:** sen hyväksyttyjä Art Master -tuntomerkkejä ei muuteta. Sen luontoon sopivasta ympäristöstä päätetään ulkomuodon mukaan; älä vahvista uusia lore-yksityiskohtia pelkän tämän vertailun perusteella.
+
+**Tekninen periaate:** “Animated Card” on **assetin nimi / valmius**, ei vaatimus että jokainen kokoelman pikkukortti toistaa videota. Usean kortin grid = still-juliste; valitun Kaikun stage = looppaava animaatio. Videoformaatti ei ole vanha GIF; käytä tarvittaessa WebM/MP4 + poster tai optimoitua spritesheetiä. Tarkka toteutustapa testataan Androidilla.
+
+**Laatuportti:** yksi hyväksytty Flintail-kortti staattisena Collection-ruudussa + sama hahmo animoinnissa omaan ympäristöön sijoitettuna, ilman identiteettidriftiä. Erillinen 3D Inspect vasta kun tämä toimii. Patrolloiva karttahahmo ei saa väittää fiktiivistä sijaintia turvalliseksi fyysiseksi vierailukohteeksi.
+
+**TILA:** käyttäjän hyväksymä inspiraatio/suunnittelusuunta; toimivat Majakka-kortit, luontoympäristöanimaatio ja patrol **EIVÄT OLE TOTEUTETTUJA**.
