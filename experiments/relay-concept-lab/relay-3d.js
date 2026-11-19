@@ -1,10 +1,10 @@
-// MAJAKKA · Relay design lab v0.1
+// MAJAKKA · Relay design lab v0.2 / Chromatic art direction
 // Three interchangeable ACTUAL 3D designs for the established Relay Node type.
 // All geometry, animations and positions are DEMO art direction only.
 // Stable v0.4.2 rendering: last MapLibre layer + isolated depth buffer.
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
 
-export const RELAY_CONCEPTS = Object.freeze(['haara', 'portti', 'kudos']);
+export const RELAY_CONCEPTS = Object.freeze(['haara', 'portti', 'kudos', 'chromatic']);
 
 const dark = () => new THREE.MeshBasicMaterial({color:0x164d5a, side:THREE.DoubleSide});
 const mid = () => new THREE.MeshBasicMaterial({color:0x218c9a, side:THREE.DoubleSide});
@@ -129,6 +129,142 @@ function buildKudos(parent){
   }};
 }
 
+
+// D: CHROMATIC CONDUIT — art-direction quality candidate. Purpose-built
+// layered ceramic-and-brass relay with 3 readable living exits, not generic
+// cyan wireframe. All color is inside the object; maps remain readable.
+// Lightweight, fixed-seed procedural geometry; NO random network/POI data.
+function buildChromatic(parent) {
+  const g = new THREE.Group(); parent.add(g);
+  const mat = (hex,metal=0.18,roughness=0.42,emissive=0,brightness=0) =>
+    new THREE.MeshStandardMaterial({
+      color:hex,metalness:metal,roughness,
+      emissive:emissive || 0x000000,emissiveIntensity:brightness,
+      side:THREE.DoubleSide
+    });
+  const marine=mat(0x163a49,0.48,0.29);
+  const ceramic=mat(0x256b7c,0.38,0.24);
+  const deep=mat(0x0a2234,0.44,0.34);
+  const coral=mat(0xff8e74,0.22,0.36,0xaa352f,0.16);
+  const gold=mat(0xffd99a,0.82,0.20,0xb07527,0.13);
+  const violet=mat(0x8f74d9,0.26,0.27,0x62419a,0.22);
+  const teal=mat(0x31dccf,0.28,0.21,0x31dccf,0.58);
+  const white=mat(0xc7fff5,0.13,0.2,0x68ffff,0.48);
+  const inner=new THREE.Group(); g.add(inner);
+  const body=solid(inner,new THREE.IcosahedronGeometry(14,2),marine,[0,0,0]);
+  body.scale.set(0.93,1.34,0.93);
+  const shell=solid(inner,new THREE.IcosahedronGeometry(12.9,1),ceramic,[0,0.6,0]);
+  shell.scale.set(0.94,1.34,0.94);
+  const heart=solid(inner,new THREE.IcosahedronGeometry(7.8,1),teal,[0,2.0,0]);
+  heart.scale.set(0.90,1.43,0.90);
+  // Raised gold and violet framing makes the faceted body look crafted.
+  for(let band=0;band<3;band++){
+    const tor=solid(inner,new THREE.TorusGeometry(14.1+band*.5,0.70,8,72),band===1?coral:gold,[0,-9.5+band*10.2,0]);
+    tor.rotation.x=Math.PI/2;
+  }
+  for(let i=0;i<9;i++){
+    const a=i*Math.PI*2/9;
+    const y=5.2*Math.sin(i*2.4);
+    const bolt=solid(inner,new THREE.OctahedronGeometry(1.55,0),i%3===0?violet:gold,[13.4*Math.cos(a),y,13.4*Math.sin(a)]);
+    bolt.scale.set(0.7,2.1,0.7);
+  }
+  const trails=[], beadPath=[], exits=[];
+  const shrouds=new THREE.Group();g.add(shrouds);
+  for(let arm=0;arm<3;arm++){
+    const theta=Math.PI*2*arm/3+Math.PI/7;
+    const dx=Math.cos(theta),dz=Math.sin(theta);
+    const points=[
+      [dx*6,4,dz*6],
+      [dx*13,10,dz*13],
+      [dx*21,16,dz*20],
+      [dx*29,16+2*Math.sin(theta*3),dz*28]
+    ];
+    const group=new THREE.Group();shrouds.add(group);
+    const path=tube(group,points,4.65,marine,56);
+    tube(group,points.map(([x,y,z])=>[x,y+3.8,z]),1.5,arm===1?coral:teal,56);
+    tube(group,points.map(([x,y,z])=>[x+dx*3.1,y+1.15,z+dz*3.1]),0.85,gold,56);
+    const finMat=arm===0?coral:(arm===1?violet:gold);
+    for(let i=1;i<=3;i++){
+      const at=path.getPoint(i/4);
+      const plate=solid(group,new THREE.OctahedronGeometry(4.3,0),finMat,[at.x,at.y+2,at.z]);
+      plate.scale.set(0.62,0.46,1.15);
+      plate.rotation.y=theta;
+    }
+    const end=points[3];
+    const port=new THREE.Group();port.position.set(...end);
+    group.add(port);exits.push(port);
+    orb(port,7.5,[0,0,0],deep);
+    orb(port,5.3,[0,0,0],arm===1?coral:ceramic);
+    orb(port,3.3,[0,0,0],white);
+    const collar=solid(port,new THREE.TorusGeometry(7.2,1.2,8,48),gold);
+    collar.rotation.y=theta+Math.PI/2;
+    collar.rotation.x=0.38;
+    for(let n=0;n<6;n++){
+      const a=n*Math.PI/3;
+      const rivet=solid(port,new THREE.SphereGeometry(.8,8,6),n%2?teal:coral,
+         [5*Math.cos(a),5*Math.sin(a),1.7]);
+      rivet.scale.set(1,1,1.5);
+    }
+    const bead=solid(group,new THREE.IcosahedronGeometry(2.6,0),arm===1?gold:white,points[0]);
+    trails.push({path,bead,offset:arm/3});
+    beadPath.push(path);
+  }
+  const crown=solid(inner,new THREE.TorusGeometry(11.7,1.45,8,72),coral,[0,15.6,0]);
+  crown.rotation.x=Math.PI/2;
+  const top=solid(inner,new THREE.ConeGeometry(5.4,12,6),gold,[0,22,0]);
+  const flame=solid(inner,new THREE.OctahedronGeometry(3.8,1),violet,[0,27.5,0]);
+
+  // Constrained VFX: a narrow halo and a few colored sparks. These are
+  // optional at Low/Medium quality, never the only visible object.
+  const fx=new THREE.Group();g.add(fx);
+  const aura=solid(fx,new THREE.SphereGeometry(20.1,24,12),
+    new THREE.MeshBasicMaterial({
+      color:0x55daca,transparent:true,opacity:.042,depthWrite:false,
+      side:THREE.BackSide,blending:THREE.AdditiveBlending
+    }),[0,0,0]);
+  const sparks=[];
+  const sparkMat=new THREE.MeshBasicMaterial({color:0xffd99a,transparent:true,opacity:.82,depthWrite:false});
+  for(let i=0;i<30;i++){
+    const a=i*2.399963229728653; // deterministic golden angle
+    const radius=22+(i%4)*4;
+    const x=radius*Math.cos(a),z=radius*Math.sin(a),y=-13+(i*11%46);
+    const bead=solid(fx,new THREE.OctahedronGeometry(i%6===0?1.2:.65,0),sparkMat,[x,y,z]);
+    sparks.push({bead,x,y,z,phase:i*1.17});
+  }
+  // Lighting required only for the premium PBR candidate;
+  // prior A/B/C remain intentionally flat-shaded comparison references.
+  const ambient=new THREE.HemisphereLight(0xb4fff0,0x102435,2.4);
+  const key=new THREE.DirectionalLight(0xffe7c2,3.1); key.position.set(40,100,80);
+  const fill=new THREE.DirectionalLight(0x8a7bea,2.1); fill.position.set(-55,35,-65);
+  g.add(ambient,key,fill);
+
+  return {
+    group:g,
+    setQuality(level){
+      fx.visible=level!=='low';
+      aura.visible=level==='high';
+      for(let i=0;i<sparks.length;i++){
+        sparks[i].bead.visible=(level==='high'||(level==='medium'&&i<11));
+      }
+    },
+    animate(t){
+      heart.scale.setScalar(1+.06*Math.sin(t*1.35));
+      heart.scale.y=1.43*(1+.06*Math.sin(t*1.35));
+      inner.rotation.y=Math.sin(t*.24)*.13;
+      crown.rotation.z=Math.sin(t*.42)*.07;
+      flame.position.y=27.5+Math.sin(t*.9)*1.4;
+      for(const [i,p] of trails.entries()){
+        p.bead.position.copy(p.path.getPoint((t*.12+p.offset)%1));
+        const port=exits[i];
+        port.rotation.z=Math.sin(t*.65+i*2.1)*.075;
+      }
+      for(const p of sparks){
+        p.bead.position.y=p.y+Math.sin(t*.8+p.phase)*1.8;
+      }
+    }
+  };
+}
+
 export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFault=()=>{}){
   const geo=maplibregl.MercatorCoordinate.fromLngLat(coords,0);
   const m=geo.meterInMercatorCoordinateUnits();
@@ -140,6 +276,7 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
   const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let enabled=true;
   let active=RELAY_CONCEPTS.includes(initialConcept)?initialConcept:'haara';
+  let quality='medium';
   const layer={
     id:'majakka-relay-art-lab',
     type:'custom',
@@ -152,7 +289,8 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
       this.concepts={
         haara:buildHaara(this.anchor),
         portti:buildPortti(this.anchor),
-        kudos:buildKudos(this.anchor)
+        kudos:buildKudos(this.anchor),
+        chromatic:buildChromatic(this.anchor)
       };
       this.floor=new THREE.Group();base(this.floor);this.scene.add(this.floor);
       this.renderer=new THREE.WebGLRenderer({
@@ -162,6 +300,7 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
       this.started=performance.now();
       this.failed=false;
       this.setConcept(active);
+      this.setQuality(quality);
     },
     setConcept(id){
       if(!RELAY_CONCEPTS.includes(id))return false;
@@ -173,6 +312,14 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
       return true;
     },
     getConcept(){return active;},
+    setQuality(level){
+      if(!['low','medium','high'].includes(level))return false;
+      quality=level;
+      if(this.concepts?.chromatic)this.concepts.chromatic.setQuality(level);
+      this.map?.triggerRepaint();
+      return true;
+    },
+    getQuality(){return quality;},
     setEnabled(value){enabled=!!value;this.map?.triggerRepaint();},
     render(gl,args){
       if(!enabled||!this.renderer||!args?.defaultProjectionData?.mainMatrix)return;
