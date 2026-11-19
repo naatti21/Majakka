@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Capture all three concepts in real headless WebGL
+      - name: Capture ABC and 6 deterministic Chromatic camera views in real WebGL
         shell: bash
         run: |
           set -euo pipefail
@@ -23,20 +23,28 @@ jobs:
           CHROME="$(command -v google-chrome || command -v chromium || true)"
           test -n "$CHROME"
           URL="https://naatti21.github.io/Majakka/experiments/relay-concept-lab/"
-          for retry in $(seq 1 24); do
-            if curl -fsSL -o /tmp/relay-page.html "$URL?ready=$retry" && grep -q 'choose-kudos' /tmp/relay-page.html; then break; fi
+          # Wait until latest commit is published, not merely any HTML page.
+          for retry in $(seq 1 30); do
+            if curl -fsSL -o /tmp/relay-page.html "$URL?ready=$retry" && grep -q "relay-3d.js?v=003" /tmp/relay-page.html && grep -q "START_CAMERA" /tmp/relay-page.html; then break; fi
             sleep 5
           done
-          curl -fsSL -o /tmp/relay-page.html "$URL"
-          grep -q 'choose-kudos' /tmp/relay-page.html
-          grep -q 'zoom:17.1' /tmp/relay-page.html
-          rm -rf /tmp/relay-chrome-cache
+          grep -q "relay-3d.js?v=003" /tmp/relay-page.html
+          grep -q "START_CAMERA" /tmp/relay-page.html
+          capture() {
+            local name="$1" args="$2"
+            timeout 95s "$CHROME" --headless=new --no-sandbox --disable-dev-shm-usage               --enable-webgl --enable-unsafe-swiftshader               --use-gl=angle --use-angle=swiftshader               --hide-scrollbars --window-size=720,1500               --virtual-time-budget=28000               --screenshot="visual-relay/$name.png"               "$URL?$args&qa=visual-v02" > "visual-relay/$name.log" 2>&1 || true
+            test -s "visual-relay/$name.png"
+          }
           for concept in haara portti kudos; do
-            timeout 95s "$CHROME"               --headless=new --no-sandbox --disable-dev-shm-usage               --enable-webgl --enable-unsafe-swiftshader               --use-gl=angle --use-angle=swiftshader               --hide-scrollbars --window-size=720,1500 \
-              --user-data-dir=/tmp/relay-chrome-cache               --virtual-time-budget=35000               --screenshot="visual-relay/$concept.png"               "$URL?concept=$concept&qa=001"               > "visual-relay/$concept.log" 2>&1 || true
-            test -s "visual-relay/$concept.png"
+            capture "$concept" "concept=$concept&pitch=55&bearing=-15&zoom=17.1"
           done
-          ls -lh visual-relay/
+          capture chromatic-01-main "concept=chromatic&pitch=55&bearing=-15&zoom=17.1"
+          capture chromatic-02-tilt "concept=chromatic&pitch=70&bearing=65&zoom=17"
+          capture chromatic-03-low "concept=chromatic&pitch=25&bearing=155&zoom=17.5"
+          capture chromatic-04-top "concept=chromatic&pitch=0&bearing=0&zoom=16.5"
+          capture chromatic-05-far "concept=chromatic&pitch=55&bearing=0&zoom=15.5"
+          capture chromatic-06-detail "concept=chromatic&pitch=55&bearing=225&zoom=18"
+          ls -lh visual-relay/*.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:
