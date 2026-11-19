@@ -87,6 +87,19 @@ import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-
 const $ = id => document.getElementById(id);
 const NODE_COORDS = [23.7603, 61.4991]; // fixed DEMO position, NOT verified public POI
 const center = NODE_COORDS;
+// Deterministic camera states for screenshot QA; no GPS or hidden user state.
+const qaCamera = new URLSearchParams(location.search);
+function cameraNumber(key, fallback, min, max){
+ const raw=qaCamera.get(key);
+ if(raw===null)return fallback;
+ const value=Number(raw);
+ return Number.isFinite(value)?Math.max(min,Math.min(max,value)):fallback;
+}
+const START_CAMERA={
+ zoom:cameraNumber('zoom',17.1,10,19),
+ pitch:cameraNumber('pitch',55,0,70),
+ bearing:cameraNumber('bearing',-15,-360,360)
+};
 const styleURL = 'https://tiles.openfreemap.org/styles/dark';
 let map, nodeLayer, nodeVisible = true, mapReady = false, nodeUnavailable = false;
 const CONCEPTS={
@@ -230,8 +243,8 @@ if(!webgl2){
 }else{
  try{
   map=new maplibregl.Map({
-   container:'map',style:styleURL,center,zoom:17.1,minZoom:10,maxZoom:19,
-   pitch:55,maxPitch:70,bearing:-15,
+   container:'map',style:styleURL,center,zoom:START_CAMERA.zoom,minZoom:10,maxZoom:19,
+   pitch:START_CAMERA.pitch,maxPitch:70,bearing:START_CAMERA.bearing,
    antialias:true,canvasContextAttributes:{antialias:true},
    dragRotate:true,touchZoomRotate:true,touchPitch:true,
    cooperativeGestures:false,renderWorldCopies:false
