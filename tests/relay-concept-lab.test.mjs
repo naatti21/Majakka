@@ -76,3 +76,13 @@ test('v0.2 optional Low Medium High only changes graphical VFX',()=>{
  for(const level of ['low','medium','high'])assert.match(page,new RegExp('id="quality-'+level+'"'));
  assert.match(page,/nodeLayer\?\.setQuality\(value\)/);
 });
+
+test('six repeatable visual QA camera orientations may be selected without GPS',()=>{
+ assert.match(page,/const START_CAMERA=\{/);
+ assert.match(page,/cameraNumber\('zoom',17\.1,10,19\)/);
+ assert.match(page,/pitch:cameraNumber\('pitch',55,0,70\)/);
+ assert.match(page,/bearing:cameraNumber\('bearing',-15,-360,360\)/);
+ assert.match(page,/zoom:START_CAMERA\.zoom/);
+ assert.match(page,/bearing:START_CAMERA\.bearing/);
+ assert.match(page,/choose-chromatic/);
+});
