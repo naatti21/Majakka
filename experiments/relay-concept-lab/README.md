@@ -35,3 +35,15 @@
 Yhden Relay-muodon valinta, hienompi visuaalinen mallinnus ja idle/herääminen/haarautuminen. Sitten kaksi Nodea + yksi todellinen ilmassa leijuva orgaaninen yhteyssäie ja sitä vastaava pelillinen valintatapa. Muut viisi Node-tyyppiä suunnitellaan oman vaikutuksensa pohjalta.
 
 Tämä kokeilu on eri hakemistossa kuin aiempi `experiments/maplibre-world-v04/`; toimivaa hyväksyttyä vertailuversiota ei korvattu.
+
+## 2026-11-19 — Chromatic Conduit D, korkeampi graafinen laatu
+
+**TOTEUTETTU ERILLISEEN LABRAAN / EI HYVÄKSYTTY NODE-KANONIKSI.** Uusi D · Värit on vertailuvaihtoehto vanhoille A/B/C-muodoille. Värillinen runko yhdistää syvän merensinisen keramiikan, kirkkaan turkoosin, korallin, kullan ja violetin. Kolme vahvaa ulostuloporttia, kohotetut pintadetaljit, metallikehykset, kiinteä monitasoinen ydin ja matkustavat energiapulssit korvaavat aiemman yksivärisen debug-estetiikan. Yhteyssäikeiden oikeaa pelilogiikkaa EI ole toteutettu.
+
+**KÄYTTÖ:** https://naatti21.github.io/Majakka/experiments/relay-concept-lab/ — painike D · Värit. LOW/MED/HIGH muuttaa lisäefektejä; esineen perussiluetti ja rooli pysyvät. URL-vertailukameran parametrit: ?concept=chromatic&zoom=17.1&pitch=55&bearing=-15&quality=medium.
+
+**TEKNIIKKA:** Entinen toimiva Dark-readable MapLibre ja Three.js CustomLayer säilytetty, samoin viimeiseksi piirtäminen ja clearDepth-korjaus. Tämä on vain fiktiivinen DEMO-koordinaatti, ei GPS:ää. Uusi renderöinti tehdään kerroksellisilla Three.js-materiaaleilla, eikä Abyssal Gardenin grafiikkaa tai koodia kopioida.
+
+**LAATUPORTTI:** Testissä 6 kiinteää Chromatic-kamerakulmaa ja A/B/C-vertailukuvat; staattiset kooditestit ovat erikseen. Oikean Androidin FPS, lämpö, sähkönkulutus ja käyttäjän visuaalinen hyväksyntä ovat AUKI.
+
+**Tuotanto-ohjeet:** [Visual Prompt System](../../docs/MAJAKKA_VISUAL_PROMPT_SYSTEM_v0.1.md), [Visual Critic](../../docs/MAJAKKA_VISUAL_CRITIC_v0.1.md), [Node Style Tokens](../../docs/NODE_STYLE_TOKENS_v0.1.md).
