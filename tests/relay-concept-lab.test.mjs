@@ -46,11 +46,33 @@ test('Relay is prototype and DEMO only, no GPS or live Node data',()=>{
  assert.doesNotMatch(page,/navigator\.geolocation|getCurrentPosition|watchPosition/);
  assert.match(model,/setEnabled\(value\)/);
  assert.match(model,/onRemove\(\)/);
- assert.match(page,/import\('\.\/relay-3d\.js\?v=002'\)/);
+ assert.match(page,/import\('\.\/relay-3d\.js\?v=003'\)/);
 });
 
 test('contrast tuning exposes Relay edges rather than burying bright geometry',()=>{
  assert.match(model,/color:0x164d5a/);
  assert.match(model,/new THREE\.TorusGeometry\(24\.2,1\.1/);
  assert.match(model,/points\.map\(\(\[x,y,z\]\)=>\[x,y\+3\.6,z\]\)/);
+});
+
+test('v0.2 premium Chromatic Relay has a distinctive solid multi-material 3D body',()=>{
+ assert.match(model,/function buildChromatic\(parent\)/);
+ assert.match(model,/chromatic:buildChromatic\(this\.anchor\)/);
+ assert.match(page,/id="choose-chromatic"/);
+ assert.match(page,/let selected=Object\.hasOwn\(CONCEPTS,requested\)\?requested:'chromatic'/);
+ assert.match(model,/new THREE\.MeshStandardMaterial/);
+ assert.match(model,/new THREE\.HemisphereLight/);
+ for(const color of ['0x163a49','0xff8e74','0xffd99a','0x8f74d9','0x31dccf'])
+   assert.ok(model.includes(color),'missing rich hero palette '+color);
+ assert.match(model,/for\(let arm=0;arm<3;arm\+\+\)/);
+ assert.match(model,/three|three exits|3 readable living exits/i);
+ assert.doesNotMatch(page,/navigator\.geolocation|getCurrentPosition|watchPosition/);
+});
+
+test('v0.2 optional Low Medium High only changes graphical VFX',()=>{
+ assert.match(model,/setQuality\(level\)/);
+ assert.match(model,/fx\.visible=level!=='low'/);
+ assert.match(model,/getQuality\(\)/);
+ for(const level of ['low','medium','high'])assert.match(page,new RegExp('id="quality-'+level+'"'));
+ assert.match(page,/nodeLayer\?\.setQuality\(value\)/);
 });
