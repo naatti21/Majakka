@@ -231,6 +231,21 @@ A/B/C-painikkeet vaihtavat mallia ilman kartan uutta latausta. Hyväksytty v0.4.
 
 **TILAT:** inspiroiva vertailu ja hyväksytty keskustelusuunta / **EI toteutettu** Majakan live-peliin. Visual Relay A/B/C -vertailu on oma edelleen avoin art-direction-portti, jota ei tarvitse sekoittaa Kaiku-esitykseen. Seuraava konkreettinen pelillinen laatukoe: testaa ensin yksi Flintailin kartta-idle + staattinen collection-kortti + sama hahmo suuressa teeman mukaisessa loopatussa esityksessä, sekä erikseen demoversion 150 m vuorovaikutuksen mielekkyys.
 
+## 2026-11-19 — Abyssal-opit toteutettu prosessiksi ja Relay Chromatic D -kokeeksi
+
+**KÄYTTÄJÄ PALAUTTI JO HYVÄKSYTYT TEHTÄVÄT:** 16.11.2026 lisätty Abyssal Garden -oppidokumentti ehdotti visuaalista laatuprosessia. Aiemmat Relay A/B/C -mallit olivat käyttäjän mielestä **liian low quality ja liian vähävärisiä**. Hänen ei tule joutua kirjoittamaan teknistä promptia: assistentti kirjoittaa sekä briefin, toteutuspromptin, visual critic -ohjeen että korjauskriteerit. Älä väitä samaa AI:ta riippumattomaksi arvioijaksi.
+
+**TOTEUTETTU JA TALLENNETTU:**
+- [Visual Prompt System v0.1](docs/MAJAKKA_VISUAL_PROMPT_SYSTEM_v0.1.md): art-director/implementer/critic-työvaiheet, konkreettiset prompt-pohjat, Done When, regressio- ja palautesilmukka.
+- [Visual Critic v0.1](docs/MAJAKKA_VISUAL_CRITIC_v0.1.md): kuusi vakioitua 3D-kameraa, värien/materiaalien/luettavuuden/hahmoroolin arviointi, P0/P1/P2-hylkäykset ja suorituskykymittaukset.
+- [Node Style Tokens v0.1](docs/NODE_STYLE_TOKENS_v0.1.md): kuuden jo määritellyn Node-tyypin erilliset väri-, materiaali-, liike- ja muotosuuntaukset; ehdotuksia, **ei hyväksyttyä kanonia**.
+- [Relay Concept Lab v0.2](https://naatti21.github.io/Majakka/experiments/relay-concept-lab/) sisältää **D · Värit / Chromatic Conduit** -muodon vanhojen A/B/C-vaihtoehtojen lisäksi. Kolme voimakasta ulostuloporttia, kiinteä kerroksellinen runko, koralli-/kulta-/violettiaksentit turkoosin rinnalla, hienovarainen proseduraalinen liike ja LOW/MED/HIGH-VFX. Aiempi hyväksytty MapLibre-kamera ja last-layer/clearDepth eivät muutu. URL-parametrit sallivat 6 vakioitua kameravertailukuvaa. [Lab README](experiments/relay-concept-lab/README.md).
+- [Relay visual smoke](.github/workflows/relay-lab-visual-smoke.yml) laajennettu ottamaan kolmesta vanhasta vaihtoehdosta kuvat ja kuusi D-kamerakulmaa; [testi](tests/relay-concept-lab.test.mjs) tarkistaa myös neljännen mallin ja laatutasot.
+
+**TILA:** lähdekoodi toteutettu, GitHub-koodi- ja kuvalliset testit tarkistettava viimeisimmistä Actions-ajoista. **Fyysisen Androidin käyttäjäarvio Chromatic-muodosta puuttuu; D ei ole lopullinen Relay.** Ei muita Node-malleja, Kaiku-assetia, oikeaa kaiku-animaatiokorttia eikä Node-verkon pelillistä haarautumista väitetä valmiiksi.
+
+**SEURAAVA PORTTI:** käyttäjän Android-kuva D · Värit -vaihtoehdosta, värit/materiaalit/selkeys kritiikkiin, sitten yksi rajattu parannus. Työtä ei jätetä promptin tarjoamiseen; tuota muutokset GitHubiin saakka. **Abyssalissa otetaan käyttöön menetelmä, ei kopioida grafiikkaa.**
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
