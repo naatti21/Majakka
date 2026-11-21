@@ -93,3 +93,9 @@ test('DEMO distance is approximately 140 m, not a player interaction radius',()=
  assert.ok(m>125 && m<155, 'distance '+m+' m must stay a compact two-Node demo');
  assert.match(page,/Nämä eivät ole oikeita pelipaikkoja/);
 });
+
+test('reduced motion and hidden-tab link toggles are immediate',()=>{
+ assert.match(layer,/if\(reduceMotion\|\|document\.hidden\)\{/);
+ assert.match(layer,/this\.strength=target/);
+ assert.match(page,/import\('\.\/link-world\.js\?v=051'\)/);
+});
