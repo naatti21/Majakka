@@ -24,7 +24,7 @@ jobs:
           test -n "$CHROME"
           URL="https://naatti21.github.io/Majakka/experiments/node-link-v05/"
           for retry in $(seq 1 36); do
-            if curl -fsSL -o /tmp/link-v05.html "$URL?deploy=$retry"                && grep -q "link-world.js?v=050" /tmp/link-v05.html                && grep -q 'Katkaise' /tmp/link-v05.html; then break; fi
+            if curl -fsSL -o /tmp/link-v05.html "$URL?deploy=$retry"                && grep -q "link-world.js?v=050" /tmp/link-v05.html                && grep -q 'KATKAISE YHTEYS' /tmp/link-v05.html; then break; fi
             sleep 5
           done
           grep -q "link-world.js?v=050" /tmp/link-v05.html
