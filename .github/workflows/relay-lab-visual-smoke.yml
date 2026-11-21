@@ -28,7 +28,7 @@ jobs:
             if curl -fsSL -o /tmp/relay-page.html "$URL?ready=$retry" && grep -q "relay-3d.js?v=004" /tmp/relay-page.html && grep -q "START_CAMERA" /tmp/relay-page.html; then break; fi
             sleep 5
           done
-          grep -q "relay-3d.js?v=003" /tmp/relay-page.html
+          grep -q "relay-3d.js?v=004" /tmp/relay-page.html
           grep -q "START_CAMERA" /tmp/relay-page.html
           capture() {
             local name="$1" args="$2"
