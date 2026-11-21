@@ -47,3 +47,21 @@ Tämä kokeilu on eri hakemistossa kuin aiempi `experiments/maplibre-world-v04/`
 **LAATUPORTTI:** Testissä 6 kiinteää Chromatic-kamerakulmaa ja A/B/C-vertailukuvat; staattiset kooditestit ovat erikseen. Oikean Androidin FPS, lämpö, sähkönkulutus ja käyttäjän visuaalinen hyväksyntä ovat AUKI.
 
 **Tuotanto-ohjeet:** [Visual Prompt System](../../docs/MAJAKKA_VISUAL_PROMPT_SYSTEM_v0.1.md), [Visual Critic](../../docs/MAJAKKA_VISUAL_CRITIC_v0.1.md), [Node Style Tokens](../../docs/NODE_STYLE_TOKENS_v0.1.md).
+
+## 2026-11-21 — Relay v0.3 / Majakka (toteutettu koodiin)
+
+**Käyttäjän art direction:** Node on majakkasukuinen beacon — ei monia rönsyäviä energiahaaroja eikä geneerinen scifi-artefakti. Käyttäjä halusi hienon pintakuvion ja laatua viestivät värit ja yksityiskohdat. **Tämä korvaa D:n tavoitellun lopullisen muotokielen, mutta D ja A/B/C jätetään vertailukelpoisina kokeina.**
+
+**TOTEUTETTU LABRASSA:** Uusi **E · Majakka** on oletusvalinta. Se koostuu vakaasta 12-sivuisesta jalustasta, ylöspäin kapenevasta yhtenäisestä tornirungosta, kaiverretuista koristeaiheista, kolmesta kulkevasta energiauomasta, värillisesti korostetuista metallisista reunoista, kolmesta valoa välittävästä kruunuikkunasta ja katosta/huipusta. 3D-geometria on oikeaa Three.js-verkkoa, ei kuvapohjainen sprite. Profiilin monimutkaisuus pysyy enimmäkseen **pinnassa**, ei leveissä ulokkeissa.
+
+**Käyttö:** https://naatti21.github.io/Majakka/experiments/relay-concept-lab/?concept=lighthouse&grade=3
+
+- **E · Majakka:** uusin luonnos. A/B/C/D edelleen mukana.
+- **Pintalaatu I–III:** suunnitteluesimerkki, jossa värit ja koristeet muuttuvat. **Ei lukittu rarity/taloudellinen pelimekaniikka**; ei vaihda Node-tyyppiä tai pelillisiä kykyjä.
+- **LOW / MED / HIGH:** erillinen graafisten lisähiukkasten laatutaso; ei koske Node-laatua.
+- Kartan kameran 2D/3D-, zoom-, kierto- ja HOME-toiminnot säilytetty.
+- DEMO-koordinaatti ei ole varmennettu fyysinen Node, eikä GPS:ää kerätä.
+
+**UUSI LÄHDE:** `relay-lighthouse.js` rakentaa E-majakan. `relay-3d.js` hallitsee versioiden vaihtoa ja säilyttää hyväksytyn v0.4.2-renderöintikorjauksen (`map.addLayer(layer)`, `renderer.clearDepth()`). HTML-versioitu moduuli `?v=004`; Lighthouse-moduuli `?v=030`. Tests mukana `relay-concept-lab.test.mjs`.
+
+**VISUAALINEN PORTTI:** Chrome-kuvat 6 kulmasta sekä pintalaatu I/II/III -vertailu, käyttäjän Android-arvio, tarvittaessa mitattu FPS/ruutuajan p99/akku. Staattisten testien läpäisy EI ole sama kuin valmis laatuhyväksyntä. Seuraavaksi yksi rajattu kaiverrusten/materialien ja kruunun viimeistely Android-kuvien perusteella.
