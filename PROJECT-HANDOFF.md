@@ -270,6 +270,14 @@ A/B/C-painikkeet vaihtavat mallia ilman kartan uutta latausta. Hyväksytty v0.4.
 
 **SEURAAVA PORTTI:** (1) varmista yhdistetyn ja katkaistun kuvakulman kontrasti, (2) käyttäjän Android-palaute nimenomaan yhteyssäikeen korkeudesta/kaartumisesta/visuaalisesta tunnistettavuudesta, (3) vasta sen jälkeen yksi pelillinen verkostotapahtuma tai kolmas Node/alue, (4) Relay-materiaalintunnun erillinen pintamateriaalikoe. Älä muuta aiempaa hyväksyttyä Relay Art Labia tai maailmakartan tyyliä v0.5-kokeilun takia.
 
+## 2026-11-21 — käyttäjän tarkennus: jokainen Node voi olla oma MAJAKKARAKENNUS ja oma KRUUNU
+
+**TÄRKEÄ TÄSMENNYS aiempaan “runko vakio, kruunu vaihtelee” -tulkintaan:** Se tulkinta oli VIRHEELLINEN. Käyttäjä vahvisti, että **rakennus/runkorakenne tai pintamateriaali pitää saada omakseen**; **myös kruunu/lyhtyosa voi olla jokaisella erilainen**. Yhteinen rajoite on vain **majakaksi tunnistettava kokonaisuus**, ei identtinen 3D-runko tai saman sylinterin pinnoittaminen.
+
+Käyttäjä nosti **Stone, Moss, Timber, Porcelain, Copper ja Pearl / Mineral Beacon** -materiaalisten majakoiden joukon; ne ovat vaihtoehtoisia rakennus- ja materiaaliperheitä. **ÄLÄ rinnasta automaattisesti** kuuteen alkuperäiseen pelilliseen Node-lajiin (Prism, Archive, Grove, Relay, Observer, Commons). Niiden yhteydet ja laatuasteet päätetään myöhemmin. **Realistinen/orgaaninen materiaalintuntu** (`roughness`, `normal`, pintatekstuurit, syyt, patina, heijastus, kuluminen) asetetaan etusijalle lisättävän geometrian ja irrallisten renkaiden sijaan. Relay v0.3:n majakkasiluetti on käyttäjän mielestä hyvänsuuntainen, **sen materiaali ei vielä täytä tavoitetta**.
+
+Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [Node Art Direction](docs/MAJAKKA_NODE_ART_DIRECTION_v0.1.md). **Tämä on suunnittelulukko, ei väite uusien 3D-assetien toteutuksesta**.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
