@@ -25,10 +25,10 @@ jobs:
           URL="https://naatti21.github.io/Majakka/experiments/relay-concept-lab/"
           # Wait until latest commit is published, not merely any HTML page.
           for retry in $(seq 1 30); do
-            if curl -fsSL -o /tmp/relay-page.html "$URL?ready=$retry" && grep -q "relay-3d.js?v=004" /tmp/relay-page.html && grep -q "START_CAMERA" /tmp/relay-page.html; then break; fi
+            if curl -fsSL -o /tmp/relay-page.html "$URL?ready=$retry" && grep -q "relay-3d.js?v=005" /tmp/relay-page.html && grep -q "START_CAMERA" /tmp/relay-page.html; then break; fi
             sleep 5
           done
-          grep -q "relay-3d.js?v=004" /tmp/relay-page.html
+          grep -q "relay-3d.js?v=005" /tmp/relay-page.html
           grep -q "START_CAMERA" /tmp/relay-page.html
           capture() {
             local name="$1" args="$2"
