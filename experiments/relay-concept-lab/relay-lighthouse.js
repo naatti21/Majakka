@@ -18,7 +18,8 @@ export function buildRelayLighthouse(THREE, parent) {
   const brass=material(0xe7ba73,.79,.28);
   const porcelain=material(0xb0cad0,.22,.25);
   const cyan=material(0x52e0d0,.22,.18,0x16baab,.52);
-  const champagne=material(0xffd69a,.19,.22,0xf4a64f,.40);
+  const champagne=material(0xffd69a,.19,.22,0xf4a64f,.52);
+  const amberGrade=material(0xffa665,.38,.22,0xee642a,.61);
   const amethyst=material(0x9674d9,.25,.25,0x7250b6,.45);
   const glassDark=material(0x163d55,.65,.21);
   const lens=material(0xffe9bf,.2,.12,0xffbb60,1.0);
@@ -131,7 +132,7 @@ export function buildRelayLighthouse(THREE, parent) {
   const secondTier=new THREE.Group();group.add(secondTier);
   for(let i=0;i<12;i++){
     const a=i*Math.PI/6;
-    const medallion=solid(new THREE.OctahedronGeometry(1.6,0),brass,
+    const medallion=solid(new THREE.OctahedronGeometry(1.9,0),amberGrade,
       [8.1*Math.sin(a),-13.1,8.1*Math.cos(a)],secondTier);
     medallion.scale.set(.7,1.5,.4);medallion.rotation.y=a;
   }
@@ -167,9 +168,9 @@ export function buildRelayLighthouse(THREE, parent) {
     secondTier.visible=grade>=2;
     thirdTier.visible=grade>=3;
     facetTop.visible=grade>=3;
-    tip.material=grade>=3?amethyst:brass;
+    tip.material=grade>=3?amethyst:(grade===2?champagne:patina);
     for(let i=0;i<portGlow.length;i++)
-      portGlow[i].material=grade>=3?(i===1?amethyst:cyan):(grade===2?(i===1?champagne:cyan):cyan);
+      portGlow[i].material=grade>=3?(i===1?amethyst:cyan):(grade===2?champagne:cyan);
     return true;
   }
   let quality='medium';
