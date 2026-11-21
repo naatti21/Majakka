@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#070f15">
+<meta name="description" content="Majakka: kuusi materiaaleista rakennettua geosidottua 3D-majakkakonseptia">
+<title>MAJAKKA · Kuusi materiaalimajakkaa v0.1</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#e7f3ee;background:#070e13}
+*{box-sizing:border-box}html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid #f0c27b;outline-offset:2px}
+#map{position:fixed;inset:0;background:#080f15;touch-action:none}
+.top{position:fixed;z-index:3;pointer-events:none;top:0;left:0;right:0;
+padding:calc(env(safe-area-inset-top) + 12px) 16px 25px;
+background:linear-gradient(180deg,#07131ef2,#081922b0 70%,transparent)}
+.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:850;color:#80e9db}
+h1{font-size:19px;font-weight:780;margin:5px 0 4px}
+.top small{font-size:10px;display:block;color:#bed0d2}
+.controls{position:fixed;z-index:4;right:11px;top:calc(env(safe-area-inset-top) + 128px);
+display:flex;flex-direction:column;gap:7px}
+.controls button{min-width:48px;min-height:45px;background:#071d27e9;border:1px solid #54767b;
+border-radius:12px;font-size:13px;font-weight:750}
+.controls .small{font-size:11px}
+.bottom{position:fixed;z-index:5;bottom:calc(env(safe-area-inset-bottom) + 10px);
+left:10px;right:10px;max-width:480px}
+.card{background:#071d27ee;border:1px solid #426a73;border-radius:14px;
+padding:12px 13px;box-shadow:0 4px 25px #0009;backdrop-filter:blur(8px)}
+.heading{display:flex;justify-content:space-between;gap:9px;align-items:center}
+.heading strong{color:#a1f2e5;font-size:11px;letter-spacing:.08em}
+.flag{color:#c4d0d2;border:1px solid #4b6570;padding:4px 8px;border-radius:15px;font-size:10px}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}
+.choices button{border:1px solid #455c67;background:#122b35;padding:8px 5px;
+border-radius:9px;min-height:49px;text-align:left;font-size:11px;font-weight:760}
+.choices button small{font-size:9px;font-weight:500;color:#b6c5c9;display:block;margin-top:2px}
+.choices button[aria-pressed="true"]{border:2px solid #efd09b;background:#265459;color:#fff2d7}
+#selected{font-weight:800;font-size:14px;margin:10px 0 2px;color:#f0e0c0}
+#role{font-size:11px;color:#b8d5d8;margin:0 0 5px;line-height:1.4}
+#status{font-size:11px;color:#c9dcdf;margin:5px 0;line-height:1.4;min-height:16px}
+#status.error{color:#ffd7aa}
+.quality{display:flex;gap:6px;align-items:center;margin-top:9px}
+.quality span{font-size:9px;color:#adc1c5;margin-right:3px}
+.quality button{flex:1;background:#102a35;border:1px solid #45626a;border-radius:7px;
+min-height:31px;font-size:10px;font-weight:700}
+.quality button[aria-pressed="true"]{border-color:#f2c58c;background:#36545d;color:#ffe2b5}
+.footer{display:flex;gap:10px;justify-content:space-between;margin-top:8px;
+color:#99b5b9;font-size:10px}
+.footer a{color:#b4e4dd}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{bottom:calc(env(safe-area-inset-bottom) + 285px)!important}
+@media(min-width:700px){.bottom{left:15px;right:auto;width:450px}.controls{top:140px;right:19px}}
+@media(max-height:680px){.controls{top:calc(env(safe-area-inset-top) + 92px)}.choices button{min-height:39px}.footer{display:none}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Tampereen tumma kartta ja vaihdettavat 3D-majakat"></div>
+<div class="top">
+ <div class="eyebrow">MAJAKKA / MATERIAL LAB</div>
+ <h1>Kuusi erilaista majakkaa</h1>
+ <small>Sama Node-perhe · oma arkkitehtuuri, kruunu ja materiaali</small>
+</div>
+<div class="controls" aria-label="Kartan kamerakontrollit">
+ <button id="plus" aria-label="Lähennä">+</button>
+ <button id="minus" aria-label="Loitonna">−</button>
+ <button id="home" class="small" aria-label="Palaa vertailupisteeseen">HOME</button>
+ <button id="pitch" class="small" aria-label="Vaihda kaksi- ja kolmiulotteinen kartta">2D</button>
+ <button id="north" class="small" aria-label="Pohjoinen ylös">N ↑</button>
+</div>
+<div class="bottom"><section class="card" aria-label="Valitse Node-tyypin ja materiaalin ehdotus">
+ <div class="heading"><strong>NODE / MATERIAALIKOE</strong><span class="flag">EI LUKITTU</span></div>
+ <div class="choices" role="group" aria-label="Kuusi pelillistä Node-tyyppiä">
+  <button id="choose-prism" type="button" aria-pressed="true">Prism<small>Posliini</small></button>
+  <button id="choose-archive" type="button" aria-pressed="false">Archive<small>Kivi</small></button>
+  <button id="choose-grove" type="button" aria-pressed="false">Grove<small>Sammal</small></button>
+  <button id="choose-relay" type="button" aria-pressed="false">Relay<small>Kupari</small></button>
+  <button id="choose-observer" type="button" aria-pressed="false">Observer<small>Helmiäinen</small></button>
+  <button id="choose-commons" type="button" aria-pressed="false">Commons<small>Puu</small></button>
+ </div>
+ <div id="selected">Prism · Porcelain Beacon</div>
+ <p id="role">Valon taitto · väritehtävät</p>
+ <p id="status" role="status" aria-live="polite">Ladataan karttaa ja pintamateriaaleja…</p>
+ <div class="quality" role="group" aria-label="Grafiikan laatutaso">
+  <span>GRAFIIKKA</span>
+  <button id="quality-low" type="button" aria-pressed="false">LOW</button>
+  <button id="quality-medium" type="button" aria-pressed="true">MED</button>
+  <button id="quality-high" type="button" aria-pressed="false">HIGH</button>
+ </div>
+ <div class="footer"><span id="camera">—</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
+</section></div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+const $=id=>document.getElementById(id);
+const B={
+ prism:{name:'Prism',material:'Porcelain',role:'Taide · valon taitto'},
+ archive:{name:'Archive',material:'Stone',role:'Historia · muistofragmentit'},
+ grove:{name:'Grove',material:'Moss',role:'Luonto · häiriön rauhoitus'},
+ relay:{name:'Relay',material:'Copper',role:'Reitit · valon haaroitus'},
+ observer:{name:'Observer',material:'Pearl / Mineral',role:'Näköalat · kaukaiset Kaiku-signaalit'},
+ commons:{name:'Commons',material:'Timber',role:'Kulttuuri · yhteiset muistot'}
+};
+const DEMO=[23.7603,61.4991]; // fictitious, not a vetted safe public POI.
+const params=new URLSearchParams(location.search);
+const requested=params.get('type');
+let selected=Object.hasOwn(B,requested)?requested:'prism';
+const requestedQuality=params.get('quality');
+let quality=['low','medium','high'].includes(requestedQuality)?requestedQuality:'medium';
+function number(name,def,min,max){
+ const raw=params.get(name);
+ if(raw===null)return def;
+ const v=Number(raw);
+ return Number.isFinite(v)?Math.max(min,Math.min(max,v)):def;
+}
+const camera={zoom:number('zoom',17.1,10,19),pitch:number('pitch',55,0,70),
+ bearing:number('bearing',-15,-360,360)};
+const styleURL='https://tiles.openfreemap.org/styles/dark';
+let map=null,layer=null,failed=false;
+const setStatus=(message,error=false)=>{$('status').textContent=message;$('status').classList.toggle('error',error);};
+function updateCamera(){
+ if(!map)return;
+ $('camera').textContent='z '+map.getZoom().toFixed(1)+' · '+Math.round(map.getPitch())+'° · '+Math.round((map.getBearing()+360)%360)+'°';
+ $('pitch').textContent=map.getPitch()<10?'3D':'2D';
+}
+const ROAD_PAINT = {
+ 'highway_path':{'line-color':'#38535c','line-opacity':0.83},
+ 'highway_minor':{'line-color':'#46616b','line-opacity':0.90},
+ 'highway_major_casing':{'line-color':'#2b414a','line-opacity':0.95},
+ 'highway_major_inner':{'line-color':'#5f7881','line-opacity':0.95},
+ 'highway_major_subtle':{'line-color':'#445d65','line-opacity':0.93},
+ 'highway_motorway_casing':{'line-color':'#324751','line-opacity':0.97},
+ 'highway_motorway_inner':{'line-color':'#657f87','line-opacity':0.94},
+ 'highway_motorway_subtle':{'line-color':'#47616b','line-opacity':0.92},
+ 'road_pier':{'line-color':'#29404a'},
+ 'waterway':{'line-color':'#2c5361'},
+ 'railway':{'line-color':'#465a61'},
+ 'railway_minor':{'line-color':'#40545a'},
+ 'railway_transit':{'line-color':'#40545a'}
+};
+function applyReadableDark() {
+ const paint = {...ROAD_PAINT};
+ const road = {'text-color':'#bdced0','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.35};
+ const place = {'text-color':'#abbfc2','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.2};
+ const water = {'text-color':'#87afbb','text-opacity':0.93,'text-halo-color':'#071119','text-halo-width':1.2};
+ for(const layer of map.getStyle().layers||[]){
+  if(layer.type!=='symbol')continue;
+  if(layer.id.startsWith('highway_name_'))paint[layer.id]=road;
+  else if(layer.id.startsWith('place_'))paint[layer.id]=place;
+  else if(layer.id==='water_name')paint[layer.id]=water;
+ }
+ for(const [id,properties] of Object.entries(paint)){
+  if(!map.getLayer(id))continue;
+  for(const [key,value] of Object.entries(properties)){
+   try{map.setPaintProperty(id,key,value);}catch(error){console.debug('Unapplied paint',id,key,error);}
+  }
+ }
+}
+
+
+function updateSelection(){
+ for(const key of Object.keys(B))
+   $('choose-'+key).setAttribute('aria-pressed',String(selected===key));
+ const info=B[selected];
+ $('selected').textContent=info.name+' · '+info.material+' Beacon';
+ $('role').textContent=info.role;
+}
+function setBeacon(type){
+ if(!Object.hasOwn(B,type))return;
+ selected=type;updateSelection();
+ if(layer&&!failed){layer.switchType(type);}
+ else setStatus('Odota 3D-majakkojen latausta…');
+}
+function setQuality(level){
+ if(!['low','medium','high'].includes(level))return;
+ quality=level;
+ layer?.setQuality(level);
+ for(const id of ['low','medium','high'])
+   $('quality-'+id).setAttribute('aria-pressed',String(id===level));
+}
+function addFootGlow(){
+ map.addSource('beacon-material-demo',{type:'geojson',data:{
+   type:'Feature',geometry:{type:'Point',coordinates:DEMO},properties:{demo:true}
+ }});
+ const firstLabel=(map.getStyle().layers||[]).find(x=>x.type==='symbol')?.id;
+ map.addLayer({id:'beacon-base-glow',type:'circle',source:'beacon-material-demo',
+   paint:{'circle-color':'#8fbdbb',
+     'circle-radius':['interpolate',['linear'],['zoom'],12,12,15,27,17,54,19,89],
+     'circle-opacity':.18,'circle-blur':1,
+     'circle-pitch-alignment':'map','circle-pitch-scale':'map'}
+ },firstLabel);
+}
+function add3D(){
+ import('./beacon-layer.js?v=001').then(({createBeaconLayer})=>{
+  if(!map||map.getLayer('majakka-beacon-material-study'))return;
+  try{
+   const study=createBeaconLayer(maplibregl,DEMO,selected,quality,info=>{
+     setStatus('3D-pinta: '+info.maps.join('×')+' px tekstuuri · vaihda materiaalia tai kierrä karttaa.');
+   },error=>{
+     failed=true;setStatus('3D-renderöinnissä ongelma. Kartta näkyy edelleen.',true);
+   });
+   // Preserve validated draw-last 3D depth behavior.
+   map.addLayer(study);
+   layer=study;
+  }catch(error){
+   failed=true;console.error('Beacon setup',error);
+   setStatus('Materiaalimajakat eivät käynnistyneet. Kartta näkyy edelleen.',true);
+  }
+ }).catch(error=>{failed=true;console.error('Beacon import',error);
+  setStatus('3D-materiaalimoduulin lataus epäonnistui.',true);});
+}
+const gl2=(()=>{try{return !!document.createElement('canvas').getContext('webgl2');}catch{return false;}})();
+if(!gl2)setStatus('WebGL2 ei ole tällä laitteella käytettävissä.',true);
+else {
+ try{
+  map=new maplibregl.Map({
+   container:'map',style:styleURL,center:DEMO,
+   zoom:camera.zoom,minZoom:10,maxZoom:19,pitch:camera.pitch,maxPitch:70,bearing:camera.bearing,
+   antialias:true,canvasContextAttributes:{antialias:true},
+   dragRotate:true,touchZoomRotate:true,touchPitch:true,
+   cooperativeGestures:false,renderWorldCopies:false
+  });
+  const slow=setTimeout(()=>{if(!layer)setStatus('Karttatiilet latautuvat hitaasti. Tarkista verkkoyhteys.',true)},25000);
+  map.on('style.load',()=>{
+   try{applyReadableDark();addFootGlow();add3D();clearTimeout(slow);}
+   catch(error){console.error('Map style',error);setStatus('Karttatasojen alustus epäonnistui.',true);}
+  });
+  map.on('error',e=>console.error('MapLibre',e.error||e));
+  map.on('move',updateCamera);
+  $('plus').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
+  $('minus').onclick=()=>map.zoomTo(Math.max(10,map.getZoom()-1),{duration:300});
+  $('home').onclick=()=>map.flyTo({center:DEMO,zoom:17.1,pitch:55,bearing:-15,duration:700,essential:true});
+  $('pitch').onclick=()=>map.easeTo({pitch:map.getPitch()<10?55:0,duration:450,essential:true});
+  $('north').onclick=()=>map.easeTo({bearing:0,duration:400,essential:true});
+  for(const id of Object.keys(B))$('choose-'+id).onclick=()=>setBeacon(id);
+  for(const id of ['low','medium','high'])$('quality-'+id).onclick=()=>setQuality(id);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)map.resize();});
+  updateSelection();setQuality(quality);updateCamera();
+ }catch(error){console.error('Map init',error);setStatus('Kartta ei käynnistynyt.',true);}
+}
+</script>
+</body>
+</html>
