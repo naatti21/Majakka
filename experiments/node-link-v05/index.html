@@ -176,7 +176,7 @@ function applyLinkStatus(details){
   : 'YHTEYS KATKAISTU · majakat pysyvät paikoillaan. Paina MUODOSTA YHTEYS.');
 }
 function add3DWorld(){
- import('./link-world.js?v=050').then(({createNodeLinkLayer})=>{
+ import('./link-world.js?v=051').then(({createNodeLinkLayer})=>{
   if(!map||map.getLayer('majakka-link-demo-3d'))return;
   try{
    const layer=createNodeLinkLayer(maplibregl,NODES,linkedInitially,applyLinkStatus,error=>{
