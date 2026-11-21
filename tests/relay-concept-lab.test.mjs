@@ -48,7 +48,7 @@ test('Relay is prototype and DEMO only, no GPS or live Node data',()=>{
  assert.doesNotMatch(page,/navigator\.geolocation|getCurrentPosition|watchPosition/);
  assert.match(model,/setEnabled\(value\)/);
  assert.match(model,/onRemove\(\)/);
- assert.match(page,/import\('\.\/relay-3d\.js\?v=004'\)/);
+ assert.match(page,/import\('\.\/relay-3d\.js\?v=005'\)/);
 });
 
 test('contrast tuning exposes Relay edges rather than burying bright geometry',()=>{
@@ -90,7 +90,7 @@ test('six repeatable visual QA camera orientations may be selected without GPS',
 });
 
 test('v0.3 lighthouse is an actual layered 3D tower with compact three-port lantern',()=>{
- assert.match(model,/import \{ buildRelayLighthouse \} from '\.\/relay-lighthouse\.js\?v=030'/);
+ assert.match(model,/import \{ buildRelayLighthouse \} from '\.\/relay-lighthouse\.js\?v=031'/);
  assert.match(model,/lighthouse:buildRelayLighthouse\(THREE,this\.anchor\)/);
  assert.match(page,/id="choose-lighthouse"/);
  assert.match(lighthouse,/CylinderGeometry\(6\.7,8\.8,38,12,3\)/);
@@ -111,4 +111,10 @@ test('v0.3 cosmetic grade levels are independent from rendering L\/M\/H and game
  assert.match(lighthouse,/setQuality\(level\)/);
  for(const level of [1,2,3])assert.match(page,new RegExp('id="grade-'+level+'"'));
  assert.doesNotMatch(page,/navigator\.geolocation|watchPosition/);
+});
+
+test('Grade II amber signal differs substantially from Grade I basic cyan',()=>{
+ assert.match(lighthouse,/const amberGrade=material\(0xffa665/);
+ assert.match(lighthouse,/portGlow\[i\]\.material=grade>=3\?\(i===1\?amethyst:cyan\):\(grade===2\?champagne:cyan\)/);
+ assert.match(lighthouse,/tip\.material=grade>=3\?amethyst:\(grade===2\?champagne:patina\)/);
 });
