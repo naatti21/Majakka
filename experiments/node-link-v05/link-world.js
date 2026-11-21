@@ -129,8 +129,14 @@ export function createNodeLinkLayer(maplibregl,coords=DEMO_NODE_COORDS,initialCo
         this.lastFrame=time;
         const t=(time-this.started)/1000;
         const target=connected?1:0;
-        this.strength+=clamp(target-this.strength,-dt*1.8,dt*1.8);
-        this.strength=clamp(this.strength,0,1);
+        // Reduced-motion mode should never strand a toggle halfway:
+        // change link visibility immediately rather than requiring idle frames.
+        if(reduceMotion||document.hidden){
+          this.strength=target;
+        }else{
+          this.strength+=clamp(target-this.strength,-dt*1.8,dt*1.8);
+          this.strength=clamp(this.strength,0,1);
+        }
         this.strand.visible=this.strength>.005;
         this.strandMaterials.forEach((material,i)=>{
           material.opacity=this.strandBaseOpacity[i]*this.strength;
