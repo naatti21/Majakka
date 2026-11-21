@@ -278,6 +278,18 @@ Käyttäjä nosti **Stone, Moss, Timber, Porcelain, Copper ja Pearl / Mineral Be
 
 Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [Node Art Direction](docs/MAJAKKA_NODE_ART_DIRECTION_v0.1.md). **Tämä on suunnittelulukko, ei väite uusien 3D-assetien toteutuksesta**.
 
+## 2026-11-21 — kuudelle alkuperäiselle Node-tyypille OMAT materiaalimajakat ja 3D-kokeilu
+
+**KÄYTTÄJÄN PYYNTÖ:** ”No nyt voit sitten noille prism, archive jne tyypeille keksiä sopivat materiaalit ja muodot. Ja tadaa Majakoita.” Tämä jatkaa aiempaa päätöstä: **majakka on yhteinen identiteetti, mutta sekä KOKO RAKENNUS että KRUUNU ja materiaali saavat vaihdella**. Ei kuutta samaa sylinteriä eri väreissä eikä lisää satunnaista debug-geometriaa.
+
+**KUUSI EHDOTETTUA YHDISTELMÄÄ (luova art direction, ei käyttäjän lopullinen canon):** `Prism = Porcelain` (lasitettu posliini, optinen kruunu), `Archive = Stone` (kulunut ladottu kivi, lämmin kivilyhty), `Grove = Moss` (sammaloitunut epäsymmetrinen kivitorni, siemenkotakruunu), `Relay = Copper` (patinoitu kuparitorni, kolme ulostulovaloa), `Observer = Pearl/Mineral` (helmiäismineraalitorni, yksi suuntaava kaukolinssi), `Commons = Timber` (puurakenteinen nelikulmainen torni, avoin yhteislyhty). Pelillinen rooli perustuu alkuperäiseen [Node Atlas v0.1](docs/NODE-ATLAS-v0.1.md). Materiaali ei ole pelillinen laatuluokka eikä 1:1-sidosta ole lukittu.
+
+**TOTEUTETTU** erillisessä [Beacon Family Material Lab](https://naatti21.github.io/Majakka/experiments/node-family-v01/) -kokeessa: uusi `index.html` valitsee kuuden tyypin välillä samassa geosidotussa *fiktiivisessä DEMO-pisteessä*. [beacon-materials.js](experiments/node-family-v01/beacon-materials.js) tekee lokaalisti **albedo-, roughness- ja bump-tekstuurit** tyypin pintamateriaalista (kiven huokoisuus/laasti, puunsyyt/oksat, kuparin patina, posliinin säröily, sammalen vaihtelu, helmiäisen kerrostuma/iridesenssi). [beacon-model.js](experiments/node-family-v01/beacon-model.js) antaa kullekin **erillisen rungon profiilin ja oman kruunun**, ja [beacon-layer.js](experiments/node-family-v01/beacon-layer.js) piirtää yhden aidon Three.js-3D-majakan kerrallaan MapLibren viimeisenä kerroksena, `clearDepth()` säilyttäen. Entisen mallin GPU-muisti vapautetaan vaihdossa. V0.4.2-map / Relay v0.3 / v0.5 säiekoe on jätetty ennalleen; EI GPS:ää, EI valmiita Node-peliefektejä.
+
+**TARKKA STATUS:** koodi/prototyyppi tallennettu GitHub-mainiin; [node-family-v01.test.mjs](tests/node-family-v01.test.mjs) testaa syntaksin, kuusi profiilia, materiaalikanavat, geosidonnan ja cleanupin. [kuvatesti](.github/workflows/node-family-v01-visual-smoke.yml) tallentaa Chromiumissa kuusi pääkuvaa + kaksi lähikuvaa. Testien läpäisy EI vielä ole käyttäjän Android-hyväksyntä eikä todista uskottavaa materiaalintuntua, suorituskykyä tai valmista lopullista assettia. [Lue myös arkkitehtuuriperheet](docs/NODE_BEACON_FAMILIES_v0.1.md) ja [labran README](experiments/node-family-v01/README.md).
+
+**SEURAAVA ARVIO:** mobiilissa kaikkien kuuden rungon ja kruunun siluetti sekä materiaalintuntu zoom 17–18, ja zoom 15–16 tunnistettavuus. Käyttäjän kuvapalaute tarkentaa ensin materiaaleja, ei lisää uusia koristeita. Vasta visuaalisen portin jälkeen kahta eri Node-tyyppiä samaan v0.5:een; pelillinen Node-verkko erikseen.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
