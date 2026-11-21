@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#070d12">
-<meta name="description" content="Majakka Relay Art Lab v0.2 — vertaile premium-väristä neljättä 3D Relayta vanhoihin DEMO-malleihin.">
-<title>MAJAKKA — Relay Art Lab v0.2 / Chromatic</title>
+<meta name="description" content="Majakka Relay v0.3 — uusi kolmiporttinen majakkatorni 3D-kartalla.">
+<title>MAJAKKA — Relay v0.3 / Lighthouse Prototype</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
 <style>
 :root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#070d12;color:#e3f3f3;font-synthesis:none}
@@ -28,10 +28,11 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
 .chip{font-size:10px;color:#bbcad0;border:1px solid #46646b;padding:3px 7px;border-radius:20px}
 #status{font-size:12px;color:#d4e6e6;min-height:18px;line-height:1.4;margin:7px 0}
 #status.error{color:#ffd9a6}
-.quality-switch{display:flex;gap:5px;margin-top:8px}
-.quality-switch button{flex:1;border:1px solid #37585c;border-radius:7px;background:#11232b;padding:6px 8px;font-size:10px;font-weight:750;min-height:30px}
-.quality-switch button[aria-pressed="true"]{background:#294448;border-color:#f1bd84;color:#ffe2a5}
-.concept-switch{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.quality-switch,.grade-switch{display:flex;gap:5px;margin-top:6px}
+.prototype-label{font-size:10px;color:#8faeb5;margin-top:8px;letter-spacing:.02em}
+.quality-switch button,.grade-switch button{flex:1;border:1px solid #37585c;border-radius:7px;background:#11232b;padding:6px 3px;font-size:10px;font-weight:750;min-height:30px}
+.quality-switch button[aria-pressed="true"],.grade-switch button[aria-pressed="true"]{background:#294448;border-color:#f1bd84;color:#ffe2a5}
+.concept-switch{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}
 .concept-switch button{background:#10262d;border:1px solid #45676a;border-radius:9px;padding:10px 3px;font-size:12px;font-weight:750;min-height:42px}
 .concept-switch button[aria-pressed="true"]{border:2px solid #8bf5de;background:#164b52;color:#c6fff5}
 .selection{font-size:14px;font-weight:800;color:#c3ffef;margin:10px 0 2px}
@@ -39,7 +40,7 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
 .hint{color:#9eb6b9;font-size:10px;line-height:1.5}
 .camera{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:7px;color:#92b0b5;font-size:10px}
 .camera a{color:#b0deda}
-.maplibregl-ctrl-bottom-right,.maplibregl-ctrl-bottom-left{bottom:calc(env(safe-area-inset-bottom) + 260px)!important}
+.maplibregl-ctrl-bottom-right,.maplibregl-ctrl-bottom-left{bottom:calc(env(safe-area-inset-bottom) + 320px)!important}
 .maplibregl-ctrl-attrib.maplibregl-compact{background:#091821b8!important}
 @media(min-width:700px){.bottom{width:390px;left:16px}.controls{right:18px;top:130px}.title{font-size:21px}.maplibregl-ctrl-bottom-right{bottom:8px!important}}
 @media(max-height:650px){.controls{top:calc(env(safe-area-inset-top) + 95px)}.hint{display:none}}
@@ -49,8 +50,8 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
 <div id="map" role="application" aria-label="Tampereen kartta ja kolmen Relay Node -muodon 3D-vertailu"></div>
 <div class="top">
   <div class="brand">MAJAKKA / NODE ART LAB</div>
-  <div class="title">Relay · Chromatic Design Lab</div>
-  <small>Neljäs monivärinen Relay · vanhat A/B/C/D vertailuna</small>
+  <div class="title">Relay · Majakka v0.3</div>
+  <small>Rauhallinen majakkatorni ja kolme valosuuntaa / DEMO</small>
 </div>
 <div class="controls" aria-label="Kamera ja 3D-testin valinnat">
  <button id="zoomIn" aria-label="Lähennä">+</button>
@@ -67,17 +68,25 @@ button:focus-visible{outline:2px solid #8cfff1;outline-offset:2px}
     <button id="choose-haara" type="button" aria-pressed="true">A · Haara</button>
     <button id="choose-portti" type="button" aria-pressed="false">B · Portti</button>
     <button id="choose-kudos" type="button" aria-pressed="false">C · Kudos</button>
-    <button id="choose-chromatic" type="button" aria-pressed="true">D · Värit</button>
+    <button id="choose-chromatic" type="button" aria-pressed="false">D · Värit</button>
+    <button id="choose-lighthouse" type="button" aria-pressed="true">E · Majakka</button>
   </div>
-  <div class="selection" id="selectedConcept">D · Chromatic</div>
+  <div class="selection" id="selectedConcept">E · Majakka</div>
+  <div class="prototype-label">Pintalaatu / värit (kolme DEMO-tasoa)</div>
+  <div class="grade-switch" role="group" aria-label="Valitse majakan pintalaadun demotaso">
+    <button id="grade-1" aria-pressed="false" type="button">I · Perus</button>
+    <button id="grade-2" aria-pressed="false" type="button">II · Jalostettu</button>
+    <button id="grade-3" aria-pressed="true" type="button">III · Hohto</button>
+  </div>
+  <div class="prototype-label">Grafiikan suorituskykytaso</div>
   <div class="quality-switch" role="group" aria-label="Valitse grafiikan laatutaso">
     <button id="quality-low" type="button">LOW</button>
     <button id="quality-medium" type="button" aria-pressed="true">MED</button>
     <button id="quality-high" type="button">HIGH</button>
   </div>
-  <div class="concept-detail" id="conceptDetail">Monivärinen kerroksellinen ydin, kolme valon ulostuloa ja virtaava energia.</div>
+  <div class="concept-detail" id="conceptDetail">Pintakaiverrettu majakkatorni, kolme valosuuntaa ja laatua korostavat värit.</div>
   <p id="status" role="status" aria-live="polite">Ladataan karttaa…</p>
-  <div class="hint">Yksi sormi: siirrä · kaksi: nipistä, kierrä ja kallista. Vertaile muotoja samassa karttapisteessä, samalla kameralla. Kaikki kolme ovat oikeita 3D-olioita. Ei GPS:ää eikä oikeaa Node-sijaintia.</div>
+  <div class="hint">Yksi sormi: siirrä · kaksi: nipistä, kierrä ja kallista. Vertaile muotoja samassa karttapisteessä, samalla kameralla. Kaikki viisi ovat oikeita 3D-olioita. Ei GPS:ää eikä oikeaa Node-sijaintia.</div>
   <div class="camera"><span id="camera">—</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
  </section>
 </div>
@@ -103,13 +112,23 @@ const START_CAMERA={
 const styleURL = 'https://tiles.openfreemap.org/styles/dark';
 let map, nodeLayer, nodeVisible = true, mapReady = false, nodeUnavailable = false;
 const CONCEPTS={
+ lighthouse:{title:'E · Relay-majakka',detail:'Yksi selkeä torni, kaiverrettu pinta, kolmivaloinen kruunu. Taso I/II/III muuttaa vain värejä ja pintakoristeita.'},
  chromatic:{title:'D · Chromatic Conduit',detail:'Rikas koralli–kulta–violetti–turkoosi muotokieli, kiinteä kerrostettu ydin ja kolme erillistä yhteyspistettä. UUSI LAATUKOE, ei hyväksytty kanoni.'},
  haara:{title:'A · Haara',detail:'Kolme orgaanisesti jakautuvaa haaraa. Yhteydet lähtevät omista päistään. Vahva siluetti, mutta ei saa muistuttaa liikaa Grovea.'},
  portti:{title:'B · Portti',detail:'Katkonaiset pystysuorat rengaskaaret. Relay näkyy yhteyksien porttina. Selkeä mutta ehkä liian tekninen.'},
  kudos:{title:'C · Kudos',detail:'Kolme ilmassa punoutuvaa kiinteää nauhaa. Säikeiden muodostuminen tuntuu elävältä, mutta pienessä koossa voi mennä sekavaksi.'}
 };
 const requested=new URLSearchParams(location.search).get('concept');
-let selected=Object.hasOwn(CONCEPTS,requested)?requested:'chromatic';
+let selected=Object.hasOwn(CONCEPTS,requested)?requested:'lighthouse';
+const requestedGrade=Number(new URLSearchParams(location.search).get('grade'));
+let grade=[1,2,3].includes(requestedGrade)?requestedGrade:3;
+function chooseGrade(value){
+ if(![1,2,3].includes(value))return;
+ grade=value;
+ nodeLayer?.setGrade(value);
+ for(const i of [1,2,3])$('grade-'+i).setAttribute('aria-pressed',String(i===value));
+}
+
 const queryQuality=new URLSearchParams(location.search).get('quality');
 let quality=['low','medium','high'].includes(queryQuality)?queryQuality:'medium';
 function chooseQuality(value){
@@ -207,7 +226,7 @@ function updateNodeVisible(){
  $('nodeToggle').setAttribute('aria-pressed',String(nodeVisible));
 }
 function addTrue3DNode() {
- import('./relay-3d.js?v=003').then(({createRelay3DLayer})=>{
+ import('./relay-3d.js?v=004').then(({createRelay3DLayer})=>{
   if(!map || map.getLayer('majakka-relay-art-lab'))return;
   const layer=createRelay3DLayer(maplibregl,NODE_COORDS,selected,(error)=>{
    nodeUnavailable=true;
@@ -222,6 +241,7 @@ function addTrue3DNode() {
    nodeLayer=layer;
    updateNodeVisible();
    chooseQuality(quality);
+   chooseGrade(grade);
    if(mapReady)setStatus(CONCEPTS[selected].title+' · 3D-muoto ladattu.');
   }catch(error){
    console.error('Relay 3D layer failed',error);
@@ -281,8 +301,10 @@ if(!webgl2){
   $('nodeToggle').onclick=()=>{nodeVisible=!nodeVisible;updateNodeVisible();};
   for(const id of Object.keys(CONCEPTS))$('choose-'+id).onclick=()=>chooseConcept(id);
   for(const level of ['low','medium','high'])$('quality-'+level).onclick=()=>chooseQuality(level);
+  for(const i of [1,2,3])$('grade-'+i).onclick=()=>chooseGrade(i);
   showConcept();
   chooseQuality(quality);
+  chooseGrade(grade);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)map.resize();});
   cameraInfo();
  }catch(error){
