@@ -6,12 +6,14 @@ import { Script } from 'node:vm';
 const base='experiments/relay-concept-lab/';
 const page=readFileSync(base+'index.html','utf8');
 const model=readFileSync(base+'relay-3d.js','utf8');
+const lighthouse=readFileSync(base+'relay-lighthouse.js','utf8');
 
 test('Relay three-option HTML module and 3D module are parsable',()=>{
  const script=page.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
  assert.ok(script);
  new Script(script.replace(/^\s*import .*?;\s*$/gm,''));
  new Script(model.replace(/^\s*import .*?;\s*$/gm,'').replace(/^\s*export /gm,''));
+ new Script(lighthouse.replace(/^\s*export /gm,''));
 });
 
 test('MapLibre readable Dark and approved depth fix are unchanged',()=>{
@@ -46,7 +48,7 @@ test('Relay is prototype and DEMO only, no GPS or live Node data',()=>{
  assert.doesNotMatch(page,/navigator\.geolocation|getCurrentPosition|watchPosition/);
  assert.match(model,/setEnabled\(value\)/);
  assert.match(model,/onRemove\(\)/);
- assert.match(page,/import\('\.\/relay-3d\.js\?v=003'\)/);
+ assert.match(page,/import\('\.\/relay-3d\.js\?v=004'\)/);
 });
 
 test('contrast tuning exposes Relay edges rather than burying bright geometry',()=>{
@@ -59,7 +61,7 @@ test('v0.2 premium Chromatic Relay has a distinctive solid multi-material 3D bod
  assert.match(model,/function buildChromatic\(parent\)/);
  assert.match(model,/chromatic:buildChromatic\(this\.anchor\)/);
  assert.match(page,/id="choose-chromatic"/);
- assert.match(page,/let selected=Object\.hasOwn\(CONCEPTS,requested\)\?requested:'chromatic'/);
+ assert.match(page,/let selected=Object\.hasOwn\(CONCEPTS,requested\)\?requested:'lighthouse'/);
  assert.match(model,/new THREE\.MeshStandardMaterial/);
  assert.match(model,/new THREE\.HemisphereLight/);
  for(const color of ['0x163a49','0xff8e74','0xffd99a','0x8f74d9','0x31dccf'])
@@ -85,4 +87,28 @@ test('six repeatable visual QA camera orientations may be selected without GPS',
  assert.match(page,/zoom:START_CAMERA\.zoom/);
  assert.match(page,/bearing:START_CAMERA\.bearing/);
  assert.match(page,/choose-chromatic/);
+});
+
+test('v0.3 lighthouse is an actual layered 3D tower with compact three-port lantern',()=>{
+ assert.match(model,/import \{ buildRelayLighthouse \} from '\.\/relay-lighthouse\.js\?v=030'/);
+ assert.match(model,/lighthouse:buildRelayLighthouse\(THREE,this\.anchor\)/);
+ assert.match(page,/id="choose-lighthouse"/);
+ assert.match(lighthouse,/CylinderGeometry\(6\.7,8\.8,38,12,3\)/);
+ assert.match(lighthouse,/for\(let i=0;i<3;i\+\+\)/);
+ assert.match(lighthouse,/new THREE\.HemisphereLight/);
+ assert.match(lighthouse,/new THREE\.TubeGeometry/);
+ assert.match(lighthouse,/CONE/i);
+ assert.match(lighthouse,/copper|brass|amethyst|cyan/);
+});
+
+test('v0.3 cosmetic grade levels are independent from rendering L\/M\/H and gameplay',()=>{
+ assert.match(model,/setGrade\(level\)/);
+ assert.match(model,/getGrade\(\)/);
+ assert.match(page,/nodeLayer\?\.setGrade\(value\)/);
+ assert.match(lighthouse,/setGrade\(level\)/);
+ assert.match(lighthouse,/secondTier\.visible=grade>=2/);
+ assert.match(lighthouse,/thirdTier\.visible=grade>=3/);
+ assert.match(lighthouse,/setQuality\(level\)/);
+ for(const level of [1,2,3])assert.match(page,new RegExp('id="grade-'+level+'"'));
+ assert.doesNotMatch(page,/navigator\.geolocation|watchPosition/);
 });
