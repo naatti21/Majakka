@@ -246,6 +246,18 @@ A/B/C-painikkeet vaihtavat mallia ilman kartan uutta latausta. Hyväksytty v0.4.
 
 **SEURAAVA PORTTI:** käyttäjän Android-kuva D · Värit -vaihtoehdosta, värit/materiaalit/selkeys kritiikkiin, sitten yksi rajattu parannus. Työtä ei jätetä promptin tarjoamiseen; tuota muutokset GitHubiin saakka. **Abyssalissa otetaan käyttöön menetelmä, ei kopioida grafiikkaa.**
 
+## 2026-11-21 — Relay v0.3: toimiva majakkamuotoinen 3D-Node, ei pelkkä build-brief
+
+**KÄYTTÄJÄN PÄÄTÖSSUUNTA:** Nodejen tulee kuulua **majakkaperheeseen**; yhteinen yksinkertainen pystysiluetti, tyypin mukaan eri kruunu/pintakuvio/valo, ja Nodejen laatua heijastavat hillityt värit/koristeet. Entinen Chromatic D oli liian laajalle haarautuva scifi-artefakti. **Käyttäjä pyysi toteutusta, ei enää vain ohjeita.**
+
+**TOTEUTETTU** repo-mainiin [Relay Lab](https://naatti21.github.io/Majakka/experiments/relay-concept-lab/?concept=lighthouse&grade=3): uusi **E · Majakka / Relay v0.3** on oletusmuoto vanhojen A/B/C/D:n rinnalla. [relay-lighthouse.js](experiments/relay-concept-lab/relay-lighthouse.js) sisältää yhden oikean Three.js-tornin: porrastettu jalusta, kiinteä kapeneva 12-sivuinen runko, kohokuvioiset pinnat/energiakanavat, hillityt koralli-/kulta-/turkoosi-/violettiaksentit, kolmisuuntainen lyhtykruunu ja sen valopulssit. [relay-3d.js](experiments/relay-concept-lab/relay-3d.js) liittää sen aiemmin Androidilla hyväksyttyyn MapLibre-renderöintiin; **piirtojärjestys + clearDepth-v0.4.2-korjaus säilyvät.** Vanhoja Node-versioita ei poistettu.
+
+**UUSI KOKEILU:** visuaalinen `grade=1|2|3` muuttaa pinnan koristeita/värejä, mutta on **vain hahmotelma mahdolliselle Node-laadulle/harvinaisuudelle**, ei oikea pelisääntö. Erillinen LOW/MED/HIGH graafinen laatutaso vaihtaa vain lisäefektejä. Kartalla DEMO-koordinaatti ilman GPS:ää. Kuusi QA-kamerakulmaa ja I–III-kuvavertailut automaattisesti, mutta pelin v0.4.2-verkkoon, Lumen-talouteen tai Node-Atlakseen ei lisätty vaikutuksia.
+
+**TILAT:** toteutettu 3D-grafiikkaprototyyppi; automaattinen staattinen CI ja Chromium-kuvasavu on vahvistettava viimeisimmästä GitHub Actionsista. **Ei valmista käyttäjän hyväksymää Node-kanoonia eikä toimivaa Node–Node-säiepelimekaniikkaa**. Fyysinen Android-katselmus ja suorituskykymittaus tarvitaan myöhemmin.
+
+**Seuraava todellinen pelituotantoportti:** valitun majakkamallin visuaalisen kelvollisuuden jälkeen 2 oikeasti paikkasidottua **DEMO**-nodea + yksi ilmassa kulkeva orgaaninen 3D-yhteys + käyttäjälle ymmärrettävä muutos. Talentteja ei rakenneta etupainotteisesti.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
