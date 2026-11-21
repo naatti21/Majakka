@@ -24,10 +24,10 @@ jobs:
           test -n "$CHROME"
           URL="https://naatti21.github.io/Majakka/experiments/node-link-v05/"
           for retry in $(seq 1 36); do
-            if curl -fsSL -o /tmp/link-v05.html "$URL?deploy=$retry"                && grep -q "link-world.js?v=050" /tmp/link-v05.html                && grep -q 'KATKAISE YHTEYS' /tmp/link-v05.html; then break; fi
+            if curl -fsSL -o /tmp/link-v05.html "$URL?deploy=$retry"                && grep -q "link-world.js?v=051" /tmp/link-v05.html                && grep -q 'KATKAISE YHTEYS' /tmp/link-v05.html; then break; fi
             sleep 5
           done
-          grep -q "link-world.js?v=050" /tmp/link-v05.html
+          grep -q "link-world.js?v=051" /tmp/link-v05.html
           capture() {
             local name="$1" params="$2"
             timeout 100s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=24000               --screenshot="node-link-qa/$name.png"               "$URL?$params&qa=050"               >"node-link-qa/$name.log" 2>&1 || true
