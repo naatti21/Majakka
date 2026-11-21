@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#070d12">
+<meta name="description" content="Majakka World v0.5: kaksi 3D-majakkaa ja yksi orgaaninen ilmassa leijuva Node-yhteys / DEMO">
+<title>Majakka · 3D-yhteyssäie v0.5</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#070d12;color:#e1f3ef}
+*{box-sizing:border-box}body,html{height:100%;height:100dvh;overflow:hidden;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid #e8c17f;outline-offset:2px}
+#map{position:fixed;inset:0;background:#0b1118;touch-action:none}
+.top{position:fixed;z-index:3;pointer-events:none;top:0;left:0;right:0;
+padding:calc(env(safe-area-inset-top) + 13px) 14px 26px;
+background:linear-gradient(180deg,#061219f0,#07131c9f 65%,transparent)}
+.eyebrow{letter-spacing:.2em;color:#80eee0;font-size:10px;font-weight:850}
+h1{font-size:19px;line-height:1.2;margin:5px 0 5px;font-weight:740}
+.top small{display:block;color:#b2c6c8;font-size:10px}
+.controls{position:fixed;top:calc(env(safe-area-inset-top) + 124px);right:10px;
+display:flex;flex-direction:column;gap:8px;z-index:4}
+.controls button{border:1px solid #4d7979;background:#081d27ec;border-radius:12px;
+min-height:46px;min-width:49px;font-size:13px;font-weight:720}
+.controls .small{font-size:11px}
+.bottom{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 12px);
+left:12px;right:12px;z-index:5}
+.panel{background:#071d26ea;border:1px solid #3e6770;border-radius:15px;
+box-shadow:0 5px 20px #0008;backdrop-filter:blur(8px);padding:12px 14px}
+.rowhead{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rowhead strong{color:#91f3e7;letter-spacing:.08em;font-size:11px}
+.chip{border:1px solid #486a74;border-radius:20px;color:#bdccd0;padding:3px 8px;font-size:10px}
+#status{font-size:12px;color:#d5e7e7;margin:8px 0;line-height:1.48;min-height:20px}
+#status.error{color:#ffcca1}
+.primary{display:block;width:100%;min-height:46px;border-radius:10px;
+border:1px solid #eab577;background:linear-gradient(120deg,#124b59,#316a70);
+font-size:14px;font-weight:830;color:#f1fff5;letter-spacing:.035em}
+.primary[aria-pressed="true"]{border-color:#77f3d6;background:linear-gradient(120deg,#0d454f,#1b706a)}
+.helper{color:#a9c4cb;font-size:10px;margin-top:7px;line-height:1.4}
+.quality{display:flex;gap:6px;margin-top:9px;align-items:center}
+.quality span{font-size:10px;color:#a9c6ca;margin-right:2px}
+.quality button{flex:1;border-radius:8px;border:1px solid #3e6369;
+min-height:31px;background:#122b34;font-weight:750;font-size:10px}
+.quality button[aria-pressed="true"]{border-color:#f1c789;background:#36525b;color:#ffe3ab}
+.camera{display:flex;justify-content:space-between;gap:9px;
+margin-top:9px;color:#9bb9bc;font-size:10px}
+.camera a{color:#c0ebe6}
+.maplibregl-ctrl-bottom-right,.maplibregl-ctrl-bottom-left{bottom:calc(env(safe-area-inset-bottom) + 195px)!important}
+.maplibregl-ctrl-attrib.maplibregl-compact{background:#091821b8!important}
+@media(min-width:700px){.bottom{width:400px;left:16px}.controls{right:18px;top:130px}}
+@media(max-height:670px){.controls{top:calc(env(safe-area-inset-top) + 93px)}.helper{display:none}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Tampereen tumma kartta ja kaksi fiktiivistä 3D-majakkaa"></div>
+<div class="top">
+ <div class="eyebrow">MAJAKKA / WORLD LAB</div>
+ <h1>Yhteyssäie · 3D v0.5</h1>
+ <small>Kaksi majakkaa · leijuva orgaaninen 3D-yhteys / DEMO</small>
+</div>
+<div class="controls" aria-label="Kartan kamerasäätimet">
+ <button id="zoomIn" aria-label="Lähennä">+</button>
+ <button id="zoomOut" aria-label="Loitonna">−</button>
+ <button id="home" class="small" aria-label="Näytä molemmat majakat">HOME</button>
+ <button id="pitch" class="small" aria-label="Vaihda kartan kallistusta">2D</button>
+ <button id="north" class="small" aria-label="Palauta pohjoinen ylös">N ↑</button>
+</div>
+<div class="bottom">
+ <section class="panel" aria-label="Yhteyden ohjaus">
+  <div class="rowhead"><strong>MAJAKKA A ↔ MAJAKKA B</strong><span class="chip">2 DEMO-NODEA</span></div>
+  <p id="status" role="status" aria-live="polite">Ladataan karttaa ja 3D-yhteyttä…</p>
+  <button id="linkToggle" class="primary" aria-pressed="true" type="button">KATKAISE YHTEYS</button>
+  <div class="helper">Testaa muutosta katkaisemalla ja muodostamalla yhteys uudelleen. Nämä eivät ole oikeita pelipaikkoja, eikä sijaintiasi lueta.</div>
+  <div class="quality" role="group" aria-label="Grafiikan laatutaso">
+   <span>GRAFIIKKA</span>
+   <button id="quality-low" type="button" aria-pressed="false">LOW</button>
+   <button id="quality-medium" type="button" aria-pressed="true">MED</button>
+   <button id="quality-high" type="button" aria-pressed="false">HIGH</button>
+  </div>
+  <div class="camera"><span id="camera">—</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
+ </section>
+</div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+const $ = id=>document.getElementById(id);
+const NODES=[[23.7603,61.4991],[23.7627,61.4996]]; // only DEMO, NOT vetted POIs
+const center=[(NODES[0][0]+NODES[1][0])/2,(NODES[0][1]+NODES[1][1])/2];
+const cameraQuery=new URLSearchParams(location.search);
+function value(key,fallback,minimum,maximum){
+ const x=Number(cameraQuery.get(key));
+ return cameraQuery.has(key)&&Number.isFinite(x)?Math.min(maximum,Math.max(minimum,x)):fallback;
+}
+const START_CAMERA={zoom:value('zoom',16.5,10,19),pitch:value('pitch',55,0,70),bearing:value('bearing',-15,-360,360)};
+const linkedInitially=cameraQuery.get('linked')!=='0';
+const queryQuality=cameraQuery.get('quality');
+let quality=['low','medium','high'].includes(queryQuality)?queryQuality:'medium';
+let connected=linkedInitially;
+let worldLayer=null,map=null,ready=false,failed=false;
+const styleURL='https://tiles.openfreemap.org/styles/dark';
+const setStatus=(label,error=false)=>{$('status').textContent=label;$('status').classList.toggle('error',error);};
+function cameraInfo(){
+ if(!map)return;
+ $('camera').textContent='z '+map.getZoom().toFixed(1)+' · kallistus '+Math.round(map.getPitch())+'° · suunta '+Math.round((map.getBearing()+360)%360)+'°';
+ $('pitch').textContent=map.getPitch()<10?'3D':'2D';
+}
+const ROAD_PAINT = {
+ 'highway_path':{'line-color':'#38535c','line-opacity':0.83},
+ 'highway_minor':{'line-color':'#46616b','line-opacity':0.90},
+ 'highway_major_casing':{'line-color':'#2b414a','line-opacity':0.95},
+ 'highway_major_inner':{'line-color':'#5f7881','line-opacity':0.95},
+ 'highway_major_subtle':{'line-color':'#445d65','line-opacity':0.93},
+ 'highway_motorway_casing':{'line-color':'#324751','line-opacity':0.97},
+ 'highway_motorway_inner':{'line-color':'#657f87','line-opacity':0.94},
+ 'highway_motorway_subtle':{'line-color':'#47616b','line-opacity':0.92},
+ 'road_pier':{'line-color':'#29404a'},
+ 'waterway':{'line-color':'#2c5361'},
+ 'railway':{'line-color':'#465a61'},
+ 'railway_minor':{'line-color':'#40545a'},
+ 'railway_transit':{'line-color':'#40545a'}
+};
+function applyReadableDark() {
+ const paint = {...ROAD_PAINT};
+ const road = {'text-color':'#bdced0','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.35};
+ const place = {'text-color':'#abbfc2','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.2};
+ const water = {'text-color':'#87afbb','text-opacity':0.93,'text-halo-color':'#071119','text-halo-width':1.2};
+ for(const layer of map.getStyle().layers||[]){
+  if(layer.type!=='symbol')continue;
+  if(layer.id.startsWith('highway_name_'))paint[layer.id]=road;
+  else if(layer.id.startsWith('place_'))paint[layer.id]=place;
+  else if(layer.id==='water_name')paint[layer.id]=water;
+ }
+ for(const [id,properties] of Object.entries(paint)){
+  if(!map.getLayer(id))continue;
+  for(const [key,value] of Object.entries(properties)){
+   try{map.setPaintProperty(id,key,value);}catch(error){console.debug('Unapplied paint',id,key,error);}
+  }
+ }
+}
+
+function addGroundGlows(){
+ map.addSource('majakka-link-demo-glows',{type:'geojson',data:{
+   type:'FeatureCollection',features:NODES.map((coords,i)=>({
+    type:'Feature',geometry:{type:'Point',coordinates:coords},properties:{demo:i}
+   }))
+ }});
+ const firstLabel=(map.getStyle().layers||[]).find(l=>l.type==='symbol')?.id;
+ map.addLayer({id:'link-glow-foot',type:'circle',source:'majakka-link-demo-glows',
+   paint:{'circle-color':['match',['get','demo'],0,'#49d2c6','#eab379'],
+     'circle-radius':['interpolate',['linear'],['zoom'],12,12,15,27,17,63,19,91],
+     'circle-opacity':.16,'circle-blur':1,
+     'circle-pitch-alignment':'map','circle-pitch-scale':'map'}
+ },firstLabel);
+ map.addLayer({id:'link-glow-core',type:'circle',source:'majakka-link-demo-glows',
+   paint:{'circle-color':['match',['get','demo'],0,'#92f9ed','#ffd7aa'],
+     'circle-radius':['interpolate',['linear'],['zoom'],12,5,15,10,17,23,19,44],
+     'circle-opacity':.22,'circle-blur':1,
+     'circle-pitch-alignment':'map','circle-pitch-scale':'map'}
+ },firstLabel);
+}
+function refreshLinkButton(){
+ $('linkToggle').textContent=connected?'KATKAISE YHTEYS':'MUODOSTA YHTEYS';
+ $('linkToggle').setAttribute('aria-pressed',String(connected));
+}
+function chooseQuality(level){
+ if(!['low','medium','high'].includes(level))return;
+ quality=level;worldLayer?.setQuality(level);
+ for(const name of ['low','medium','high'])
+   $('quality-'+name).setAttribute('aria-pressed',String(name===level));
+}
+function applyLinkStatus(details){
+ connected=details.connected;
+ refreshLinkButton();
+ setStatus(connected
+  ? 'YHTEYS MUODOSTETTU · '+details.distanceM+' m · valosäie kulkee ilmassa.'
+  : 'YHTEYS KATKAISTU · majakat pysyvät paikoillaan. Paina MUODOSTA YHTEYS.');
+}
+function add3DWorld(){
+ import('./link-world.js?v=050').then(({createNodeLinkLayer})=>{
+  if(!map||map.getLayer('majakka-link-demo-3d'))return;
+  try{
+   const layer=createNodeLinkLayer(maplibregl,NODES,applyLinkStatus,error=>{
+    failed=true;setStatus('3D-virhe. Kartta toimii edelleen.',true);
+   });
+   // Preserve approved v0.4.2 occlusion fix: add AFTER all basemap labels.
+   map.addLayer(layer);
+   worldLayer=layer;
+   worldLayer.setConnected(linkedInitially);
+   chooseQuality(quality);
+  }catch(error){
+   failed=true;console.error('Link layer start',error);
+   setStatus('3D-majakat eivät käynnistyneet. Kartta toimii edelleen.',true);
+  }
+ }).catch(error=>{
+  failed=true;console.error('Link world module failed',error);
+  setStatus('3D-moduulin lataus epäonnistui. Tarkista verkkoyhteys.',true);
+ });
+}
+refreshLinkButton();
+const webgl2=(()=>{
+ try{return !!document.createElement('canvas').getContext('webgl2');}catch{return false;}
+})();
+if(!webgl2){
+ setStatus('WebGL2 ei ole käytettävissä tällä laitteella.',true);
+}else{
+ try{
+  map=new maplibregl.Map({
+   container:'map',style:styleURL,center,
+   zoom:START_CAMERA.zoom,minZoom:10,maxZoom:19,
+   pitch:START_CAMERA.pitch,maxPitch:70,bearing:START_CAMERA.bearing,
+   antialias:true,canvasContextAttributes:{antialias:true},
+   dragRotate:true,touchZoomRotate:true,touchPitch:true,
+   cooperativeGestures:false,renderWorldCopies:false
+  });
+  const loadingTimeout=setTimeout(()=>{
+   if(!ready)setStatus('Karttatiilien lataus kestää. Tarkista yhteys.',true);
+  },22000);
+  map.on('style.load',()=>{
+   try{
+    applyReadableDark();
+    addGroundGlows();
+    add3DWorld();
+    ready=true;clearTimeout(loadingTimeout);
+   }catch(error){console.error('Map setup failed',error);setStatus('Karttatasojen lataus epäonnistui.',true);}
+  });
+  map.on('error',event=>{console.error('MapLibre error',event?.error||event);
+    if(!ready)setStatus('Karttadatan latauksessa ongelma.',true);
+  });
+  map.on('move',cameraInfo);
+  $('linkToggle').onclick=()=>{
+   if(!worldLayer||failed)return;
+   worldLayer.setConnected(!worldLayer.isConnected());
+  };
+  for(const level of ['low','medium','high'])
+   $('quality-'+level).onclick=()=>chooseQuality(level);
+  $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
+  $('zoomOut').onclick=()=>map.zoomTo(Math.max(10,map.getZoom()-1),{duration:300});
+  $('home').onclick=()=>map.flyTo({center,zoom:16.5,pitch:55,bearing:-15,duration:750,essential:true});
+  $('pitch').onclick=()=>map.easeTo({pitch:map.getPitch()<10?55:0,duration:450,essential:true});
+  $('north').onclick=()=>map.easeTo({bearing:0,duration:400,essential:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)map.resize();});
+  chooseQuality(quality);
+  cameraInfo();
+ }catch(error){console.error('Map init failed',error);setStatus('Kartta ei käynnistynyt.',true);}
+}
+</script>
+</body>
+</html>
