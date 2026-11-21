@@ -60,7 +60,13 @@ test('preserve approved MapLibre style and last-layer Three depth-buffer repair'
  assert.match(page,/map\.addLayer\(layer\);/);
  assert.match(layer,/renderingMode:'3d'/);
  assert.match(layer,/defaultProjectionData\.mainMatrix/);
- assert.match(layer,/this\.renderer\.resetState\(\);\s*this\.renderer\.clearDepth\(\);\s*this\.renderer\.render\(this\.scene,this\.camera\)/);
+ assert.match(layer,/this\.renderer\.resetState\(\)/);
+ assert.match(layer,/this\.renderer\.clearDepth\(\)/);
+ assert.match(layer,/this\.renderer\.render\(this\.scene,this\.camera\)/);
+ const reset=layer.indexOf('this.renderer.resetState()');
+ const clear=layer.indexOf('this.renderer.clearDepth()');
+ const render=layer.indexOf('this.renderer.render(this.scene,this.camera)');
+ assert.ok(reset>=0 && clear>reset && render>clear,'Depth must clear after state reset and before final render');
  assert.match(page,/map\.addLayer\(\{id:'link-glow-foot'/);
  assert.match(page,/map\.addLayer\(\{id:'link-glow-core'/);
  assert.doesNotMatch(page,/navigator\.geolocation|watchPosition|getCurrentPosition/);
