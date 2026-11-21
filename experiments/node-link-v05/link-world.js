@@ -9,7 +9,7 @@ export const DEMO_NODE_COORDS=[
   [23.7603,61.4991],
   [23.7627,61.4996]
 ];
-export function createNodeLinkLayer(maplibregl,coords=DEMO_NODE_COORDS,onChange=()=>{},onFault=()=>{}){
+export function createNodeLinkLayer(maplibregl,coords=DEMO_NODE_COORDS,initialConnected=true,onChange=()=>{},onFault=()=>{}){
   if(!Array.isArray(coords)||coords.length!==2)throw Error('Node link demo requires two coordinates');
   const geo0=maplibregl.MercatorCoordinate.fromLngLat(coords[0],0);
   const geo1=maplibregl.MercatorCoordinate.fromLngLat(coords[1],0);
@@ -24,7 +24,7 @@ export function createNodeLinkLayer(maplibregl,coords=DEMO_NODE_COORDS,onChange=
   const projection=new THREE.Matrix4();
   const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let enabled=true, connected=true, quality='medium';
+  let enabled=true, connected=!!initialConnected, quality='medium';
   const layer={
     id:'majakka-link-demo-3d',
     type:'custom',
@@ -98,7 +98,7 @@ export function createNodeLinkLayer(maplibregl,coords=DEMO_NODE_COORDS,onChange=
       this.started=performance.now();
       this.lastFrame=this.started;
       this.strength=connected?1:0;
-      this.lastNotified=null;
+      this.lastNotified=connected;
       this.renderer=new THREE.WebGLRenderer({
         canvas:map.getCanvas(),context:gl,alpha:true,antialias:true
       });
