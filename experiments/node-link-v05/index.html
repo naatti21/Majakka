@@ -179,7 +179,7 @@ function add3DWorld(){
  import('./link-world.js?v=050').then(({createNodeLinkLayer})=>{
   if(!map||map.getLayer('majakka-link-demo-3d'))return;
   try{
-   const layer=createNodeLinkLayer(maplibregl,NODES,applyLinkStatus,error=>{
+   const layer=createNodeLinkLayer(maplibregl,NODES,linkedInitially,applyLinkStatus,error=>{
     failed=true;setStatus('3D-virhe. Kartta toimii edelleen.',true);
    });
    // Preserve approved v0.4.2 occlusion fix: add AFTER all basemap labels.
