@@ -1,10 +1,11 @@
-// MAJAKKA · Relay design lab v0.2 / Chromatic art direction
+// MAJAKKA · Relay design lab v0.3 / lighthouse family
 // Three interchangeable ACTUAL 3D designs for the established Relay Node type.
 // All geometry, animations and positions are DEMO art direction only.
 // Stable v0.4.2 rendering: last MapLibre layer + isolated depth buffer.
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
+import { buildRelayLighthouse } from './relay-lighthouse.js?v=030';
 
-export const RELAY_CONCEPTS = Object.freeze(['haara', 'portti', 'kudos', 'chromatic']);
+export const RELAY_CONCEPTS = Object.freeze(['haara', 'portti', 'kudos', 'chromatic', 'lighthouse']);
 
 const dark = () => new THREE.MeshBasicMaterial({color:0x164d5a, side:THREE.DoubleSide});
 const mid = () => new THREE.MeshBasicMaterial({color:0x218c9a, side:THREE.DoubleSide});
@@ -265,7 +266,7 @@ function buildChromatic(parent) {
   };
 }
 
-export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFault=()=>{}){
+export function createRelay3DLayer(maplibregl,coords,initialConcept='lighthouse',onFault=()=>{}){
   const geo=maplibregl.MercatorCoordinate.fromLngLat(coords,0);
   const m=geo.meterInMercatorCoordinateUnits();
   const world=new THREE.Matrix4()
@@ -275,8 +276,9 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
   const proj=new THREE.Matrix4();
   const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   let enabled=true;
-  let active=RELAY_CONCEPTS.includes(initialConcept)?initialConcept:'haara';
+  let active=RELAY_CONCEPTS.includes(initialConcept)?initialConcept:'lighthouse';
   let quality='medium';
+  let grade=3;
   const layer={
     id:'majakka-relay-art-lab',
     type:'custom',
@@ -290,7 +292,8 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
         haara:buildHaara(this.anchor),
         portti:buildPortti(this.anchor),
         kudos:buildKudos(this.anchor),
-        chromatic:buildChromatic(this.anchor)
+        chromatic:buildChromatic(this.anchor),
+        lighthouse:buildRelayLighthouse(THREE,this.anchor)
       };
       this.floor=new THREE.Group();base(this.floor);this.scene.add(this.floor);
       this.renderer=new THREE.WebGLRenderer({
@@ -301,6 +304,7 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
       this.failed=false;
       this.setConcept(active);
       this.setQuality(quality);
+      this.setGrade(grade);
     },
     setConcept(id){
       if(!RELAY_CONCEPTS.includes(id))return false;
@@ -316,10 +320,19 @@ export function createRelay3DLayer(maplibregl,coords,initialConcept='haara',onFa
       if(!['low','medium','high'].includes(level))return false;
       quality=level;
       if(this.concepts?.chromatic)this.concepts.chromatic.setQuality(level);
+      if(this.concepts?.lighthouse)this.concepts.lighthouse.setQuality(level);
       this.map?.triggerRepaint();
       return true;
     },
     getQuality(){return quality;},
+    setGrade(level){
+      if(![1,2,3].includes(level))return false;
+      grade=level;
+      this.concepts?.lighthouse?.setGrade(level);
+      this.map?.triggerRepaint();
+      return true;
+    },
+    getGrade(){return grade;},
     setEnabled(value){enabled=!!value;this.map?.triggerRepaint();},
     render(gl,args){
       if(!enabled||!this.renderer||!args?.defaultProjectionData?.mainMatrix)return;
