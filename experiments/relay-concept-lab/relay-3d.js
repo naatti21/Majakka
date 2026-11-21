@@ -3,7 +3,7 @@
 // All geometry, animations and positions are DEMO art direction only.
 // Stable v0.4.2 rendering: last MapLibre layer + isolated depth buffer.
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
-import { buildRelayLighthouse } from './relay-lighthouse.js?v=030';
+import { buildRelayLighthouse } from './relay-lighthouse.js?v=031';
 
 export const RELAY_CONCEPTS = Object.freeze(['haara', 'portti', 'kudos', 'chromatic', 'lighthouse']);
 
