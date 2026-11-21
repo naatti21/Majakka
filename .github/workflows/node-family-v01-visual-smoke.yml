@@ -1,0 +1,48 @@
+name: Majakka - six Beacon material art visual QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/node-family-v01/**"
+      - "tests/node-family-v01.test.mjs"
+      - ".github/workflows/node-family-v01-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  chromatic-materials:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture six real PBR 3D lighthouses at a consistent mobile camera
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p beacon-qa
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          URL="https://naatti21.github.io/Majakka/experiments/node-family-v01/"
+          # Wait for the actual deployed material lab, not a stale 200 response.
+          for attempt in $(seq 1 34); do
+            if curl -fsSL -o /tmp/beacon-page.html "$URL?check=$attempt"               && grep -q "beacon-layer.js?v=001" /tmp/beacon-page.html               && grep -q "choose-commons" /tmp/beacon-page.html; then break; fi
+            sleep 5
+          done
+          grep -q 'beacon-layer.js?v=001' /tmp/beacon-page.html
+          capture() {
+            local name="$1" query="$2"
+            timeout 100s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=20000               --screenshot="beacon-qa/$name.png"               "$URL?$query&visual=001" >"beacon-qa/$name.log" 2>&1 || true
+            test -s "beacon-qa/$name.png"
+          }
+          for kind in prism archive grove relay observer commons; do
+            capture "$kind-main" "type=$kind&quality=medium&zoom=17.1&pitch=55&bearing=-15"
+          done
+          capture copper-detail "type=relay&quality=medium&zoom=18&pitch=55&bearing=55"
+          capture porcelain-detail "type=prism&quality=medium&zoom=18&pitch=55&bearing=55"
+          ls -lh beacon-qa/*.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-six-3d-beacon-materials
+          path: beacon-qa/
+          retention-days: 5
