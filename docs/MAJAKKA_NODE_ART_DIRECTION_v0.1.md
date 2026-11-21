@@ -6,6 +6,12 @@
 **Avaa Androidilla:** https://naatti21.github.io/Majakka/experiments/relay-concept-lab/  
 **Lähteet:** [Node Atlas v0.1](NODE-ATLAS-v0.1.md), [Auto Atlas v0.1](NODE-ATLAS-AUTOGEN-v0.1.md), [World v0.4](MAJAKKA-WORLD-v0.4-3D-NODES-KAIKU-SPEC.md), [Project handoff](../PROJECT-HANDOFF.md).
 
+## 21.11.2026 — käyttäjän majakka-arkkitehtuurin täsmennys
+
+Majakat ovat **yhteinen tunnistettava perhe**, mutta käyttäjä **ei** vaadi kaikille samaa rakennusta tai täsmälleen samaa perusrunkomallia. Kokonainen majakka saa olla **Stone, Moss, Timber, Porcelain, Copper tai Pearl/Mineral** -henkinen sekä **omanlaisella kruunulla/lyhtyhuoneella** toteutettu. Tunnistettava majakkafunktio ja korkeussiluetti säilyvät. Muoto voi vaihdella luonnollisesti rakennusmateriaalin ja tehtävän mukaan; liika tekninen rönsyily ja irralliset artefaktikoristeet vältetään.
+
+Aiempi `Relay v0.3` näyttää jo oikeansuuntaiselta majakalta, mutta käyttäjä ei pidä pinnan nykyisiä lisägeometrisia koristeita aitona **materiaalintuntuna**. Seuraava taidetuotanto keskittyy materiaaleihin ja valon käyttäytymiseen, ei pelkkään uusiin muotoihin. Pelilliset kuusi Node-tyyppiä ja nämä kuusi materiaaliperhettä ovat **eri akselit**, eivät automaattinen 1:1-luokittelu. Tarkempi lista: [NODE_STYLE_TOKENS_v0.1.md](NODE_STYLE_TOKENS_v0.1.md).
+
 ## 1. Kiinnitetty suunnitteluperusta (EI tehdä uusiksi)
 
 Aiemmasta Node Atlas -suunnitelmasta tulee suoraan **kuusi erilaista Node-tyyppiä**, joiden vaikutus ei saa jäädä väriin, UI-tagiin tai erilaiseen koristeeseen:
