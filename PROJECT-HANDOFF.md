@@ -258,6 +258,18 @@ A/B/C-painikkeet vaihtavat mallia ilman kartan uutta latausta. Hyväksytty v0.4.
 
 **Seuraava todellinen pelituotantoportti:** valitun majakkamallin visuaalisen kelvollisuuden jälkeen 2 oikeasti paikkasidottua **DEMO**-nodea + yksi ilmassa kulkeva orgaaninen 3D-yhteys + käyttäjälle ymmärrettävä muutos. Talentteja ei rakenneta etupainotteisesti.
 
+## 2026-11-21 — v0.3 hyväksytty MUOTOSUUNNAKSI, materiaalintuntu avoin; v0.5-kaksi-Nodea-yhteys
+
+**UUSIN KÄYTTÄJÄN PALAUTE:** Relay v0.3 -majakan **yksinkertainen tornimainen siluetti ja yleisilme ovat oikea suunta**: käyttäjä sanoi *“kyllä tuo näyttää hyvältä”*. **Pintaa EI ole hyväksytty valmiiksi:** yksityiskohdat ovat nyt lähinnä lisää 3D-muotoja, eivät vielä uskottavaa materiaalin pintaa. Oikea termi: **materiaalintuntu / pintatekstuuri / material response**. Seuraava rajattu art-polku: tekstuuri- tai proseduraalinen normal-/roughness-vaihtelu, värikerrosten mikrorakenne, fyysisesti uskottava valon heijastuminen; vältä turhaa ulokkeiden/polygonien lisäämistä. **Ei väitettä että uusi materiaali olisi jo toteutettu.**
+
+**KÄYTTÄJÄ PYYNTÖ:** *“Edetään suunnitelmasi mukaan”* = ensin kahden majakan välinen oikea ilmassa leijuva yhteyssäie; ei lisää pitkää suunnittelumonologia, vaan toteuta peliä.
+
+**TOTEUTETTU GitHub-mainiin, uusi erillinen kokeilu:** [World Link v0.5](https://naatti21.github.io/Majakka/experiments/node-link-v05/), lähteet [index.html](experiments/node-link-v05/index.html) ja [link-world.js](experiments/node-link-v05/link-world.js). Kaksi oikeaa 3D Three.js Relay-v0.3-majakkaa kahdessa erillisessä fiktiivisessä, karttaan sidotussa DEMO-pisteessä `[23.7603,61.4991]` ja `[23.7627,61.4996]` (~140 m toisistaan, **ei** pelaajan toimintamatka). Samassa 3D-scenessä yksi orgaaninen koholla kulkeva `CatmullRomCurve3/TubeGeometry`-valosäie ja sivujuovat sekä liikkuvat valopulssit. Käyttäjä voi oikeasti **KATKAISTA** ja **MUODOSTAA** 3D-yhteyden takaisin (lyhyt hiipumis-/syttymissiirtymä). Runkokartta on edelleen OpenFreeMap Dark + MapLibre. `map.addLayer(layer)` viimeisenä ja `renderer.clearDepth()` säilyttävät käyttäjän hyväksymän 3D-piirtojärjestyskorjauksen. `linked=0`-URL-parametri avaa kuvan ilman yhteyttä. LOW/MED/HIGH on graafinen tehostekytkin. **Ei GPS:ää, ei oikeita Node-sijainteja, ei sääntömoottoria eikä pysyvää peliverkkoa.**
+
+**VERIFIOINTI:** [tests/node-link-v05.test.mjs](tests/node-link-v05.test.mjs) testaa kaksi koordinaattia, 3D-säikeen, tilakytkimen ja depth-fiksin. Uusi [GitHub Actions -kuvatesti](.github/workflows/node-link-v05-visual-smoke.yml) ottaa yhdistetyn/katkaistun tilan ja eri 3D-kamerakulmat. **CI/PAGES/kuvallisen QA:n lopputila tarkistettava viimeisimmistä ajoista; älä tulkitse pelkkää kuvan onnistunutta tallennusta oikean sisällön hyväksynnäksi.** Fyysisen Androidin ulkonäkö, akku ja FPS ovat vielä AVOIN. [Kokeilun README](experiments/node-link-v05/README.md).
+
+**SEURAAVA PORTTI:** (1) varmista yhdistetyn ja katkaistun kuvakulman kontrasti, (2) käyttäjän Android-palaute nimenomaan yhteyssäikeen korkeudesta/kaartumisesta/visuaalisesta tunnistettavuudesta, (3) vasta sen jälkeen yksi pelillinen verkostotapahtuma tai kolmas Node/alue, (4) Relay-materiaalintunnun erillinen pintamateriaalikoe. Älä muuta aiempaa hyväksyttyä Relay Art Labia tai maailmakartan tyyliä v0.5-kokeilun takia.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
