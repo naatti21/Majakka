@@ -1,6 +1,24 @@
 # MAJAKKA — NODE STYLE TOKENS v0.1
 **Päiväys 19.11.2026 · Tila: ART-DIRECTION-EHDOTUKSET. Ei käyttäjän hyväksymää lopullista 3D-designia.**
 
+## Täsmennys 21.11.2026 — majakka PERHEENÄ, ei identtinen runkomalli
+
+**KÄYTTÄJÄN KORJAUS / ENSISIJAINEN ART DIRECTION:** `Node = majakka` tarkoittaa **tunnistettavaa majakka-arkkitehtuuria**, EI samaa sylinterimäistä perusrunkoa eri tekstuureilla. **Koko rakennus voi olla omanlaisensa**: mittasuhteet, rungon rakenne, pinta, materiaalin toiminta ja kruunu/lyhtyhuone saavat vaihdella. Silti lopputuloksen pitää lukeutua selkeästi majakaksi ilman muita selitteitä. **Kruunu voi myös olla jokaisella oma**, ei yksi vakioyläosa.
+
+**Kuusi tarkasteltavaa materiaalista rakennusperhettä (ei pakotettua 1:1-kytkentää Node-tyyppeihin):**
+- **Stone Beacon**: luonnonkivi, ladonta, kuluminen ja pinnan karheus; omannäköinen kivimajakka ja kruunu.
+- **Moss Beacon**: sammal, kasvuston epätasaisuus, kosteuden vaihtelu; oma kasvanut/vanhentunut majakkarakenne ja kruunu.
+- **Timber Beacon**: rakenteellinen puu, näkyvät syyt ja ikääntyminen; oma puurakenteinen majakka ja kruunu.
+- **Porcelain Beacon**: lasitettu keramiikka, heijastukset, hiushalkeamat; oma vaalea/vaikutelmaltaan keraaminen majakka ja kruunu.
+- **Copper Beacon**: kupari/pronssi, patina, lämmin metallinen heijastus; oma metallinen majakka ja kruunu.
+- **Pearl / Mineral Beacon**: helmiäinen, kivennäisten kerrostumat ja vaihtuva valonsävy; oma mineraalinen majakkarakenne ja kruunu.
+
+**Erottelu:** pelillisiä Node-rooleja on ennestään **Prism, Archive, Grove, Relay, Observer ja Commons**. Ne kuvaavat toimintaa. Yllä olevat kuusi rakennus-/materiaaliperhettä kuvaavat **rakennustapaa ja pintavaikutelmaa**. Näiden välisiä vastineita EI ole vielä päätetty. Sama pätee Nodejen laatuasteisiin; niiden värit ja pintayksityiskohdat ovat erillinen suunnittelumuuttuja.
+
+**Materiaalintuntu on tärkeämpi kuin lisägeometria:** huokoisuus, karkea/sileä/kiiltävä pinta, luonnolliset värieroavaisuudet, patina, syyt, halkeilu, kosteus ja valon pintaheijasteet (`roughness / normal / albedo` tai vastaavat). Uusia renkaita, erillisiä koristeosia tai ulokkeita EI pidä lisätä keinotekoisesti korvaamaan uskottavaa materiaalin pintaa. Fyysisen Androidin kuvallinen arvio vaaditaan.
+
+**Tila:** tämä korjaus on hyväksytty suunnitteluperiaate; **kuutta yksilöllistä 3D-majakkaa ei ole vielä toteutettu**. Nykyinen Relay v0.3 on edelleen yksi tekninen malliversio, jonka pintamateriaali ei vielä vastaa tätä laatutavoitetta.
+
 ## Yhteiset invarianssit
 - Tausta: MapLibre OpenFreeMap **Dark · tiet ja tekstit näkyviin**. Kartan kontrastia ei saa huonontaa.
 - Kaikkien kuuden Noden runko on kolmiulotteinen, **kiinteä siluetti**. Valo ja hiukkaset saavat olla läpikuultavia. Ei mustia karttaviiltoja.
