@@ -167,11 +167,13 @@ export function createNetworkLayer(maplibregl,initialStage=3,initialQuality='med
         this.renderer.clearDepth(); // Important: preserve approved world v0.4.2 fix.
         this.renderer.render(this.scene,this.camera);
         const redrawRate=quality==='high'?18:quality==='medium'?33:55;
-        if(!document.hidden&&(changing||(!movementReduced&&now-this.lastRepaint>=redrawRate))){
-          this.lastRepaint=now;
-          // requestAnimationFrame is intentionally throttled via map triggerRepaint;
-          // stopped/hidden backgrounds don't require continuous GPU work.
-          this.map.triggerRepaint();
+        // Schedule a real later repaint rather than only testing elapsed time
+        // inside render: otherwise an idle MapLibre map may never draw again.
+        if(!document.hidden&&(changing||!movementReduced)&&!this.repaintTimer){
+          this.repaintTimer=setTimeout(()=>{
+            this.repaintTimer=null;
+            this.map?.triggerRepaint();
+          },redrawRate);
         }
       }catch(error){
         if(!this.failed){this.failed=true;console.error('Majakka three-node network:',error);onError(error);}
@@ -180,6 +182,7 @@ export function createNetworkLayer(maplibregl,initialStage=3,initialQuality='med
     },
     onRemove(){
       active=false;
+      if(this.repaintTimer){clearTimeout(this.repaintTimer);this.repaintTimer=null;}
       for(const b of this.beacons||[])b.dispose();
       for(const e of this.edges||[]){
         e.group.traverse(obj=>{
