@@ -1,0 +1,49 @@
+name: Majakka v0.7 - organic resonance 3D link visual QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/node-network-v07/**"
+      - "tests/node-network-v07.test.mjs"
+      - ".github/workflows/node-network-v07-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  organic-screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture organic translucent links, inside droplets and staged 3D network
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p organic-v07-qa
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          URL="https://naatti21.github.io/Majakka/experiments/node-network-v07/"
+          for attempt in $(seq 1 36); do
+            if curl -fsSL -o /tmp/majakka-organic-v07.html "$URL?deploy=$attempt"               && grep -q 'network-world.js?v=070' /tmp/majakka-organic-v07.html               && grep -q 'Orgaaninen verkosto' /tmp/majakka-organic-v07.html; then break; fi
+            sleep 5
+          done
+          grep -q 'network-world.js?v=070' /tmp/majakka-organic-v07.html
+          capture() {
+            local title="$1" params="$2"
+            timeout 100s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=24000               --screenshot="organic-v07-qa/$title.png"               "$URL?$params&qa=organic-v07" >"organic-v07-qa/$title.log" 2>&1 || true
+            test -s "organic-v07-qa/$title.png"
+          }
+          capture stage-0 "stage=0&quality=medium&zoom=17&pitch=55&bearing=-15"
+          capture stage-1 "stage=1&quality=medium&zoom=17&pitch=55&bearing=-15"
+          capture stage-3 "stage=3&quality=medium&zoom=17&pitch=55&bearing=-15"
+          capture side-3 "stage=3&quality=medium&zoom=17.6&pitch=68&bearing=75"
+          capture top-3 "stage=3&quality=medium&zoom=16.5&pitch=0&bearing=0"
+          capture close-3 "stage=3&quality=high&zoom=18&pitch=55&bearing=110"
+          capture low-3 "stage=3&quality=low&zoom=17&pitch=55&bearing=-15"
+          ls -lh organic-v07-qa/*.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-organic-resonance-v07-webgl
+          path: organic-v07-qa/
+          retention-days: 5
