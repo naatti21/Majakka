@@ -3,7 +3,7 @@
 // Gameplay Node roles (Atlas) remain separate from visual concept candidates.
 import {BEACONS,createMaterialMaps} from './beacon-materials.js?v=001';
 
-export function buildBeacon(THREE,id,quality='medium'){
+export function buildBeacon(THREE,id,quality='medium',sharedLighting=false){
   const def=BEACONS.find(t=>t.id===id);
   if(!def)throw Error('Unknown beacon '+id);
   const group=new THREE.Group();
@@ -224,7 +224,9 @@ export function buildBeacon(THREE,id,quality='medium'){
   warm.position.set(25,55,75);
   const cool=new THREE.DirectionalLight(0x8dbcf7,1.6);
   cool.position.set(-44,34,-38);
-  group.add(hemi,warm,cool);
+  // In a multi-Node scene use one shared ambient/key/fill lighting rig.
+  // Standalone material lab still owns its original per-beacon lights.
+  if(!sharedLighting)group.add(hemi,warm,cool);
   const light=new THREE.PointLight(lamp.color,10,35,2);
   light.position.set(0,18,0);group.add(light);
   const firstTimeColor=lamp.color.clone();
