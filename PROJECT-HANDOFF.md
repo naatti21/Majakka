@@ -290,6 +290,22 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **SEURAAVA ARVIO:** mobiilissa kaikkien kuuden rungon ja kruunun siluetti sekä materiaalintuntu zoom 17–18, ja zoom 15–16 tunnistettavuus. Käyttäjän kuvapalaute tarkentaa ensin materiaaleja, ei lisää uusia koristeita. Vasta visuaalisen portin jälkeen kahta eri Node-tyyppiä samaan v0.5:een; pelillinen Node-verkko erikseen.
 
+## 2026-11-22 — World v0.6: kolme erilaista PBR-majakkaa ja vaiheittain heräävä 3D-verkko
+
+**KÄYTTÄJÄN “Hyvä, jatketaan siitä” tarkoitti edellisen hyväksytyn suunnitelman KONKREETTISTA TOTEUTUSTA**, ei uutta pitkää suunnittelutekstiä. Kuusi perhemallia jäi ehdokasvalikoimaksi; valittu seuraava demo on **kolme eri 3D-materiaalimajakkaa samassa maastokartassa, niiden väliset 3D-yhteyssäikeet ja näkyvä verkoston muodostuminen**. Peittoaluepilvi vasta seuraavaksi linkkien Android-laatukontrollin jälkeen.
+
+**TOTEUTETTU** erillinen [World v0.6 – Three-Node Network](https://naatti21.github.io/Majakka/experiments/node-network-v06/), ei v0.5-vertailun päälle kirjoitettu:
+- **Relay / Copper**, **Grove / Moss**, **Prism / Porcelain** omine 3D-runkoprofiileineen, kruunuineen ja proseduraalisine PBR albedo+roughness+bump -pintoineen vanhasta `node-family-v01`-kokeesta.
+- 3 fiktiivistä **DEMO-karttakoordinaattia** Tampereella: `[23.7603,61.4991]`, `[23.7622,61.4992]`, `[23.7612,61.5006]`. Ne eivät ole hyväksyttyjä POI-ankkureita eikä niihin ohjata pelaajaa fyysisesti.
+- **Kolme oikeaa ilmassa kaartuvaa 3D CatmullRomCurve3/TubeGeometry -säiettä:** Relay–Grove, Relay–Prism, Grove–Prism. Kussakin lämpimän tai viileän sävyinen runko, ohut valoisa keskusta, sivujuovat ja liikkuva valopulssi.
+- Mobiili-UI: napit **0/3, 1/3, 2/3, 3/3** sekä **HERÄTÄ VERKOSTO VAIHEITTAIN** (toistettava havaittava eteneminen); kamera HOME, zoom, pitch, north ja LOW/MED/HIGH.
+- Yksi yhteinen ambient/key/fill-valaistus kolmelle PBR-majakalle, jolloin samaa valoa ei kerrota kolmella. Siksi `beacon-model.js` sai takaisin-yhteensopivan valinnaisen `sharedLighting`-parametrin; vanha yksittäisen majakan material labin valaistus pysyy ennallaan.
+- MapLibre OpenFreeMap Dark + teiden/nimien luettavuus. Hyväksytty **lisää 3D-kerros viimeisenä + `renderer.clearDepth()`** -korjaus säilytetty. Animaation päivityspyyntö ajastettu hallitusti, jotta staattinen kartta jatkaa heräämistä ilman pahaa GPU-spiniä.
+- `?stage=0|1|2|3` avaa halutun tilan testikuvaksi. Käytössä ei ole GPS:ää, pelaajan 150m interaktiota, oikeaa linkkirakennuskustannusta, serveriä, persistenttejä linkkejä eikä todellista pelikattavuutta. Nämä ovat VAIN visuaalinen/prosessillinen prototyyppi.
+- Koodilähteet `experiments/node-network-v06/index.html`, `network-world.js`, [README](experiments/node-network-v06/README.md); testi `tests/node-network-v06.test.mjs`; Chromium/WebGL-katselmus `.github/workflows/node-network-v06-visual-smoke.yml`.
+
+**HYVÄKSYNNÄN RAJA:** GitHub Actions -kooditestien ja 0–3 kuvatestien tila tarkistettava raportista; HTML/Three-koodi on tehty mutta **ei vielä Androidilla käyttäjän hyväksymä**. Ei väitettä että peittoaluepilvi tai pelillinen verkostomekaniikka olisi valmis. Älä taas jää loputtomaan CI-pollaussilmukkaan. **Seuraava portti:** käyttäjän Android-kuva 3/3 ja 0/3 vaiheista ja arvio, näkyykö jokainen majakka/säie ilman mustia karttaviiltoja ja miten säikeet kaartuvat; sen jälkeen pehmeä leijuva peittoaluepilvi `v0.7` erillisenä art-testinä.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
