@@ -81,7 +81,9 @@ function makeMembraneGeometry(THREE,curve,index,startColor,endColor,quality){
   }
   for(let i=0;i<segments;i++)for(let j=0;j<sides;j++){
     const a=i*(sides+1)+j,b=a+sides+1;
-    indices.push(a,b,a+1,b,b+1,a+1);
+    // Outward-facing winding: tangent cross circumferential gives inward
+    // for this frame convention; reversing exposes the membrane exterior.
+    indices.push(a,a+1,b,b,a+1,b+1);
   }
   const geometry=new THREE.BufferGeometry();
   geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
@@ -116,7 +118,7 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
     makeMembraneGeometry(THREE,curve,index,fromColor,toColor,buildQuality),
     new THREE.MeshStandardMaterial({
       vertexColors:true,transparent:true,opacity:.48,
-      depthWrite:false,side:THREE.DoubleSide,roughness:.58,
+      depthWrite:false,side:THREE.FrontSide,roughness:.58,
       metalness:.04,roughnessMap:materialMaps.roughnessMap,
       bumpMap:materialMaps.bumpMap,bumpScale:.18,
       emissive:new THREE.Color(fromColor).lerp(new THREE.Color(toColor),.45),
