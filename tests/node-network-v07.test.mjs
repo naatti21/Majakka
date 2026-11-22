@@ -36,7 +36,7 @@ test('translucent organic PBR membrane has genuine microscopic surface response'
  assert.match(strand,/new THREE\.CanvasTexture\(bump\)/);
  assert.match(strand,/new THREE\.MeshStandardMaterial\(\{/);
  assert.match(strand,/vertexColors:true,transparent:true,opacity:\.48/);
- assert.match(strand,/depthWrite:false,side:THREE\.DoubleSide/);
+ assert.match(strand,/depthWrite:false,side:THREE\.FrontSide/);
  assert.match(strand,/roughnessMap:materialMaps\.roughnessMap/);
  assert.match(strand,/bumpMap:materialMaps\.bumpMap,bumpScale:\.18/);
  assert.match(strand,/emissiveIntensity:\.12/);
@@ -66,7 +66,7 @@ test('three geosited PBR beacons and stage 0–3 network remain intact and funct
  assert.match(world,/this\.scene\.add\(organic\.group\)/);
  assert.match(world,/edge\.organic\.update\(elapsed,level,quality,movementReduced\)/);
  assert.match(world,/const target=i<stage\?1:0/);
- assert.match(html,/import\('\.\/network-world\.js\?v=070'\)/);
+ assert.match(html,/import\('\.\/network-world\.js\?v=071'\)/);
  for(const i of [0,1,2,3])assert.match(html,new RegExp('id="stage-'+i+'"'));
  assert.match(html,/id="replay"/);
  assert.match(html,/Vertaa v0\.6/);
@@ -96,4 +96,9 @@ test('motion accessibility and frame load scales with phone quality choice',()=>
  assert.match(world,/this\.repaintTimer=setTimeout/);
  assert.match(world,/clearTimeout\(this\.repaintTimer\)/);
  assert.match(strand,/motionReduced\?\(d\.offset\+\.13\)%1/);
+});
+
+test('organic tube faces outward rather than using a double-rendered inside-out shell',()=>{
+ assert.match(strand,/indices\.push\(a,a\+1,b,b,a\+1,b\+1\)/);
+ assert.match(world,/organic-strand\.js\?v=002/);
 });
