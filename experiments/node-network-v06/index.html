@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#070e14">
+<meta name="description" content="Majakka World v0.6: kolme eri materiaalimajakkaa, ilmassa leijuva verkosto ja vaiheittainen herääminen">
+<title>MAJAKKA · Elävä kolmen majakan verkosto v0.6</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#080f15;color:#e4f6f2}
+*{box-sizing:border-box}html,body{height:100%;height:100dvh;margin:0;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid #ffd59d;outline-offset:2px}
+#map{position:fixed;inset:0;background:#070d15;touch-action:none}
+.top{position:fixed;z-index:3;pointer-events:none;top:0;right:0;left:0;
+padding:calc(env(safe-area-inset-top) + 13px) 14px 25px;
+background:linear-gradient(180deg,#07131bef,#0d1a22bc 65%,transparent)}
+.top .eyebrow{font-size:10px;color:#85e9da;font-weight:850;letter-spacing:.18em}
+.top h1{font-size:18px;margin:5px 0 4px;line-height:1.2;font-weight:780}
+.top small{font-size:10px;color:#bdcdd0;display:block}
+.controls{position:fixed;z-index:5;right:10px;top:calc(env(safe-area-inset-top) + 125px);
+display:flex;flex-direction:column;gap:8px}
+.controls button{background:#0b232aee;border:1px solid #49757e;border-radius:12px;
+min-width:47px;min-height:45px;font-size:12px;font-weight:750}
+.controls .tiny{font-size:11px}
+.bottom{position:fixed;z-index:6;bottom:calc(env(safe-area-inset-bottom) + 11px);
+left:11px;right:11px;max-width:500px}
+.panel{border:1px solid #426e74;background:#081f28ed;border-radius:15px;padding:12px 13px;
+box-shadow:0 7px 24px #000a;backdrop-filter:blur(9px)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.head strong{font-size:11px;color:#a6f1e5;letter-spacing:.08em}
+.pill{border:1px solid #53747b;border-radius:99px;color:#b8d3d1;font-size:10px;padding:4px 7px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.legend span{font-size:10px;color:#d9e6e1;display:flex;align-items:center;gap:5px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+#status{font-size:11px;color:#b4d5d7;margin:6px 0 9px;min-height:20px}
+#status.error{color:#ffd09b}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steps button{background:#122c33;border:1px solid #3e626a;border-radius:9px;padding:8px 3px;
+font-size:11px;font-weight:750;min-height:40px}
+.steps button[aria-pressed="true"]{background:#25545c;border:2px solid #f0c88c;color:#ffe6af}
+.replay{width:100%;border:1px solid #dfb979;border-radius:11px;
+background:linear-gradient(100deg,#164a52,#35746a);color:#f1fff2;font-size:13px;
+font-weight:800;min-height:43px;margin-top:9px}
+.graphic{display:flex;align-items:center;gap:6px;margin-top:9px}
+.graphic span{font-size:10px;color:#a8bfc5;margin-right:3px}
+.graphic button{flex:1;border-radius:8px;background:#122a34;border:1px solid #49666d;
+min-height:30px;font-size:10px;font-weight:750}
+.graphic button[aria-pressed="true"]{background:#355159;border-color:#e7b784;color:#ffe3b9}
+.note{font-size:10px;line-height:1.42;margin:7px 0 0;color:#a7c1c7}
+.camera{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;color:#91acb1}
+.camera a{color:#abdfd4}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{bottom:calc(env(safe-area-inset-bottom) + 275px)!important}
+@media(min-width:760px){.bottom{left:16px;width:430px}.controls{right:18px;top:125px}}
+@media(max-height:690px){.controls{top:calc(env(safe-area-inset-top) + 93px)}.note,.camera{display:none}.legend{margin-top:5px}.panel{padding:9px}}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Kolme geosidottua 3D-majakkaa Tampereen demokartalla"></div>
+<header class="top">
+ <div class="eyebrow">MAJAKKA / WORLD LAB</div>
+ <h1>Elävä verkosto · v0.6</h1>
+ <small>Relay + Grove + Prism · kolme erilaista 3D-majakkaa</small>
+</header>
+<div class="controls" aria-label="Kartan kamera">
+ <button id="zoomIn" aria-label="Lähennä karttaa">+</button>
+ <button id="zoomOut" aria-label="Loitonna karttaa">−</button>
+ <button id="home" class="tiny" aria-label="Näytä koko kolmio">HOME</button>
+ <button id="pitch" class="tiny" aria-label="Kallista karttaa">2D</button>
+ <button id="north" class="tiny" aria-label="Käännä pohjoinen ylös">N ↑</button>
+</div>
+<div class="bottom"><section class="panel" aria-label="Verkon aktivoinnin demo">
+ <div class="head"><strong>NODE-VERKKO / HERÄÄMINEN</strong><span class="pill">DEMO · EI GPS</span></div>
+ <div class="legend" aria-label="Majakoiden roolit">
+  <span><i style="background:#d9a075"></i>Relay · kupari</span>
+  <span><i style="background:#89e6ae"></i>Grove · sammal</span>
+  <span><i style="background:#b5baff"></i>Prism · posliini</span>
+ </div>
+ <p id="status" role="status" aria-live="polite">Ladataan kolmea majakkaa ja 3D-säikeitä…</p>
+ <div class="steps" role="group" aria-label="Valitse muodostuneiden yhteyksien määrä">
+  <button id="stage-0" type="button" aria-pressed="false">0 / 3</button>
+  <button id="stage-1" type="button" aria-pressed="false">1 / 3</button>
+  <button id="stage-2" type="button" aria-pressed="false">2 / 3</button>
+  <button id="stage-3" type="button" aria-pressed="true">3 / 3</button>
+ </div>
+ <button id="replay" type="button" class="replay">HERÄTÄ VERKOSTO VAIHEITTAIN</button>
+ <div class="graphic" role="group" aria-label="3D-grafiikan laatu">
+  <span>GRAFIIKKA</span>
+  <button id="quality-low" type="button" aria-pressed="false">LOW</button>
+  <button id="quality-medium" type="button" aria-pressed="true">MED</button>
+  <button id="quality-high" type="button" aria-pressed="false">HIGH</button>
+ </div>
+ <p class="note">Yhteydet ovat ilmassa kaartuvia 3D-säikeitä. Vaihda vaihetta tai toista herääminen; tämä ei vielä tallenna oikeaa peliverkostoa.</p>
+ <div class="camera"><span id="camera">—</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
+</section></div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+const $=id=>document.getElementById(id);
+const NODES=[
+ {id:'relay',coords:[23.7603,61.4991],color:'#d9a075'},
+ {id:'grove',coords:[23.7622,61.4992],color:'#89e6ae'},
+ {id:'prism',coords:[23.7612,61.5006],color:'#b5baff'}
+]; // fixed fictional DEMO points; NOT real approved visitor POIs
+const center=[
+ NODES.reduce((s,n)=>s+n.coords[0],0)/3,
+ NODES.reduce((s,n)=>s+n.coords[1],0)/3
+];
+const query=new URLSearchParams(location.search);
+function numeric(key,defaultValue,min,max){
+ const raw=query.get(key);
+ if(raw===null)return defaultValue;
+ const value=Number(raw);
+ return Number.isFinite(value)?Math.max(min,Math.min(max,value)):defaultValue;
+}
+const camera={zoom:numeric('zoom',17,10,19),pitch:numeric('pitch',55,0,70),
+ bearing:numeric('bearing',-15,-360,360)};
+let stage=numeric('stage',3,0,3);
+stage=Math.round(stage);
+const requestedQuality=query.get('quality');
+let quality=['low','medium','high'].includes(requestedQuality)?requestedQuality:'medium';
+const styleURL='https://tiles.openfreemap.org/styles/dark';
+let map=null,network=null,error=false;
+let replayTimers=[];
+const setStatus=(value,failed=false)=>{
+ $('status').textContent=value;
+ $('status').classList.toggle('error',failed);
+};
+const ROAD_PAINT = {
+ 'highway_path':{'line-color':'#38535c','line-opacity':0.83},
+ 'highway_minor':{'line-color':'#46616b','line-opacity':0.90},
+ 'highway_major_casing':{'line-color':'#2b414a','line-opacity':0.95},
+ 'highway_major_inner':{'line-color':'#5f7881','line-opacity':0.95},
+ 'highway_major_subtle':{'line-color':'#445d65','line-opacity':0.93},
+ 'highway_motorway_casing':{'line-color':'#324751','line-opacity':0.97},
+ 'highway_motorway_inner':{'line-color':'#657f87','line-opacity':0.94},
+ 'highway_motorway_subtle':{'line-color':'#47616b','line-opacity':0.92},
+ 'road_pier':{'line-color':'#29404a'},
+ 'waterway':{'line-color':'#2c5361'},
+ 'railway':{'line-color':'#465a61'},
+ 'railway_minor':{'line-color':'#40545a'},
+ 'railway_transit':{'line-color':'#40545a'}
+};
+function applyReadableDark() {
+ const paint = {...ROAD_PAINT};
+ const road = {'text-color':'#bdced0','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.35};
+ const place = {'text-color':'#abbfc2','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.2};
+ const water = {'text-color':'#87afbb','text-opacity':0.93,'text-halo-color':'#071119','text-halo-width':1.2};
+ for(const layer of map.getStyle().layers||[]){
+  if(layer.type!=='symbol')continue;
+  if(layer.id.startsWith('highway_name_'))paint[layer.id]=road;
+  else if(layer.id.startsWith('place_'))paint[layer.id]=place;
+  else if(layer.id==='water_name')paint[layer.id]=water;
+ }
+ for(const [id,properties] of Object.entries(paint)){
+  if(!map.getLayer(id))continue;
+  for(const [key,value] of Object.entries(properties)){
+   try{map.setPaintProperty(id,key,value);}catch(error){console.debug('Unapplied paint',id,key,error);}
+  }
+ }
+}
+
+
+
+function addGroundGlows(){
+ map.addSource('three-beacon-glows',{type:'geojson',data:{
+  type:'FeatureCollection',features:NODES.map((n,i)=>({
+   type:'Feature',geometry:{type:'Point',coordinates:n.coords},properties:{index:i}
+  }))
+ }});
+ const firstLabel=(map.getStyle().layers||[]).find(x=>x.type==='symbol')?.id;
+ map.addLayer({
+  id:'network-beacon-glow',source:'three-beacon-glows',type:'circle',
+  paint:{
+   'circle-color':['match',['get','index'],0,'#cb8d5e',1,'#5cb98a','#aeb7e7'],
+   'circle-radius':['interpolate',['linear'],['zoom'],12,8,15,20,17,43,19,68],
+   'circle-blur':1,'circle-opacity':.19,
+   'circle-pitch-alignment':'map','circle-pitch-scale':'map'
+  }
+ },firstLabel);
+}
+function onStageStatus(data){
+ stage=data.stage;
+ updateStageButtons();
+ const messages=[
+  '0 / 3 · kolme majakkaa, ei vielä yhteyksiä.',
+  '1 / 3 · Relay ja Grove yhdistetty.',
+  '2 / 3 · myös Prism on kytketty verkkoon.',
+  '3 / 3 · kolmen majakan kolmio on muodostettu.'
+ ];
+ setStatus(messages[stage]);
+}
+function updateStageButtons(){
+ for(const i of [0,1,2,3])$('stage-'+i).setAttribute('aria-pressed',String(stage===i));
+}
+function stopReplay(){
+ for(const timer of replayTimers)clearTimeout(timer);
+ replayTimers=[];
+}
+function chooseStage(value,fromReplay=false){
+ if(!fromReplay)stopReplay();
+ const number=Number(value);
+ if(!Number.isInteger(number)||number<0||number>3)return;
+ stage=number;
+ updateStageButtons();
+ if(network&&!error)network.setStage(stage);
+ else onStageStatus({stage});
+}
+function replay(){
+ stopReplay();chooseStage(0,true);
+ for(const i of [1,2,3])
+  replayTimers.push(setTimeout(()=>chooseStage(i,true),1100*i));
+}
+function chooseQuality(value){
+ if(!['low','medium','high'].includes(value))return;
+ quality=value;
+ network?.setQuality(value);
+ for(const id of ['low','medium','high'])
+  $('quality-'+id).setAttribute('aria-pressed',String(id===value));
+}
+function cameraInfo(){
+ if(!map)return;
+ $('camera').textContent='z '+map.getZoom().toFixed(1)+' · '+Math.round(map.getPitch())+'° · '+Math.round((360+map.getBearing())%360)+'°';
+ $('pitch').textContent=map.getPitch()<10?'3D':'2D';
+}
+function addNetwork3D(){
+ import('./network-world.js?v=060').then(({createNetworkLayer})=>{
+  if(!map||map.getLayer('majakka-three-node-3d-network'))return;
+  try{
+   const instance=createNetworkLayer(maplibregl,stage,quality,onStageStatus,err=>{
+    error=true;setStatus('3D-verkossa virhe. Kartta toimii edelleen.',true);
+   });
+   // Append after basemap and glow layers — v0.4.2 occlusion fix.
+   map.addLayer(instance);
+   network=instance;
+   chooseQuality(quality);
+  }catch(err){
+   error=true;console.error('3D network start',err);
+   setStatus('3D-majakoiden käynnistys epäonnistui. Kartta toimii edelleen.',true);
+  }
+ }).catch(err=>{
+  error=true;console.error('Network module load',err);
+  setStatus('3D-moduulin lataus epäonnistui. Tarkista verkkoyhteys.',true);
+ });
+}
+updateStageButtons();
+const gl2=(()=>{try{return !!document.createElement('canvas').getContext('webgl2');}catch{return false;}})();
+if(!gl2)setStatus('WebGL2 ei ole käytettävissä tällä laitteella.',true);
+else{
+ try{
+  map=new maplibregl.Map({
+   container:'map',style:styleURL,center,
+   zoom:camera.zoom,minZoom:10,maxZoom:19,pitch:camera.pitch,maxPitch:70,bearing:camera.bearing,
+   antialias:true,canvasContextAttributes:{antialias:true},
+   dragRotate:true,touchZoomRotate:true,touchPitch:true,
+   cooperativeGestures:false,renderWorldCopies:false
+  });
+  let styleReady=false;
+  const timeout=setTimeout(()=>{if(!styleReady)setStatus('Kartta latautuu hitaasti. Tarkista verkkoyhteys.',true);},26000);
+  map.on('style.load',()=>{
+   try{
+    applyReadableDark();
+    addGroundGlows();
+    addNetwork3D();
+    styleReady=true;clearTimeout(timeout);
+   }catch(err){console.error('3D scene map style',err);setStatus('Karttatasojen alustusvirhe.',true);}
+  });
+  map.on('error',event=>console.error('MapLibre error',event?.error||event));
+  map.on('move',cameraInfo);
+  $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
+  $('zoomOut').onclick=()=>map.zoomTo(Math.max(10,map.getZoom()-1),{duration:300});
+  $('home').onclick=()=>map.flyTo({center,zoom:17,pitch:55,bearing:-15,duration:720,essential:true});
+  $('pitch').onclick=()=>map.easeTo({pitch:map.getPitch()<10?55:0,duration:430,essential:true});
+  $('north').onclick=()=>map.easeTo({bearing:0,duration:350,essential:true});
+  $('replay').onclick=replay;
+  for(const i of [0,1,2,3])$('stage-'+i).onclick=()=>chooseStage(i);
+  for(const id of ['low','medium','high'])$('quality-'+id).onclick=()=>chooseQuality(id);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)map.resize();});
+  chooseQuality(quality);
+  cameraInfo();
+ }catch(err){console.error('Map startup',err);setStatus('Kartta ei käynnistynyt.',true);}
+}
+</script>
+</body>
+</html>
