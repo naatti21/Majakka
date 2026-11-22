@@ -2,7 +2,7 @@
 // Art/gameplay demonstration only. Coordinates are fictional DEMO anchors;
 // no GPS, published Atlas nodes, player reach, rewards or permanent network state.
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
-import {buildBeacon} from '../node-family-v01/beacon-model.js?v=001';
+import {buildBeacon} from '../node-family-v01/beacon-model.js?v=002';
 
 // All coordinates are intentional DEMO points, not vetted accessible POIs.
 export const NETWORK_NODES=Object.freeze([
