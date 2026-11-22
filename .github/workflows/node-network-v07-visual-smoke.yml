@@ -24,10 +24,10 @@ jobs:
           test -n "$CHROME"
           URL="https://naatti21.github.io/Majakka/experiments/node-network-v07/"
           for attempt in $(seq 1 36); do
-            if curl -fsSL -o /tmp/majakka-organic-v07.html "$URL?deploy=$attempt"               && grep -q 'network-world.js?v=070' /tmp/majakka-organic-v07.html               && grep -q 'Orgaaninen verkosto' /tmp/majakka-organic-v07.html; then break; fi
+            if curl -fsSL -o /tmp/majakka-organic-v07.html "$URL?deploy=$attempt"               && grep -q 'network-world.js?v=071' /tmp/majakka-organic-v07.html               && grep -q 'Orgaaninen verkosto' /tmp/majakka-organic-v07.html; then break; fi
             sleep 5
           done
-          grep -q 'network-world.js?v=070' /tmp/majakka-organic-v07.html
+          grep -q 'network-world.js?v=071' /tmp/majakka-organic-v07.html
           capture() {
             local title="$1" params="$2"
             timeout 100s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=24000               --screenshot="organic-v07-qa/$title.png"               "$URL?$params&qa=organic-v07" >"organic-v07-qa/$title.log" 2>&1 || true
