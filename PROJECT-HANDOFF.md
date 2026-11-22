@@ -306,6 +306,20 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **HYVÄKSYNNÄN RAJA:** GitHub Actions -kooditestien ja 0–3 kuvatestien tila tarkistettava raportista; HTML/Three-koodi on tehty mutta **ei vielä Androidilla käyttäjän hyväksymä**. Ei väitettä että peittoaluepilvi tai pelillinen verkostomekaniikka olisi valmis. Älä taas jää loputtomaan CI-pollaussilmukkaan. **Seuraava portti:** käyttäjän Android-kuva 3/3 ja 0/3 vaiheista ja arvio, näkyykö jokainen majakka/säie ilman mustia karttaviiltoja ja miten säikeet kaartuvat; sen jälkeen pehmeä leijuva peittoaluepilvi `v0.7` erillisenä art-testinä.
 
+## 2026-11-22 — World v0.7: ORGAANINEN 3D-resonanssikanava, ei testiputki
+
+**KÄYTTÄJÄN VISUAALIPALAUTE:** v0.6:n kolme linkkiä toimivat mutta ”Meidän putket näyttää testi grafiikalta. Tehdään vähän orgaanisempia.” Ingress-kuva toimi vertailuna: suora viiva + liikkuva pallo ei riitä. **UUSI SUUNTA:** läpikuultava orgaaninen kalvo/putki, kevyttä pintamateriaalin tuntua, kalvon sisäinen virtaus, pyöreät valopisarat ja hienot mikrofilamentit. Hillitty, luettava kartalla. Värit seuraavat linkin kummankin Node-materiaalin sävyä.
+
+**TOTEUTETTU erilliseen v0.7-kokeeseen**:
+- URL: https://naatti21.github.io/Majakka/experiments/node-network-v07/
+- `experiments/node-network-v07/organic-strand.js`: kokonaan uusi `BufferGeometry`-putken ulkoseinämiä mukautuva **säde/paksuus + orgaaniset pitkittäiset rypyt**, fysikaalisen oloinen `MeshStandardMaterial` jossa **transparent / opacity, vertexColors, roughnessMap ja bumpMap**. Materiaalikartat luodaan lokaalisti 192×96 canvas-tekstuurina (jaettu 3 linkille). Kalvon etupinnan kolmiot ja normaalit suunnattu ulospäin; `FrontSide` eikä turhaa kaksoisrenderöintiä.
+- Kanavan sisältö: hillitty läpikuultava 3D-sisävirtaus, **kaksi mikrorihmaa**, 1–3 **SphereGeometry-valopisaraa** jotka liikkuvat oikeaa polkua pitkin; pallojen mukana hienovarainen halo. Hidas elävä hengitys opasiteetissa, ei verteksien jatkuvaa regenerointia.
+- `network-world.js`: samat kolme geosidottua DEMO-majakkaa **Relay Copper, Grove Moss, Prism Porcelain**, samat kolme Triangle-linkkiä, vaihe 0–3, ja sama 3D:n viimeisenä piirron `renderer.clearDepth()`-korjaus. PBR-majakkojen perustekstuureihin ei koskettu. LOW/MED/HIGH säätää pääasiassa sisäefektejä; geometrian tarkkuus asetetaan alustuksessa. `index.html`: mobiilikartta, 0/3–3/3-valinta, **Herätä verkosto** ja linkki vanhaan v0.6 vertailuun.
+- `tests/node-network-v07.test.mjs` testaa JS-syntaksin, muuntuvan kalvogeometrian, materiaalikartat, pallot, suuntaukset, 0–3 vaiheet, resurssien vapautuksen, saavutettavuuden ja MapLibre-syvyyskorjauksen. `.github/workflows/node-network-v07-visual-smoke.yml` ottaa automaattisesti 7 WebGL-kuvaa eri vaiheista, kulmista ja laatutasoilta. [README](experiments/node-network-v07/README.md).
+- **TÄRKEÄ RAJA:** tämä on 3D-visuaaliprototyyppi. Ei oikeaa Node Atlas / POI / GPS -yhteyttä, pelisääntöä, pysyviä yhteyksiä, peittoaluepilveä eikä Android-suorituskykymittausta. Käyttäjä ei ole vielä hyväksynyt v0.7-linkkien lopullista ulkonäköä. Älä väitä testiskriptin läpäisyä käyttäjän esteettiseksi hyväksynnäksi.
+
+**Seuraava askel:** käyttäjä katsoo v0.7:n puhelimella verraten v0.6:een. Jos kuvissa liian paksu tai tekninen, **säädä** läpikuultavuutta/radius/pintakarheutta/pallojen näkyvyyttä, älä lisää irrallisia rengasobjekteja. Vasta tämän jälkeen pehmeä leijuva **peittoaluepilvi** kolmion sisään. Ei projektin uudelleensuunnittelua alusta.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
