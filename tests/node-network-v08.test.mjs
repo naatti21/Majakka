@@ -15,9 +15,9 @@ test('all v0.8 JavaScript modules and mobile page parse',()=>{
  const inline=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
  assert.ok(inline);
  for(const s of [flow,fog,world,inline])new Script(strip(s));
- assert.match(html,/network-world\.js\?v=080/);
+ assert.match(html,/network-world\.js\?v=081/);
  assert.match(world,/organic-strand\.js\?v=080/);
- assert.match(world,/coverage-mist\.js\?v=080/);
+ assert.match(world,/coverage-mist\.js\?v=081/);
 });
 
 test('approved v0.7.2 organic tube and curved path remain literally unchanged',()=>{
@@ -60,27 +60,30 @@ test('one extra point-cloud draw call per link, no per-frame objects or textures
  assert.match(flow,/geometries\.forEach\(g=>g\.dispose\(\)\)/);
 });
 
-test('one procedural translucent fog sheet with soft edges and mild vertex waves',()=>{
- assert.match(fog,/const subdivisions=18/);
- assert.match(fog,/new THREE\.ShaderMaterial\(/);
- assert.match(fog,/transparent:true,depthWrite:false,depthTest:true/);
- assert.match(fog,/float feather=smoothstep\(\.0,\.16,edge\)/);
- assert.match(fog,/p\.y \+= \.85\*sin/);
- assert.match(fog,/uOpacity:\{value:0\}/);
- assert.match(fog,/float opacity=uOpacity\*feather/);
- assert.match(fog,/fogMaterial\.uniforms\.uTime\.value=reduceMotion\?0:time/);
- assert.match(fog,/fogMaterial\.uniforms\.uOpacity\.value=v\+Math\.sign/);
+test('one small alpha-textured canopy has a softly feathered triangular boundary',()=>{
+ assert.match(fog,/const steps=14/);
+ assert.match(fog,/const size=192,canvas=document\.createElement/);
+ assert.match(fog,/const feather=smooth\(clamp\(edge\/\.125\)\)/);
+ assert.match(fog,/image\.data\[i\+3\]=Math\.round\(200\*feather/);
+ assert.match(fog,/new THREE\.CanvasTexture\(canvas\)/);
+ assert.match(fog,/map\.flipY=false/);
+ assert.match(fog,/new THREE\.MeshBasicMaterial\(/);
+ assert.match(fog,/transparent:true,opacity:0/);
+ assert.match(fog,/fogMaterial\.opacity=opacity\*/);
+ assert.match(fog,/positionAttr\.setY\(i,12\+\.90\*Math\.sin/);
+ assert.match(fog,/positionAttr\.needsUpdate=true/);
+ assert.doesNotMatch(fog,/new THREE\.ShaderMaterial|raymarch|for\(.*gl_FragCoord/);
 });
 
-test('fog dust is one static point cloud; LOW keeps shader-only coverage',()=>{
+test('static mist motes use one Points draw; LOW keeps textured canopy',()=>{
  assert.match(fog,/const MAX_MOTES=48/);
- assert.match(fog,/dustGeo\.setDrawRange\(0,28\)/);
+ assert.match(fog,/moteGeometry\.setDrawRange\(0,28\)/);
  assert.match(fog,/const count=quality==='high'\?48:quality==='medium'\?28:0/);
- assert.match(fog,/const dust=new THREE\.Points\(dustGeo,dustMat\)/);
- assert.match(fog,/dust\.visible=count>0/);
+ assert.match(fog,/const motes=new THREE\.Points\(moteGeometry,moteMaterial\)/);
+ assert.match(fog,/motes\.visible=count>0/);
  assert.match(fog,/const group=new THREE\.Group\(\)/);
- assert.match(fog,/geometry\.dispose\(\);fogMaterial\.dispose\(\)/);
- assert.match(fog,/dustGeo\.dispose\(\);dustMat\.dispose\(\)/);
+ assert.match(fog,/geometry\.dispose\(\);fogMaterial\.dispose\(\);fogTexture\.dispose\(\)/);
+ assert.match(fog,/moteGeometry\.dispose\(\);moteMaterial\.dispose\(\)/);
  assert.doesNotMatch(fog,/requestAnimationFrame|setInterval|SphereGeometry/);
 });
 
