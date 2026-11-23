@@ -24,3 +24,13 @@
 - [testit](../../tests/node-network-v072.test.mjs) vertaavat putken geometrian ja polun lähdekoodia **sanasta sanaan** vanhaan v0.7.1:een, varmistavat serpentiinien poistumisen, 12/22/34-pistebudjetit ja zoomista riippumattoman pistekoon.
 - Automatisoitu WebGL-kuvatesti [workflow](../../.github/workflows/node-network-v072-visual-smoke.yml) tarkistaa vaihetta 0, MED-verkkoa ja kauempaa zoomattua MED-verkkoa; käyttäjän **fyysinen Android-palaute** ratkaisee visuaalisen hyväksynnän.
 - Tämä on edelleen graafinen kokeilu; ei GPS:ää, todellista POI/Node-verkkoa, peittoaluepilveä, pelaajan 150 m vuorovaikutussädettä, palkintomekaniikkaa tai mitattua Android-akku/FPS-kuormaa.
+
+## 23.11.2026 — Android-kuvapalaute: hiukkasten kirkkaus ylös
+
+Käyttäjän kahdessa aidossa Android-kuvakaappauksessa v0.7.2:n putki on mukavan orgaaninen, mutta hiukkaset erottuvat **liian heikosti jopa HIGH-tilassa**. Täsmäkorjaus tehtiin **samaan v0.7.2-linkkiin** (ei muutosta rakennusten tai putken geometrian muotoon eikä hiukkasmääriin):
+
+- Pisteiden ruutukoko 4.0 → **5.5 px**, `sizeAttenuation:false` säilyy, joten kameraetäisyys ei pienennä valopisteitä olemattomiin.
+- Värit sekoittuvat enemmän vaaleaan valkoiseen (50 % → **78 %**), yksilöllisen valokirkkauden minimitaso nousee ja alpha kasvaa.
+- Kolmelle linkille jo jaetun 32×32 säteittäisen pistetekstuurin kirkas keskialue levenee. Pisteissä on nyt additiivinen valosekoitus ilman yhtään lisämesh-/draw call -kustannusta.
+- Edelleen **12/22/34 pistettä per linkki**, sama rauhallinen orgaaninen kalvo, samat kolme linkkiä, ei sisäistä serpentiinirihmaa.
+- Muutos on **päätelmä kuvista, ei vielä käyttäjän hyväksymä lopputulos**. WebGL-kuva ja Android-palautteen jälkeen voidaan säätää vain kirkkautta. Kiiltävää jatkuvaa laserviivaa, palloja tai spiraaleja ei pidä palauttaa.
