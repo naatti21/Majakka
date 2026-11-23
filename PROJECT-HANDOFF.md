@@ -333,6 +333,19 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **Seuraava askel:** käyttäjä vertailee **v0.7.1 (uusi hiukkasvirta)** ja **v0.7 (isot pallot)** puhelimella. Jos MED-näkymä riittävän elävä, lisätään *seuraavaksi* erillinen pehmeä, ilmassa leijuva peittoaluepilvi kolmion sisälle. Jos virta liian heikko tai nopea, säädetään ensisijaisesti `PointsMaterial.size/opacity`, sprite-hehku, nopeus ja pisteiden määrä (ei uusia objekteja).
 
+## 2026-11-23 — v0.7.2: säilytä orgaaninen putki, POISTA SERPENTIINIRIHMA
+
+**KÄYTTÄJÄN NIMENOMAINEN TÄSMENNYS:** “Putket oli ihan kivan orgaanisia mutta hiukkasten mukana lisäsit sinne sisälle serpentiiniä.” **ÄLÄ enää tulkitse tätä käskyksi suoristaa putkia tai poistaa niiden orgaanista muotoa.** V0.7/v0.7.1:n läpikuultava, epätasapaksu ja hieman kaartuva ulkokalvo miellyttää. Ongelma oli sen sisällä oleva 2 kierteistä `filaments`-TubeGeometryä, joiden mutkittelut näyttivät serpentiininauhalta. Hiukkaset olivat myös liian himmeitä ja hävisivät zoomissa.
+
+**TOTEUTETTU oma v0.7.2:** https://naatti21.github.io/Majakka/experiments/node-network-v072/?stage=3&quality=medium
+- `experiments/node-network-v072/organic-strand.js`: **`makeMembraneGeometry` ja `makePath` sanatarkasti IDENTTISET v0.7.1:een.** Molemmat spiraalifilamentit poistettu. Hillitty sisäinen valo ja ulkoinen materiaalinkaltainen PBR-kalvo ennallaan.
+- Hiukkaset: **LOW 12, MED 22, HIGH 34 per linkki**, 3 linkillä 36/66/102. `THREE.Points` kerta per linkki, jaettu 32×32 pehmeä piste-tekstuurikuva. Näyttöpikselien koko **4px (`PointsMaterial.sizeAttenuation:false`)**, jotta virta ei kutistu pois zoomatessa; kirkkaus nostettu hieman. `curve.getPointAt`-otoksia 257 esilaskettuna, joten jokaisen hiukkasen päivityksessä tehdään vain nopea kahden pisteen interpolointi, ei kallista kaarihaun laskentaa.
+- `index.html`: mobiilikartta, 0/3–3/3-aktivointi, LOW/MED/HIGH ja suora linkki v0.7.1-vertailuun. `network-world.js` vanhan hyväksytyn MapLibre-geosidonnan ja clearDepth-korjauksen päällä. Vanha v0.7.1 ei muutu.
+- `tests/node-network-v072.test.mjs`: JS-parse, alkuperäisen ulkoputken geometrian ja käyrän tarkka vertailu vanhaan koodiin, serpentiinigeometrian poissaolo, 12/22/34, screen-space-zoom, resurssien vapautus. `README.md` ja uusi kuvatesti `.github/workflows/node-network-v072-visual-smoke.yml`.
+- **Status:** valmis koodikoe GitHubissa. Selvitä viimeisimmän CI- ja Pages-ajon lopputulos tarvittaessa. Fyysinen Android-hyväksyntä yhä AVOIN; peliominaisuudet, karttapeitto, GPS ja todellinen FPS-/akkuajo eivät ole toteutuneet.
+
+**Seuraava portti:** käyttäjä katsoo v0.7.2 MED normaalissa ja zoomatussa näkymässä. Arvioi **vain** hiukkasvirran luettavuus ja poistetun serpentiinin vaikutus — ÄLÄ muuttele muuten miellyttäviä putkia. Jos riittävän hyvä, palataan peittoaluepilven visuaaliseen kokeeseen.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
