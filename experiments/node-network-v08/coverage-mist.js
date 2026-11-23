@@ -28,6 +28,8 @@ function makeFogTexture(THREE){
   ctx.putImageData(image,0,0);
   const map=new THREE.CanvasTexture(canvas);
   map.colorSpace=THREE.SRGBColorSpace;
+  // Canvas rows are authored in the same orientation as our barycentric UVs.
+  map.flipY=false;
   map.wrapS=map.wrapT=THREE.ClampToEdgeWrapping;
   map.anisotropy=2;
   return map;
