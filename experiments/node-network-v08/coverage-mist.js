@@ -101,8 +101,9 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
     dustPositions[3*i]=p.x;
     dustPositions[3*i+1]=14+3*rand(i*5+19);
     dustPositions[3*i+2]=p.z;
-    tint.copy(colors[0]).multiplyScalar(a).addScaledVector(colors[1],b)
-      .addScaledVector(colors[2],c).lerp(white,.62);
+    tint.copy(colors[0]).multiplyScalar(a)
+      .add(colors[1].clone().multiplyScalar(b))
+      .add(colors[2].clone().multiplyScalar(c)).lerp(white,.62);
     dustColors[3*i]=tint.r;
     dustColors[3*i+1]=tint.g;
     dustColors[3*i+2]=tint.b;
