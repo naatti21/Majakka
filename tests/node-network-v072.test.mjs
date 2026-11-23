@@ -14,8 +14,8 @@ test('v0.7.2 modules and inline mobile controls parse',()=>{
  const ui=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
  assert.ok(ui);
  for(const js of [strand,world,ui])new Script(strip(js));
- assert.match(html,/network-world\.js\?v=074/);
- assert.match(world,/organic-strand\.js\?v=073/);
+ assert.match(html,/network-world\.js\?v=075/);
+ assert.match(world,/organic-strand\.js\?v=074/);
 });
 
 test('the liked organic shell and path are identical to v0.7.1',()=>{
@@ -42,10 +42,10 @@ test('remove ONLY the extra serpentine inner ribbons and keep faint main core',(
 test('more and brighter particles with constant screen-space size when zooming',()=>{
  assert.match(strand,/const MAX_PARTICLES=34/);
  assert.match(strand,/Object\.freeze\(\{low:12,medium:22,high:34\}\)/);
- assert.match(strand,/size:4\.0,sizeAttenuation:false/);
- assert.match(strand,/material\.opacity=\.92\*level/);
- assert.match(strand,/brightness=\.76\+\.23/);
- assert.match(strand,/\.lerp\(warmWhite,\.50\)/);
+ assert.match(strand,/size:5\.5,sizeAttenuation:false/);
+ assert.match(strand,/material\.opacity=\.98\*level/);
+ assert.match(strand,/brightness=\.87\+\.13/);
+ assert.match(strand,/\.lerp\(warmWhite,\.78\)/);
  assert.match(strand,/geometry\.setDrawRange\(0,count\)/);
  assert.match(world,/createRadialGradient\(16,16,0,16,16,16\)/);
  assert.match(strand,/new THREE\.Points\(geometry,material\)/);
@@ -72,4 +72,12 @@ test('three Node links, staged network and map depth still function',()=>{
  assert.match(world,/this\.membraneMaps\?\.dispose\(\)/);
  assert.match(html,/Vertaa v0\.7\.1/);
  assert.doesNotMatch(html+world,/navigator\.geolocation|watchPosition|getCurrentPosition|localStorage/);
+});
+
+test('bright particles use one additive draw call per link and a wider soft core',()=>{
+ assert.match(strand,/blending:THREE\.AdditiveBlending,alphaTest:\.03/);
+ assert.match(world,/glow\.addColorStop\(\.36,'rgba\(255,255,255,1\)'\)/);
+ assert.match(world,/glow\.addColorStop\(\.7,'rgba\(255,255,255,\.50\)'\)/);
+ assert.match(strand,/const MAX_PARTICLES=34/);
+ assert.doesNotMatch(strand,/const filaments=\[\]/);
 });
