@@ -25,9 +25,9 @@ Käyttäjä pyysi:
 ### Leijuva peittoalue
 
 - Peite rakennetaan **kolmen DEMO-majakan karttakoordinaattien muodostaman kolmion SISÄÄN** ja aktivoituu vasta, kun kolmas linkki sulkee kolmion (**3/3**). Vaiheissa 0–2 sitä ei ole.
-- Kevyt shader-kalvo: 190 vertexin kolmioverkko (18 jaottelua), rauhallinen noin metrin suuruusluokan shader-aaltoilu, 2 hyvin loivaa valokuvioista laskettua usvajuovaa, läpikuultavuus + barysentrinen reuna-pehmennys. Ei terävää, lasimaista, kiinteää kolmiolevyä.
+- Kevyt läpikuultava tekstuurikalvo: 120 vertexin kolmioverkko (14 jaottelua), pieni 192×192 proseduraalinen RGBA-usvatekstuuri, jossa on pehmeä kolmion reunaa seuraava häivytys. Rungon aaltoliike syntyy vain noin 120 verteksin y-koordinaatin hitaasta päivityksestä; erillistä raskasta fragmenttishaderia ei tarvita.
 - Peite kelluu hieman kartan yläpuolella, **alempana kuin orgaaniset yhteysputket**. Se on visuaalinen ”verkon valoherääminen”, EI todellinen laskettu pelillinen peittoalue.
-- MED: 28 pientä **staattista** usvamotetta; HIGH: 48; LOW: ei erillisiä pisteitä, mutta aaltoileva usvakalvo edelleen näkyy. Hiukkasille korkeintaan **yksi lisäpiirtokutsu** koko peitealueessa. Pisteet värjäytyvät Nodejen materiaaliväreistä.
+- MED: 28 pientä **staattista** usvamotetta; HIGH: 48; LOW: ei erillisiä pisteitä, mutta aaltoileva tekstuurikalvo edelleen näkyy. Hiukkasille korkeintaan **yksi lisäpiirtokutsu** koko peitealueessa. Pisteet värjäytyvät Nodejen materiaaliväreistä.
 - Peite häipyy esiin/pois pehmeästi; **USVA ON/OFF** -painikkeesta voi vertailla sitä verkon ollessa 3/3. Demo-URL `?mist=0` avaa vertailun suoraan ilman peitettä.
 - PBR-majakkoja, kartan luettavia katuja, `renderer.clearDepth()`-piirtojärjestystä, geosidontaa tai reittien muotoa ei muutettu.
 
@@ -41,6 +41,10 @@ Käyttäjä pyysi:
 
 ## Rehelliset rajat
 
-**Käyttäjän fyysisen Androidin FPS-, viive- ja lämpötesti on avoin.** Emme lupaa suorituskykyä vain draw-call-arvion perusteella. Pääasiallinen kustannus on usvan läpikuultava shader-peitto (fragmenttimäärä etenkin zoomattaessa), joten tarvittaessa sen alpha/kuviointia ja redraw-rajaa säädetään ennen uusia efektejä.
+**Käyttäjän fyysisen Androidin FPS-, viive- ja lämpötesti on avoin.** Emme lupaa suorituskykyä vain draw-call-arvion perusteella. Pääasiallinen kustannus on usvan läpikuultavan tekstuurikalvon piirto ja jo ennestään käytettyjen PBR-majakkojen renderöinti, joten tarvittaessa usvapeitteen opasiteettia, näkyvyysaluetta ja päivitysrytmiä säädetään ennen uusia efektejä.
 
 **Ei vielä toteutettu:** oikeat hyväksytyt Node-POI:t, GPS, 150 metrin pelaajainteraktio, tallennetut peliyhteydet, peittoalueen todellinen pelimekaniikka, taloudellinen vaikutus tai pelaajien välinen vuorovaikutus. Tämä on **visuaalinen esitys siitä, miltä suljettu verkko voisi näyttää**.
+
+## Kuvallinen QA-korjaus: liian huomaamaton peite
+
+Ensimmäinen v0.8-WebGL-testikuva todisti hiukkasten valovanan piirtyvän, mutta usvan ON/OFF-kuvien erotus jäi lähes olemattomaksi. Siksi vaihdoimme ensimmäisen kokeilun vähäkontrastisen erikoisshaderin **selvästi mutta hillitysti näkyvään, paikallisesti luotuun RGBA-tekstuurikalvoon**, jonka reunat häipyvät kolmiomaskilla. Uusi toteutus ei lisää kolmatta sumupiirtokerrosta, ei raymarchingia eikä hiukkasfysiikkaa. Se tekee noin 120 vertexin kevyen aaltopäivityksen ja käyttää yhä enintään yhtä usvan pistemateriaalijoukkoa. **Tämä on toteutettu; uuden renderöinnin ja Androidin ulkoasu pitää vielä tarkistaa.**
