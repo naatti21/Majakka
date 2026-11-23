@@ -25,3 +25,7 @@ Hiukkaset etenevät samaan suuntaan pienillä yksilöllisillä nopeuseroilla, us
 - `tests/node-network-v071.test.mjs` tarkistaa JS-syntaksin, SphereGeometryn poistumisen, 8/14/26-määrät, GPU-puskurien uudelleenkäytön, yhden pistejoukon/linkki, pehmeän spriteshaderin, orgaanisen kuoren ja vanhan MapLibre `clearDepth()`-piirtojärjestyksen.
 - `.github/workflows/node-network-v071-visual-smoke.yml` ottaa viisi WebGL-kuvaa sisältäen vaihe 0, vaihe 3 MED, LOW, HIGH ja sivuperspektiivi.
 - Käyttäjän puhelimella: katso ensin **MED** zoomissa 17–18 ja vertaa v0.7:ään. Pisteiden pitää näyttää virtaavalta hienolta aineelta, ei ylivalottuneelta hehkusuikalelta, ilotulitukselta eikä suurilta palloilta. Tarkista myös LOW ja HIGH ja kerro mahdollinen nykiminen.
+
+### 23.11.2026 — kuvallisen ensimmäisen testin perusteella tehty korjaus
+
+Chromiumin ensimmäisessä mobiilikuvassa hiukkaset olivat **liian himmeitä** verrattuna kalvoon. Korjattiin vain `PointsMaterial.size` (2.55 → 5.0), hiukkasten läpinäkyvyyttä ja valkoisen värisekoituksen kirkkausaluetta. **Määrät 8/14/26 ja kolmen piirtokutsun rakenne pysyvät samoina.** Lopullinen Android-hyväksyntä ja tämän korjauksen kuvallinen tarkistus ovat erillisiä QA-vaiheita.
