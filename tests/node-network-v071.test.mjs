@@ -13,7 +13,7 @@ test('new v0.7.1 sources and mobile UI parse',()=>{
  const embedded=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
  assert.ok(embedded);
  for(const s of [embedded,strand,world])new Script(strip(s));
- assert.match(html,/network-world\.js\?v=072/);
+ assert.match(html,/network-world\.js\?v=073/);
  assert.match(world,/organic-strand\.js\?v=071/);
 });
 
@@ -86,4 +86,11 @@ test('original v0.7 remains intact as a compare path and every particle resource
  assert.match(strand,/geometries\.forEach\(g=>g\.dispose\(\)\)/);
  assert.match(strand,/materials\.forEach\(m=>m\.dispose\(\)\)/);
  assert.match(world,/for\(const e of this\.edges\|\|\[\]\)e\.organic\.dispose\(\)/);
+});
+
+test('mobile particle readability improved without increasing particle budgets',()=>{
+ assert.match(strand,/size:5\.0,sizeAttenuation:true/);
+ assert.match(strand,/material\.opacity=\.86\*level/);
+ assert.match(world,/organic-strand\.js\?v=072/);
+ assert.match(strand,/const MAX_PARTICLES=26/);
 });
