@@ -14,7 +14,7 @@ test('new v0.7.1 sources and mobile UI parse',()=>{
  assert.ok(embedded);
  for(const s of [embedded,strand,world])new Script(strip(s));
  assert.match(html,/network-world\.js\?v=073/);
- assert.match(world,/organic-strand\.js\?v=071/);
+ assert.match(world,/organic-strand\.js\?v=072/);
 });
 
 test('large animated spheres eliminated only from new version',()=>{
