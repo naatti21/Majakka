@@ -320,6 +320,19 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **Seuraava askel:** käyttäjä katsoo v0.7:n puhelimella verraten v0.6:een. Jos kuvissa liian paksu tai tekninen, **säädä** läpikuultavuutta/radius/pintakarheutta/pallojen näkyvyyttä, älä lisää irrallisia rengasobjekteja. Vasta tämän jälkeen pehmeä leijuva **peittoaluepilvi** kolmion sisään. Ei projektin uudelleensuunnittelua alusta.
 
+## 2026-11-23 — World v0.7.1: isot pallot pois, kevyt hiukkasvirta toteutettu
+
+**UUSIN KÄYTTÄJÄN PALAUTE:** v0.7:n orgaaninen kalvo ”paljon parempi”. **Poista isot liikkuvat pallot**, korvaa ne **lukuisilla pienillä virtaavilla protoni-/valohiukkasilla**, mutta **älä tee grafiikasta raskasta**. Käyttäjä hyväksyi speksin ja pyysi heti toteutusta.
+
+**TOTEUTETTU OMA VERROKKI v0.7.1**: https://naatti21.github.io/Majakka/experiments/node-network-v071/
+- Vanhat v0.6/v0.7 jäävät ennalleen. Kolme samaa materiaalista geosidonnaista DEMO-majakkaa, organinen PBR-kalvo, pienet sisärihmat ja stage 0–3 -säikeet säilyvät.
+- Isot `SphereGeometry`-pallot ja halot **poistettu uudesta versiosta**. Niiden tilalla **yksi `THREE.Points` per linkki**, koko 3 linkin verkostossa kolme pistejoukon piirtokutsua. **LOW 8, MED 14, HIGH 26 pistettä/linkki** → 24/42/78 yhteensä, oletus MED 42. Pienet väriltä/valolta vaihtelevat pisteet kulkevat orgaanisen kalvon sisällä hieman eri kaistoja ja nopeuksia, samaan suuntaan.
+- **Yksi jaettu 32×32 läpikuultava radiaalinen valosprite** kaikille 3 linkille. Paikka- ja väritiedot päivitetään ennalta allokoiduissa dynaamisissa `Float32Array`-puskureissa; `setDrawRange` määrää aktiivisen pistemäärän. Ei uusia mesh-geometrioita per ruutu. `prefers-reduced-motion` jää käyttöön.
+- Lähteet `experiments/node-network-v071/organic-strand.js`, `network-world.js`, `index.html`, `README.md`; testit `tests/node-network-v071.test.mjs` ja visual-QA `.github/workflows/node-network-v071-visual-smoke.yml`.
+- **Ei** oikeaa GPS:ää, pelisääntöjä, muita Node-pelaamisen resursseja, peittoaluepilveä eikä FPS-/lämpömittauksia. Pelillinen 150m säde on edelleen eri asia kuin DEMO-kartan vierekkäisten Nodejen etäisyys. Fyysinen Android-grafiikan hyväksyntä **AVOIN**. Kooditestien/kuvatestin viimeisin tila varmistettava Actionsista, mutta välttää aiempi CI-loputon silmukka.
+
+**Seuraava askel:** käyttäjä vertailee **v0.7.1 (uusi hiukkasvirta)** ja **v0.7 (isot pallot)** puhelimella. Jos MED-näkymä riittävän elävä, lisätään *seuraavaksi* erillinen pehmeä, ilmassa leijuva peittoaluepilvi kolmion sisälle. Jos virta liian heikko tai nopea, säädetään ensisijaisesti `PointsMaterial.size/opacity`, sprite-hehku, nopeus ja pisteiden määrä (ei uusia objekteja).
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
