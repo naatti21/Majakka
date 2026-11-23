@@ -1,0 +1,45 @@
+name: Majakka v0.7.2 - preserved organic tube, microflow zoom QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/node-network-v072/**"
+      - "tests/node-network-v072.test.mjs"
+      - ".github/workflows/node-network-v072-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  organic-flow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture staged and zoomed real Chromium WebGL organic particles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p organic-v072-qa
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          URL="https://naatti21.github.io/Majakka/experiments/node-network-v072/"
+          for try in $(seq 1 24); do
+            if curl -fsSL -o /tmp/v072-page.html "$URL?check=$try"               && grep -q 'network-world.js?v=074' /tmp/v072-page.html; then break; fi
+            sleep 5
+          done
+          grep -q 'network-world.js?v=074' /tmp/v072-page.html
+          shot() {
+            local title="$1" args="$2"
+            timeout 75s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=18000               --screenshot="organic-v072-qa/$title.png"               "$URL?$args&test=072" >"organic-v072-qa/$title.log" 2>&1 || true
+            test -s "organic-v072-qa/$title.png"
+          }
+          shot no-links "stage=0&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot med-normal "stage=3&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot med-zoomed-out "stage=3&quality=medium&zoom=15.5&pitch=55&bearing=-15"
+          ls -lh organic-v072-qa/*.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-v072-no-serpentine-zoom-screens
+          path: organic-v072-qa/
+          retention-days: 5
