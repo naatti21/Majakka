@@ -1,0 +1,48 @@
+name: Majakka v0.8 - particle wakes and floating mist WebGL QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/node-network-v08/**"
+      - "tests/node-network-v08.test.mjs"
+      - ".github/workflows/node-network-v08-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  veil-screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render closed-coverage vs open-network and fog on/off on mobile WebGL
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p v08-mist-qa
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          URL="https://naatti21.github.io/Majakka/experiments/node-network-v08/"
+          for attempt in $(seq 1 30); do
+            if curl -fsSL -o /tmp/majakka-v08-page.html "$URL?publish=$attempt"               && grep -q "network-world.js?v=080" /tmp/majakka-v08-page.html               && grep -q 'mistToggle' /tmp/majakka-v08-page.html; then break; fi
+            sleep 5
+          done
+          grep -q "network-world.js?v=080" /tmp/majakka-v08-page.html
+          shot() {
+            local name="$1" args="$2"
+            timeout 85s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=20000               --screenshot="v08-mist-qa/$name.png"               "$URL?$args&qa=v08" >"v08-mist-qa/$name.log" 2>&1 || true
+            test -s "v08-mist-qa/$name.png"
+          }
+          shot stage0 "stage=0&mist=1&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot stage2 "stage=2&mist=1&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot stage3-mist "stage=3&mist=1&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot stage3-no-mist "stage=3&mist=0&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot stage3-high "stage=3&mist=1&quality=high&zoom=17.7&pitch=65&bearing=85"
+          shot stage3-low-zoomout "stage=3&mist=1&quality=low&zoom=15.6&pitch=55&bearing=-15"
+          ls -lh v08-mist-qa/*.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-v08-particle-trails-mist-webgl
+          path: v08-mist-qa/
+          retention-days: 5
