@@ -160,9 +160,9 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
     map:particleTexture,
     color:0xffffff,vertexColors:true,
     // Screen-space size is essential: energy must not vanish on zoom-out.
-    transparent:true,opacity:.90,depthWrite:false,depthTest:false,
-    size:4.0,sizeAttenuation:false,
-    blending:THREE.NormalBlending,alphaTest:.04
+    transparent:true,opacity:.98,depthWrite:false,depthTest:false,
+    size:5.5,sizeAttenuation:false,
+    blending:THREE.AdditiveBlending,alphaTest:.03
   });
   const particles=new THREE.Points(geometry,material);
   particles.frustumCulled=false; // tiny animated particles; bounding box is static
@@ -182,7 +182,7 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
     const count=particleCount[quality]??22;
     geometry.setDrawRange(0,count);
     particles.visible=level>.005;
-    material.opacity=.92*level;
+    material.opacity=.98*level;
     for(let j=0;j<count;j++){
       const t=motionReduced?offset(j):(offset(j)+time*drift(j))%1;
       const frame=Math.max(0,Math.min(96,Math.round(t*96)));
@@ -197,8 +197,8 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
       particlePositions[j*3+1]=tmp.y;
       particlePositions[j*3+2]=tmp.z;
       // Broad bright/dim variation, but no epileptic twinkling.
-      const brightness=.76+.23*(.5+.5*Math.sin(j*2.35+index*.8));
-      tint.copy(from).lerp(to,t).lerp(warmWhite,.50);
+      const brightness=.87+.13*(.5+.5*Math.sin(j*2.35+index*.8));
+      tint.copy(from).lerp(to,t).lerp(warmWhite,.78);
       particleColors[j*3]=tint.r*brightness;
       particleColors[j*3+1]=tint.g*brightness;
       particleColors[j*3+2]=tint.b*brightness;
