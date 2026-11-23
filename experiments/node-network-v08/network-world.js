@@ -4,7 +4,7 @@
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
 import {buildBeacon} from '../node-family-v01/beacon-model.js?v=002';
 import {createMembraneMaps,buildOrganicStrand} from './organic-strand.js?v=080';
-import {buildCoverageMist} from './coverage-mist.js?v=080';
+import {buildCoverageMist} from './coverage-mist.js?v=081';
 
 // All coordinates are intentional DEMO points, not vetted accessible POIs.
 export const NETWORK_NODES=Object.freeze([
