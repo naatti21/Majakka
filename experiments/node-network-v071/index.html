@@ -231,7 +231,7 @@ function cameraInfo(){
  $('pitch').textContent=map.getPitch()<10?'3D':'2D';
 }
 function addNetwork3D(){
- import('./network-world.js?v=072').then(({createNetworkLayer})=>{
+ import('./network-world.js?v=073').then(({createNetworkLayer})=>{
   if(!map||map.getLayer('majakka-three-node-3d-network'))return;
   try{
    const instance=createNetworkLayer(maplibregl,stage,quality,onStageStatus,err=>{
