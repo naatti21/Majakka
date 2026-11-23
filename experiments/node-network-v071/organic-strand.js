@@ -183,7 +183,7 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
     map:particleTexture,
     color:0xffffff,vertexColors:true,
     transparent:true,opacity:.70,depthWrite:false,depthTest:false,
-    size:2.55,sizeAttenuation:true,
+    size:5.0,sizeAttenuation:true,
     blending:THREE.NormalBlending,alphaTest:.04
   });
   const particles=new THREE.Points(geometry,material);
@@ -201,7 +201,7 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
     const count=particleCount[quality]??14;
     geometry.setDrawRange(0,count);
     particles.visible=level>.005;
-    material.opacity=.73*level;
+    material.opacity=.86*level;
     for(let j=0;j<count;j++){
       const t=motionReduced?offset(j):(offset(j)+time*drift(j))%1;
       const frame=Math.max(0,Math.min(96,Math.round(t*96)));
@@ -214,7 +214,7 @@ export function buildOrganicStrand(THREE,start,end,index,fromColor,toColor,mater
       particlePositions[j*3+1]=tmp.y;
       particlePositions[j*3+2]=tmp.z;
       // Broad bright/dim variation, but no epileptic twinkling.
-      const brightness=.62+.33*(.5+.5*Math.sin(j*2.35+index*.8));
+      const brightness=.70+.28*(.5+.5*Math.sin(j*2.35+index*.8));
       tint.copy(from).lerp(to,t).lerp(warmWhite,.34);
       particleColors[j*3]=tint.r*brightness;
       particleColors[j*3+1]=tint.g*brightness;
