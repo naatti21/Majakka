@@ -367,6 +367,10 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **Seuraava portti:** fyysinen mobiilikatselmus: avaa `stage=3&quality=medium`, katso jääkö valovana liian pitkäksi/täpliksi; vertaa USVA ON vs OFF ja zoom 15.5–18. Jos peite hävittää katutekstin tai vie liikaa suorituskykyä, säädä varovasti shaderin opasiteettia ja hiukkasia. Seuraavat peliominaisuudet vasta kun kartan visuaalinen luettavuus ja lataus on hyväksytty.
 
+## 2026-11-24 — v0.8:n ON/OFF-QA:ssa usva oli aluksi liian heikko: TOTEUTETTU KORJAUS
+
+Ensimmäisissä automatisoiduissa 3D-kuvissa hiukkasvanat ja kolme majakkaa näkyivät, mutta usvan ON/OFF-kuvien erotus oli lähes näkymätön. **Korjattu v0.8:ssa**: `coverage-mist.js` käyttää nyt yhtä **120 vertexin** pienesti CPU-aaltoilevaa kolmiopintaa, läpikuultavaa **192×192 RGBA CanvasTexture** -usvatekstuuria, reunoilta häipyvää maskia sekä LOW=0/MED=28/HIGH=48 pientä usvapistettä. Tämä korvaa aiemman 190-vertexisen erikoisshaderin; peitteeseen ei lisätty uusia piirtokutsuja. `map.flipY=false` varmistaa UV-kolmion oikean pehmytreunan. `network-world.js` -> `coverage-mist.js?v=081`, `index.html` -> `network-world.js?v=081`. Muuttumaton orgaaninen linkkirunko ja kaksi nopeasti katoavaa valovanapistettä/linkkihiukkanen säilyvät. Staattiset testit on päivitetty ja viimeisin CI vihreä; **uuden peitekuvan näkyvyys ja käyttäjän mobiilikokemus tarkistettava vielä, älä väitä lopullista hyväksyntää ilman sitä**.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
