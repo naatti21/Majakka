@@ -346,6 +346,14 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **Seuraava portti:** käyttäjä katsoo v0.7.2 MED normaalissa ja zoomatussa näkymässä. Arvioi **vain** hiukkasvirran luettavuus ja poistetun serpentiinin vaikutus — ÄLÄ muuttele muuten miellyttäviä putkia. Jos riittävän hyvä, palataan peittoaluepilven visuaaliseen kokeeseen.
 
+## 2026-11-23 — Androidin v0.7.2-kuvapalaute: hiukkasten valovoima ylös
+
+**KÄYTTÄJÄN SUORA PALAUTE kahdesta omasta mobiilikuvasta:** “Hiukkasten kirkkautta täytyy nostaa.” Kolme majakkaa ja orgaaniset läpikuultavat putket näkyvät, mutta pienet pisteet ovat liian vaimeita **myös HIGH-asetuksella**. **ÄLÄ muuta putkien polkua tai geometriaa, palauta serpentiinikiertymiä tai isoja valopalloja.**
+
+**TOTEUTETTU korjaus samaan v0.7.2-demoon:** `experiments/node-network-v072/organic-strand.js` nostaa `THREE.PointsMaterial`-hiukkasten näyttökoon 4 → 5.5 px (`sizeAttenuation:false` säilyy), alpha .98, `AdditiveBlending`, väri sekoittuu 78% kohti vaaleaa ja minikirkkaus nousee; `network-world.js` laajentaa jo olemassa olevan 32x32 radiaalisen valopistespriten valkoista ydintä. Pisteitä **ei ole lisätty**, budjetti yhä 12/22/34 per linkki ja 3 pistejoukkoa koko verkossa. `index.html` moduulien versionumerot päivitetty Android-välimuistin ohittamiseksi. Testit ja WebGL-savu päivitetty. URL: https://naatti21.github.io/Majakka/experiments/node-network-v072/?stage=3&quality=medium . 
+
+**Tila:** koodi viety GitHubiin; CI/Pages/kuvakoe tarkistettava kerran uusimmasta ajosta. **Fyysinen Android-lopputulos on yhä AVOIN**; ei FPS-/akkumittauksia. Korjausraja on hiukkasten näkyvyys, ei linkkityylin uusinta. Seuraava suuri ominaisuus on edelleen peittoaluepilvi vasta käyttäjän hyväksymän graafisen virran jälkeen.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
