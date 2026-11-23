@@ -354,6 +354,19 @@ Päivitetyt lähteet: [Node Style Tokens](docs/NODE_STYLE_TOKENS_v0.1.md) ja [No
 
 **Tila:** koodi viety GitHubiin; CI/Pages/kuvakoe tarkistettava kerran uusimmasta ajosta. **Fyysinen Android-lopputulos on yhä AVOIN**; ei FPS-/akkumittauksia. Korjausraja on hiukkasten näkyvyys, ei linkkityylin uusinta. Seuraava suuri ominaisuus on edelleen peittoaluepilvi vasta käyttäjän hyväksymän graafisen virran jälkeen.
 
+## 2026-11-24 — World v0.8: lyhyt valovana + kevyt leijuva usvapeite (toteutettu)
+
+**UUSIN KÄYTTÄJÄPYYNTÖ:** edellisen v0.7.2:n kirkkaissa pienissä hiukkasissa voisi olla **pieni, pian katoava vana**, jos se ei vaadi merkittävästi tehoa. Lisäksi samaan kokeeseen **hitaasti hieman aaltoileva, ilmassa leijuva usva-/hiukkaspeitto** kolmen Noden sisään. Näitä halutaan toteutettuna, ei uutena suunnitelmakierroksena.
+
+**TEHTY erillinen [World v0.8 -koe](https://naatti21.github.io/Majakka/experiments/node-network-v08/?stage=3&quality=medium)** vanhan v0.7.2:n rinnalle:
+- `experiments/node-network-v08/organic-strand.js`: käyttäjän pitämä orgaaninen putken 3D-geometria ja polku **säilytetty muuttumattomina**. Isoja valopalloja, serpentiinin sisärihmoja tai uusia mekaanisia lisäosia ei ole palautettu. Jokaiselle hiukkaselle kaksi himmenevää jälkinäytettä (etäisyys `0.014/0.030` käyrästä). **Yksi lisä `THREE.Points` piirtokutsu per linkki**, ei offscreen-blur tai historia-framebuffer, ei uutta geometriavarausta per ruutu. MED/HIGH: hienovarainen vana; LOW ja `prefers-reduced-motion`: vana pois. Hiukkasmäärät yhä LOW/MED/HIGH=12/22/34 per linkki. Kirkkautta juuri korjatun v0.7.2:n asetukset säilyvät.
+- `experiments/node-network-v08/coverage-mist.js`: uusi **yksi matalalla leijuva, shaderilla aaltoileva, reunoiltaan häipyvä trianguloitu 3D-usvakalvo** kolmen geosidotun DEMO-Noden sisään. Peite on näkyvissä VAIN, kun kaikki kolme linkkiä on aktivoitu (stage 3/3); esiintulo/poistuminen rauhallinen. LOW: vain shader-kalvo; MED: +28 hiukkasta, HIGH: +48 hiukkasta, korkeintaan yksi `THREE.Points`-pilvi. 190 pintaverteksiä; ei volumetrista raymarchingia eikä raskaampaa partikkelisimua. **Tämä on visuaalinen peite, EI pelillisen peittoalueen laskenta.**
+- `network-world.js`: integroi usvakerroksen olemassa olevaan Three.js-skenen ja v0.4.2:sta hyväksyttyyn MapLibre-3D-depth-järjestykseen, omistaa piirtorakenteet ja purkaa GPU-resurssit. `index.html`: mobiilin **USVA ON/OFF** -painike sekä `?mist=0`-vertailulinkki, samat stage 0–3 ja grafiikkalaadut.
+- Lähteet ja laadun rajat [v0.8 README](experiments/node-network-v08/README.md). Testit: `tests/node-network-v08.test.mjs`. Visuaalinen WebGL-QA: `.github/workflows/node-network-v08-visual-smoke.yml`; 0/2/3, peite ON/OFF, LOW/HIGH ja zoom. **V0.7.2 säilyi koskemattomana.**
+- **Tila:** koodi GitHubissa ja perustestit ajettu; viimeisimmän CI/Pages/kuvakokeen lopputila tarkistetaan kerran, ei loputonta pollausta. **Käyttäjän Android-lopullinen visuaalinen arvio, todellinen GPU-ruutuaika/FPS ja akku/lämpö AVOIN.** Ei GPS:ää, oikeaa Node Atlas -sijaintia, pelillistä verkostoitumista, resurssitaloutta tai pysyviä linkkejä.
+
+**Seuraava portti:** fyysinen mobiilikatselmus: avaa `stage=3&quality=medium`, katso jääkö valovana liian pitkäksi/täpliksi; vertaa USVA ON vs OFF ja zoom 15.5–18. Jos peite hävittää katutekstin tai vie liikaa suorituskykyä, säädä varovasti shaderin opasiteettia ja hiukkasia. Seuraavat peliominaisuudet vasta kun kartan visuaalinen luettavuus ja lataus on hyväksytty.
+
 ## Prioriteetit seuraavaan työvaiheeseen
 
 1. Selvitä PWA-mainin ja mahdollisen Native/Godot-työpuun todellinen tilanne, myös assetit.
