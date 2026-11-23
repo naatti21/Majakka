@@ -3,7 +3,7 @@
 // no GPS, published Atlas nodes, player reach, rewards or permanent network state.
 import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
 import {buildBeacon} from '../node-family-v01/beacon-model.js?v=002';
-import {createMembraneMaps,buildOrganicStrand} from './organic-strand.js?v=071';
+import {createMembraneMaps,buildOrganicStrand} from './organic-strand.js?v=072';
 
 // All coordinates are intentional DEMO points, not vetted accessible POIs.
 export const NETWORK_NODES=Object.freeze([
