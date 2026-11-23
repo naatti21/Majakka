@@ -1,0 +1,47 @@
+name: Majakka v0.7.1 - micro-particle current visual QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "experiments/node-network-v071/**"
+      - "tests/node-network-v071.test.mjs"
+      - ".github/workflows/node-network-v071-visual-smoke.yml"
+permissions:
+  contents: read
+jobs:
+  micro-current:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render low, medium, high currents and no-link view in real WebGL
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p proton-v071-qa
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          URL="https://naatti21.github.io/Majakka/experiments/node-network-v071/"
+          for attempt in $(seq 1 30); do
+            if curl -fsSL -o /tmp/v071.html "$URL?deployed=$attempt"               && grep -q 'network-world.js?v=072' /tmp/v071.html               && grep -q 'Orgaaninen verkosto' /tmp/v071.html; then break; fi
+            sleep 5
+          done
+          grep -q 'network-world.js?v=072' /tmp/v071.html
+          shot() {
+            local title="$1" params="$2"
+            timeout 85s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=18000               --screenshot="proton-v071-qa/$title.png"               "$URL?$params&qa=071" >"proton-v071-qa/$title.log" 2>&1 || true
+            test -s "proton-v071-qa/$title.png"
+          }
+          shot network-off "stage=0&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot network-med "stage=3&quality=medium&zoom=17&pitch=55&bearing=-15"
+          shot network-low "stage=3&quality=low&zoom=17&pitch=55&bearing=-15"
+          shot network-high "stage=3&quality=high&zoom=17.8&pitch=55&bearing=110"
+          shot network-side "stage=3&quality=medium&zoom=17.4&pitch=70&bearing=85"
+          ls -lh proton-v071-qa/*.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-v071-micro-particle-webgl
+          path: proton-v071-qa/
+          retention-days: 5
