@@ -24,10 +24,10 @@ jobs:
           test -n "$CHROME"
           URL="https://naatti21.github.io/Majakka/experiments/node-network-v08/"
           for attempt in $(seq 1 30); do
-            if curl -fsSL -o /tmp/majakka-v08-page.html "$URL?publish=$attempt"               && grep -q "network-world.js?v=081" /tmp/majakka-v08-page.html               && grep -q 'mistToggle' /tmp/majakka-v08-page.html; then break; fi
+            if curl -fsSL -o /tmp/majakka-v08-page.html "$URL?publish=$attempt"               && grep -q "network-world.js?v=082" /tmp/majakka-v08-page.html               && grep -q 'mistToggle' /tmp/majakka-v08-page.html; then break; fi
             sleep 5
           done
-          grep -q "network-world.js?v=081" /tmp/majakka-v08-page.html
+          grep -q "network-world.js?v=082" /tmp/majakka-v08-page.html
           shot() {
             local name="$1" args="$2"
             timeout 85s "$CHROME" --headless=new --no-sandbox               --disable-dev-shm-usage --enable-webgl               --enable-unsafe-swiftshader --use-gl=angle               --use-angle=swiftshader --hide-scrollbars               --window-size=720,1500 --virtual-time-budget=20000               --screenshot="v08-mist-qa/$name.png"               "$URL?$args&qa=v08" >"v08-mist-qa/$name.log" 2>&1 || true

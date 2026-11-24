@@ -72,7 +72,7 @@ button:disabled{opacity:.55;cursor:default}
 <header class="top">
  <div class="eyebrow">MAJAKKA / PLAYTEST</div>
  <h1>Restore the light</h1>
- <small>Local fictional test world · no GPS or shared progress</small>
+ <small>Rejected button prototype · not the GPS game</small>
 </header>
 <div class="controls" aria-label="Map camera">
  <button id="zoomIn" aria-label="Zoom in">+</button>
@@ -99,7 +99,7 @@ button:disabled{opacity:.55;cursor:default}
   <button id="quality-high" type="button" aria-pressed="false">HIGH</button>
   <button id="mistToggle" type="button" aria-pressed="true" aria-label="Toggle mist">MIST ON</button>
  </div>
- <p class="note">Fixed test budget. No real POIs or shared progress. Map needs internet.</p>
+ <p class="note">Archived interaction test. Not the Majakka GPS game.</p>
  <div class="camera"><span id="camera">—</span><a href="../node-network-v08/" aria-label="Compare visual reference">Visual reference</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
 </section></div>
 <script type="module">
@@ -239,7 +239,7 @@ function cameraInfo(){
  $('pitch').textContent=map.getPitch()<10?'3D':'2D';
 }
 function addNetwork3D(){
- import('../node-network-v08/network-world.js?v=081').then(({createNetworkLayer})=>{
+ import('../node-network-v08/network-world.js?v=082').then(({createNetworkLayer})=>{
   if(!map||map.getLayer('majakka-three-node-3d-network'))return;
   try{
    const instance=createNetworkLayer(maplibregl,stage,quality,onStageStatus,err=>{

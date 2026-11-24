@@ -395,3 +395,8 @@ Päivitä ensin tarkin aihekohtainen dokumentti ja lisää tähän vain olennais
 ## Kopioitava aloitus seuraavaan keskusteluun
 
 “Jatketaan Majakkaa. Lue repon naatti21/Majakka PROJECT-HANDOFF.md ja docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md. Tarkista mainin nykytila ja mahdollinen erillinen Native/Godot-prototyyppi. Älä aloita hahmosuunnittelua alusta. Seuraava työ: [tehtävä].”
+
+
+## 2026-11-24 — PRODUCT RESET: World v0.9.1 button demo REJECTED
+User explicitly rejected the fixed 3-beacon button demo and ground-level mist. Do not treat passing CI as product acceptance. v0.9.1 is an archived interaction experiment, not GPS gameplay. Canonical direction: real GPS avatar, automatically derived meaningful real-world POI beacons (Ingress-like), stable world IDs, movement Lumen, map-selected interactions, collectable Kaiku, Player and Kaiku talents, 1–3 active Kaiku, Guardians. No fictional filler POIs. Keep remote play and safety. Read docs/NODE-ATLAS-AUTOGEN-v0.1.md, docs/MAJAKKA_TALENT_ARCHITECTURE_RECOVERY_v0.1.md, docs/MAJAKKA_KAIKU_PRESENTATION_ARCHITECTURE_v0.1.md and existing stacked rules PRs #2–8 before writing any replacement gameplay. The rules branch's v1.2 numbers are candidates, not silently approved. No new button-demo versions.
+Mist defect: old coverage was fixed at y=12 while link ends were y=54.1; the new v082 geometry takes elevations from the three actual curves, with broad time-varying interior waves and elevated motes. Numeric tests check edge altitude, center and motion. Android visual acceptance still required; link geometry unchanged.

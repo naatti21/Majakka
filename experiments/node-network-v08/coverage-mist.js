@@ -35,11 +35,34 @@ function makeFogTexture(THREE){
   return map;
 }
 
-export function buildCoverageMist(THREE,nodes,spriteTexture){
+// Barycentric blend of the three actual link elevations. Exactly matches
+// each link along its edge; interior blends the three airborne profiles.
+// Edge order: AB, AC, BC. Sample lookup uses normalized curve parameter.
+export function coverageHeight(a,b,c,heights){
+  const ab=a+b,ac=a+c,bc=b+c;
+  const weights=[a*b,a*c,b*c];
+  const total=weights[0]+weights[1]+weights[2];
+  if(total<1e-10)return a>=b&&a>=c?heights[0](0):b>=c?heights[0](1):heights[1](1);
+  return (weights[0]*heights[0](ab?b/ab:0)+weights[1]*heights[1](ac?c/ac:0)+weights[2]*heights[2](bc?c/bc:0))/total;
+}
+export function coverageWave(a,b,c,time){
+  // Zero at boundary; broad travelling crests, stronger than the old 0.9 m ripple.
+  const interior=Math.min(1,Math.max(0,27*a*b*c));
+  return interior*(3.2*Math.sin(8*b+4*c-time*.75)+1.5*Math.sin(6*c-3*a+time*.48));
+}
+function heightSampler(curve){
+  const n=64,values=Array.from({length:n+1},(_,i)=>curve.getPoint(i/n).y);
+  return t=>{const x=clamp(t)*n,i=Math.min(n-1,Math.floor(x)),f=x-i;return values[i]*(1-f)+values[i+1]*f;};
+}
+
+export function buildCoverageMist(THREE,nodes,spriteTexture,curves){
   if(nodes.length!==3)throw Error('Coverage mist needs exactly three Node positions');
+  if(!Array.isArray(curves)||curves.length!==3)throw Error('Coverage needs three actual link curves');
+  const heights=curves.map(heightSampler);
   const steps=14;
   const verts=[],uv=[],indices=[],grid=[];
-  const anchors=nodes.map(p=>new THREE.Vector3(p.x,12,p.z));
+  const anchors=nodes;
+  const bary=[];
   for(let i=0;i<=steps;i++){
     grid[i]=[];
     for(let j=0;j<=steps-i;j++){
@@ -47,7 +70,8 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
       const p=anchors[0].clone().multiplyScalar(w)
         .addScaledVector(anchors[1],u).addScaledVector(anchors[2],v);
       grid[i][j]=verts.length/3;
-      verts.push(p.x,12,p.z);
+      verts.push(p.x,coverageHeight(w,u,v,heights),p.z);
+      bary.push([w,u,v]);
       uv.push(u,v);
     }
   }
@@ -70,7 +94,7 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
   mesh.frustumCulled=false;
   mesh.renderOrder=3;
 
-  // Sparse static motes with a slow group offset instead of per-point physics.
+  // Sparse motes share the canopy's airborne height and wave.
   const MAX_MOTES=48;
   const positions=new Float32Array(MAX_MOTES*3);
   const colors=new Float32Array(MAX_MOTES*3);
@@ -83,7 +107,7 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
     const p=anchors[0].clone().multiplyScalar(a)
       .addScaledVector(anchors[1],b).addScaledVector(anchors[2],c);
     positions[k*3]=p.x;
-    positions[k*3+1]=13.5+3*rand(k*5+19);
+    positions[k*3+1]=coverageHeight(a,b,c,heights)+1.2+3*rand(k*5+19);
     positions[k*3+2]=p.z;
     tint.copy(nodeColors[0]).multiplyScalar(a)
       .add(nodeColors[1].clone().multiplyScalar(b))
@@ -107,6 +131,9 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
 
   const positionAttr=geometry.getAttribute('position');
   const original=positionAttr.array.slice();
+  const moteBase=positions.slice();
+  const moteBary=Array.from({length:MAX_MOTES},(_,k)=>{const r1=Math.sqrt(rand(k*3+1)),r2=rand(k*3+2);return [1-r1,r1*(1-r2),r1*r2];});
+  const moteAttr=moteGeometry.getAttribute('position');
   let enabled=true;
   let opacity=0;
   function setEnabled(v){enabled=!!v;}
@@ -118,10 +145,9 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
     group.visible=opacity>.002;
     if(!group.visible)return;
     // Gentle 3D rippling. ~120 vertices, no geometry allocations per frame.
-    if(!reduced){
+    {
       for(let i=0;i<positionAttr.count;i++){
-        const x=original[i*3],z=original[i*3+2];
-        positionAttr.setY(i,12+.90*Math.sin(x*.045+time*.20)*Math.sin(z*.039-time*.16));
+        positionAttr.setY(i,original[i*3+1]+(reduced?0:coverageWave(...bary[i],time)));
       }
       positionAttr.needsUpdate=true;
     }
@@ -130,7 +156,8 @@ export function buildCoverageMist(THREE,nodes,spriteTexture){
     moteGeometry.setDrawRange(0,count);
     motes.visible=count>0;
     moteMaterial.opacity=opacity*.39;
-    motes.position.y=reduced?0:.38*Math.sin(time*.24);
+    if(!reduced){for(let k=0;k<count;k++)moteAttr.setY(k,moteBase[k*3+1]+coverageWave(...moteBary[k],time));moteAttr.needsUpdate=true;}
+    else {for(let k=0;k<count;k++)moteAttr.setY(k,moteBase[k*3+1]);moteAttr.needsUpdate=true;}
   }
   function dispose(){
     geometry.dispose();fogMaterial.dispose();fogTexture.dispose();

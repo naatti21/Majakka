@@ -15,9 +15,9 @@ test('all v0.8 JavaScript modules and mobile page parse',()=>{
  const inline=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
  assert.ok(inline);
  for(const s of [flow,fog,world,inline])new Script(strip(s));
- assert.match(html,/network-world\.js\?v=081/);
+ assert.match(html,/network-world\.js\?v=082/);
  assert.match(world,/organic-strand\.js\?v=080/);
- assert.match(world,/coverage-mist\.js\?v=081/);
+ assert.match(world,/coverage-mist\.js\?v=082/);
 });
 
 test('approved v0.7.2 organic tube and curved path remain literally unchanged',()=>{
@@ -70,7 +70,7 @@ test('one small alpha-textured canopy has a softly feathered triangular boundary
  assert.match(fog,/new THREE\.MeshBasicMaterial\(/);
  assert.match(fog,/transparent:true,opacity:0/);
  assert.match(fog,/fogMaterial\.opacity=opacity\*/);
- assert.match(fog,/positionAttr\.setY\(i,12\+\.90\*Math\.sin/);
+ assert.match(fog,/positionAttr\.setY\(i,original\[i\*3\+1\]\+\(reduced\?0:coverageWave/);
  assert.match(fog,/positionAttr\.needsUpdate=true/);
  assert.doesNotMatch(fog,/new THREE\.ShaderMaterial|raymarch|for\(.*gl_FragCoord/);
 });
@@ -88,7 +88,7 @@ test('static mist motes use one Points draw; LOW keeps textured canopy',()=>{
 });
 
 test('coverage only appears when the 3-node loop closes, with optional UI toggle',()=>{
- assert.match(world,/this\.coverage=buildCoverageMist\(THREE,local,this\.particleSprite\)/);
+ assert.match(world,/this\.coverage=buildCoverageMist\(THREE,local,this\.particleSprite,this\.edges\.map\(e=>e\.organic\.curve\)\)/);
  assert.match(world,/const enclosed=stage===3\?smooth\(this\.edges\[2\]\?\.alpha\?\?0\):0/);
  assert.match(world,/this\.coverage\?\.update\(elapsed,enclosed,quality,movementReduced,dt\)/);
  assert.match(world,/setCoverageEnabled\(value\)/);
@@ -111,4 +111,20 @@ test('validated geographic 3D depth fix, mobile settings and zero GPS remain',()
  assert.match(world,/this\.membraneMaps\?\.dispose\(\)/);
  assert.match(world,/tiles\.openfreemap|MercatorCoordinate\.fromLngLat/);
  assert.doesNotMatch(html+world,/navigator\.geolocation|watchPosition|getCurrentPosition|localStorage|sessionStorage/);
+});
+
+// Execute the pure elevation helpers, not just source pattern checks.
+test('coverage follows actual link altitude at all three edges, waves above ground',()=>{
+ const {coverageHeight,coverageWave}=new Function(strip(fog)+';return {coverageHeight,coverageWave}')();
+ const h=[t=>54.1+12*Math.sin(Math.PI*t),t=>54.1+14*Math.sin(Math.PI*t),t=>54.1+10*Math.sin(Math.PI*t)];
+ for(const t of [0,.1,.25,.5,.75,.9,1]){
+  for(const [a,b,c,k] of [[1-t,t,0,0],[1-t,0,t,1],[0,1-t,t,2]]){
+   assert.ok(Math.abs(coverageHeight(a,b,c,h)-h[k](t))<1e-8);assert.equal(coverageWave(a,b,c,3),0);
+  }
+ }
+ const a=1/3,center=coverageHeight(a,a,a,h);assert.ok(center>60);assert.ok(Math.abs(coverageWave(a,a,a,0)-coverageWave(a,a,a,4))>1);
+ for(let i=0;i<=20;i++)for(let j=0;j<=20-i;j++){
+  const u=i/20,v=j/20,w=1-u-v;
+  assert.ok(coverageHeight(u,v,w,h)+coverageWave(u,v,w,3)>49);
+ }
 });
