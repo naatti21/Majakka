@@ -6,6 +6,7 @@
 
 ## Uuden keskustelun aloitus
 
+0. **Lue ensin [MASTER DEVELOPMENT BLUEPRINT v1.0](docs/MAJAKKA_MASTER_DEVELOPMENT_BLUEPRINT_v1.0.md)** (24.11.2026). Tämä on uusin kokonaispelin kehitysohje, ja [Codex S0–S1 -työmääräys](docs/CODEX_GPS_WORLD_S0_S1_v1.0.md) on seuraava toteutustyö. Vanhat art-lab-prioriteetit eivät ohita tätä. Uudet pelimekaniikat ovat ehdotuksia, eivät vielä lukittua balanssia.
 1. Lue tämä tiedosto.
 2. Lue tehtävän mukaan [Flintailin hyväksytty visual pipeline](docs/KAIKU-FLINTAIL-VISUAL-PIPELINE-v0.1.md), [APP-SPEC](APP-SPEC.md), [README](README.md) ja [Node Atlas AutoGen](docs/NODE-ATLAS-AUTOGEN-v0.1.md).
 3. Tarkista GitHubin koodi ja käytettävissä olevat assetit: mikä on suunniteltu, mikä prototyyppi, mikä oikeasti toteutettu, mikä puhelimella testattu?
@@ -400,3 +401,7 @@ Päivitä ensin tarkin aihekohtainen dokumentti ja lisää tähän vain olennais
 ## 2026-11-24 — PRODUCT RESET: World v0.9.1 button demo REJECTED
 User explicitly rejected the fixed 3-beacon button demo and ground-level mist. Do not treat passing CI as product acceptance. v0.9.1 is an archived interaction experiment, not GPS gameplay. Canonical direction: real GPS avatar, automatically derived meaningful real-world POI beacons (Ingress-like), stable world IDs, movement Lumen, map-selected interactions, collectable Kaiku, Player and Kaiku talents, 1–3 active Kaiku, Guardians. No fictional filler POIs. Keep remote play and safety. Read docs/NODE-ATLAS-AUTOGEN-v0.1.md, docs/MAJAKKA_TALENT_ARCHITECTURE_RECOVERY_v0.1.md, docs/MAJAKKA_KAIKU_PRESENTATION_ARCHITECTURE_v0.1.md and existing stacked rules PRs #2–8 before writing any replacement gameplay. The rules branch's v1.2 numbers are candidates, not silently approved. No new button-demo versions.
 Mist defect: old coverage was fixed at y=12 while link ends were y=54.1; the new v082 geometry takes elevations from the three actual curves, with broad time-varying interior waves and elevated motes. Numeric tests check edge altitude, center and motion. Android visual acceptance still required; link geometry unchanged.
+
+
+## 2026-11-24 — kokonaispelin kehitysohje
+Käyttäjän pyynnöstä tallennettu [Master Development Blueprint v1.0](docs/MAJAKKA_MASTER_DEVELOPMENT_BLUEPRINT_v1.0.md) ja [Codex S0–S1](docs/CODEX_GPS_WORLD_S0_S1_v1.0.md). S1 on yksi oikea GPS-kartta, automaattinen lähdepohjainen Node-katalogi, Lumen ja karttavuorovaikutus. S2 verkko, S3 Kaiku-keräys + Resonance Bond -ehdotus ja talentit, S4 Interference, S5 shared world. Nämä kaikki samaan peliin. Uusi pelisuunnittelu on ehdotus; aiemmat hyväksytyt periaatteet säilyvät. Ei uutta sovelluskoodia tässä dokumenttipäivityksessä. v082 mist CI, WebGL ja Pages PASS SHA 07056869db83715f17430d786bd1b77d24ae867b; fyysinen Android-hyväksyntä avoin.
