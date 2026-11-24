@@ -63,6 +63,8 @@ min-height:30px;font-size:10px;font-weight:750}
 @media(min-width:760px){.bottom{left:16px;width:430px}.controls{right:18px;top:125px}}
 @media(max-height:690px){.controls{top:calc(env(safe-area-inset-top) + 93px)}.note,.camera{display:none}.legend{margin-top:5px}.panel{padding:9px}}
 button:disabled{opacity:.55;cursor:default}
+.restart{background:none;border:0;color:#a7c1c7;font-size:11px;min-height:32px;text-decoration:underline;padding:0 4px}
+.steps button,.replay{min-height:44px}
 </style>
 </head>
 <body>
@@ -89,6 +91,7 @@ button:disabled{opacity:.55;cursor:default}
  </div>
  <button id="link" type="button" class="replay">Connect beacons</button>
  <p id="progress" class="note" style="display:block"></p>
+ <button id="restart" class="restart" type="button">Restart playtest</button>
  <div class="graphic" role="group" aria-label="Graphics quality and mist">
   <span>GRAPHICS</span>
   <button id="quality-low" type="button" aria-pressed="false">LOW</button>
@@ -141,6 +144,7 @@ function toggleMist(){
 }
 const styleURL='https://tiles.openfreemap.org/styles/dark';
 let map=null,network=null,error=false;
+let worldReady=false;
 
 const setStatus=(value,failed=false)=>{
  $('status').textContent=value;
@@ -204,18 +208,19 @@ function refreshPlay(){
  $('wallet').textContent=lumen(play)+' LUMEN';
  for(const id of IDS){
   const done=play.restored.includes(id);
-  const b=$('restore-'+id);b.disabled=done||lumen(play)<2;b.textContent=labels[id]+(done?' ✓':' · 2');
+  const b=$('restore-'+id);b.disabled=!worldReady||done||lumen(play)<2;b.textContent=labels[id]+(done?' ✓':' · 2');
  }
  const edge=nextEdge(play),button=$('link');
- button.disabled=!edge||!edge.every(id=>play.restored.includes(id));
+ button.disabled=!worldReady||!edge||!edge.every(id=>play.restored.includes(id));
  button.textContent=edge?'Connect '+edge.map(id=>labels[id]).join(' + '):'Network complete';
  $('progress').textContent=play.restored.length+'/3 restored · '+play.stage+'/3 links'+(!storageOK?' · progress not saved':'');
- if(!error)setStatus(play.stage===3?'The field is awake.':play.stage===1?'First Chord: the world is responding.':play.stage===2?'Close the triangle to awaken the field.':'Restore beacons for 2 Lumen each, then connect them.');
+ if(!error)setStatus(!worldReady?'Loading 3D world…':play.stage===3?'The field is awake.':play.stage===1?'First Chord: the world is responding.':play.stage===2?'Close the triangle to awaken the field.':'Restore beacons for 2 Lumen each, then connect them.');
  if(map?.getLayer('network-beacon-glow')){
   map.setPaintProperty('network-beacon-glow','circle-opacity',['match',['get','index'],0,play.restored.includes('relay')?.55:.08,1,play.restored.includes('grove')?.55:.08,2,play.restored.includes('prism')?.55:.08,.08]);
  }
 }
 function act(action){
+ if(!worldReady||error)return;
  const result=transition(play,action);if(!result.ok)return;
  play=result.state;stage=play.stage;
  storageOK=save(storage,play);
@@ -238,9 +243,17 @@ function addNetwork3D(){
   if(!map||map.getLayer('majakka-three-node-3d-network'))return;
   try{
    const instance=createNetworkLayer(maplibregl,stage,quality,onStageStatus,err=>{
-    error=true;setStatus('3D network failed. Map remains available.',true);
+    error=true;worldReady=false;refreshPlay();setStatus('3D network failed. Map remains available.',true);
    },mistEnabled);
    // Append after basemap and glow layers — v0.4.2 occlusion fix.
+   const draw=instance.render;
+   instance.render=function(...args){
+    draw.apply(this,args);
+    if(!error&&!this.failed&&args[1]?.defaultProjectionData?.mainMatrix){
+     document.body.dataset.renderedStage=String(instance.getStage());
+     if(!worldReady){worldReady=true;refreshPlay();}
+    }
+   };
    map.addLayer(instance);
    network=instance;
    chooseQuality(quality);
@@ -255,9 +268,10 @@ function addNetwork3D(){
 }
 for(const id of IDS)$('restore-'+id).onclick=()=>act({type:'restore',id});
 $('link').onclick=()=>act({type:'link'});
+$('restart').onclick=()=>{if(!confirm('Restart this local playtest?'))return;play=initial();stage=0;storageOK=save(storage,play);network?.setStage(0);refreshPlay();};
 refreshPlay();
 const gl2=(()=>{try{return !!document.createElement('canvas').getContext('webgl2');}catch{return false;}})();
-if(!gl2)setStatus('WebGL2 is unavailable.',true);
+if(!gl2){error=true;setStatus('WebGL2 is unavailable.',true);}
 else{
  try{
   map=new maplibregl.Map({
@@ -268,14 +282,14 @@ else{
    cooperativeGestures:false,renderWorldCopies:false
   });
   let styleReady=false;
-  const timeout=setTimeout(()=>{if(!styleReady)setStatus('Map is loading slowly. Check internet.',true);},26000);
+  const timeout=setTimeout(()=>{if(!styleReady&&!error)setStatus('Map is loading slowly. Check internet.',true);},26000);
   map.on('style.load',()=>{
    try{
     applyReadableDark();
     addGroundGlows();refreshPlay();
     addNetwork3D();
     styleReady=true;clearTimeout(timeout);
-   }catch(err){console.error('3D scene map style',err);setStatus('Map layer initialization failed.',true);}
+   }catch(err){error=true;console.error('3D scene map style',err);setStatus('Map layer initialization failed.',true);}
   });
   map.on('error',event=>console.error('MapLibre error',event?.error||event));
   map.on('move',cameraInfo);
@@ -290,7 +304,7 @@ else{
   chooseQuality(quality);
   updateMistButton();
   cameraInfo();
- }catch(err){console.error('Map startup',err);setStatus('Map could not start.',true);}
+ }catch(err){error=true;console.error('Map startup',err);setStatus('Map could not start.',true);}
 }
 </script>
 </body>

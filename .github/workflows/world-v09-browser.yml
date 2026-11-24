@@ -1,0 +1,32 @@
+name: Majakka v0.9 browser playtest
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'experiments/world-v09-playtest/**'
+      - '.github/workflows/world-v09-browser.yml'
+permissions:
+  contents: read
+jobs:
+  mobile-webgl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependency
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install chromium
+      - name: Run actual mobile-viewport browser interaction
+        run: |
+          python3 -m http.server 8765 > /tmp/majakka-http.log 2>&1 &
+          node experiments/world-v09-playtest/browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: majakka-v09-browser-qa
+          path: v09-qa/
+          retention-days: 7

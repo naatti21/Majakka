@@ -6,3 +6,6 @@ Progress is stored in an isolated localStorage key. Invalid data or storage fail
 ## QA
 Run node --test tests/world-v09-playtest.test.mjs. Test initial state, invalid/repeated action, link prerequisites, all restoration orders, persistence, corrupt input and complete triangle. Browser/WebGL and Android visual QA NOT RUN unless separately evidenced. No release or merge without user approval and QA gate.
 Physical playtest: restore two beacons, connect, restore third, close triangle, refresh; check Lumen, visible links, mist ON/OFF, street names, short wakes and low-end device usability. Note emotional payoff, not just whether the graphics work.
+
+## Browser QA revision
+Controls are disabled until the first successful WebGL render; test-only restart requires confirmation. PR browser workflow drives real MapLibre/Three.js with mobile touch, waits for actual rendered stage, verifies wallet and persistence, toggles mist/quality, and captures screenshots. Actual device acceptance remains separate.
