@@ -1,0 +1,33 @@
+import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import {mkdir} from 'node:fs/promises';
+const browser=await chromium.launch({headless:true,args:['--no-sandbox','--enable-webgl','--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']});
+await mkdir('v09-qa',{recursive:true});
+const context=await browser.newContext({viewport:{width:390,height:844},deviceScaleFactor:1,isMobile:true,hasTouch:true});
+const page=await context.newPage();
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+const url='http://127.0.0.1:8765/experiments/world-v09-playtest/';
+const waitStage=async stage=>page.waitForFunction(s=>document.body.dataset.renderedStage===String(s),stage,{timeout:60000});
+const text=async id=>(await page.locator('#'+id).textContent()).trim();
+const click=async id=>page.locator('#'+id).tap();
+try{
+ await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+ await waitStage(0);assert.equal(await text('wallet'),'6 LUMEN');assert.equal(await page.locator('#link').isDisabled(),true);
+ await page.screenshot({path:'v09-qa/00-start.png'});
+ await click('restore-relay');assert.equal(await text('wallet'),'4 LUMEN');
+ assert.equal(await page.locator('#restore-relay').isDisabled(),true);
+ await click('restore-grove');assert.equal(await text('wallet'),'2 LUMEN');
+ await click('link');await waitStage(1);assert.equal(await page.locator('#link').isDisabled(),true);
+ await page.screenshot({path:'v09-qa/01-first-chord.png'});
+ await click('restore-prism');assert.equal(await text('wallet'),'0 LUMEN');
+ await click('link');await waitStage(2);await click('link');await waitStage(3);
+ assert.equal(await page.locator('#link').isDisabled(),true);assert.match(await text('progress'),/3\/3 restored · 3\/3 links/);
+ await page.waitForTimeout(1800);await page.screenshot({path:'v09-qa/03-field.png'});
+ await click('mistToggle');assert.equal(await page.locator('#mistToggle').getAttribute('aria-pressed'),'false');
+ await page.waitForTimeout(1200);await page.screenshot({path:'v09-qa/04-no-mist.png'});
+ await click('quality-low');assert.equal(await page.locator('#quality-low').getAttribute('aria-pressed'),'true');
+ await page.reload({waitUntil:'domcontentloaded'});await waitStage(3);assert.equal(await text('wallet'),'0 LUMEN');
+ page.once('dialog',d=>d.accept());await click('restart');await waitStage(0);assert.equal(await text('wallet'),'6 LUMEN');
+ await page.reload({waitUntil:'domcontentloaded'});await waitStage(0);assert.equal(await text('wallet'),'6 LUMEN');
+ assert.deepEqual(errors,[]);console.log('PASS: mobile viewport, real WebGL render stages 0–3, wallet, prerequisites, mist toggle, quality, persistence, restart');
+}finally{await page.screenshot({path:'v09-qa/final.png'}).catch(()=>{});await browser.close();}

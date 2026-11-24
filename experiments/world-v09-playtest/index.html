@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#070e14">
+<meta name="description" content="Local restoration playtest">
+<title>MAJAKKA · Restoration playtest</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#080f15;color:#e4f6f2}
+*{box-sizing:border-box}html,body{height:100%;height:100dvh;margin:0;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid #ffd59d;outline-offset:2px}
+#map{position:fixed;inset:0;background:#070d15;touch-action:none}
+.top{position:fixed;z-index:3;pointer-events:none;top:0;right:0;left:0;
+padding:calc(env(safe-area-inset-top) + 13px) 14px 25px;
+background:linear-gradient(180deg,#07131bef,#0d1a22bc 65%,transparent)}
+.top .eyebrow{font-size:10px;color:#85e9da;font-weight:850;letter-spacing:.18em}
+.top h1{font-size:18px;margin:5px 0 4px;line-height:1.2;font-weight:780}
+.top small{font-size:10px;color:#bdcdd0;display:block}
+.controls{position:fixed;z-index:5;right:10px;top:calc(env(safe-area-inset-top) + 125px);
+display:flex;flex-direction:column;gap:8px}
+.controls button{background:#0b232aee;border:1px solid #49757e;border-radius:12px;
+min-width:47px;min-height:45px;font-size:12px;font-weight:750}
+.controls .tiny{font-size:11px}
+.bottom{position:fixed;z-index:6;bottom:calc(env(safe-area-inset-bottom) + 11px);
+left:11px;right:11px;max-width:500px}
+.panel{border:1px solid #426e74;background:#081f28ed;border-radius:15px;padding:12px 13px;
+box-shadow:0 7px 24px #000a;backdrop-filter:blur(9px)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.head strong{font-size:11px;color:#a6f1e5;letter-spacing:.08em}
+.pill{border:1px solid #53747b;border-radius:99px;color:#b8d3d1;font-size:10px;padding:4px 7px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 6px}
+.legend span{font-size:10px;color:#d9e6e1;display:flex;align-items:center;gap:5px}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+#status{font-size:11px;color:#b4d5d7;margin:6px 0 9px;min-height:20px}
+#status.error{color:#ffd09b}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steps button{background:#122c33;border:1px solid #3e626a;border-radius:9px;padding:8px 3px;
+font-size:11px;font-weight:750;min-height:40px}
+.steps button[aria-pressed="true"]{background:#25545c;border:2px solid #f0c88c;color:#ffe6af}
+.replay{width:100%;border:1px solid #dfb979;border-radius:11px;
+background:linear-gradient(100deg,#164a52,#35746a);color:#f1fff2;font-size:13px;
+font-weight:800;min-height:43px;margin-top:9px}
+.graphic{display:flex;align-items:center;gap:6px;margin-top:9px}
+.graphic span{font-size:10px;color:#a8bfc5;margin-right:3px}
+.graphic button{flex:1;border-radius:8px;background:#122a34;border:1px solid #49666d;
+min-height:30px;font-size:10px;font-weight:750}
+.graphic button[aria-pressed="true"]{background:#355159;border-color:#e7b784;color:#ffe3b9}
+.graphic #mistToggle{min-width:68px;flex:1.15;font-size:9px}
+.note{font-size:10px;line-height:1.42;margin:7px 0 0;color:#a7c1c7}
+.camera{display:flex;justify-content:space-between;margin-top:7px;font-size:10px;color:#91acb1}
+.camera a{color:#abdfd4}
+.maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{bottom:calc(env(safe-area-inset-bottom) + 275px)!important}
+.maplibregl-ctrl-attrib,.maplibregl-ctrl-attrib.maplibregl-compact{
+  background:#091922d9!important;color:#a8c4c8!important;
+  border-radius:7px;padding:2px 5px!important;box-shadow:none!important
+}
+.maplibregl-ctrl-attrib a{color:#b8e6df!important;text-decoration:underline}
+.maplibregl-ctrl-attrib-button{background-color:#b7d5d2!important}
+
+@media(min-width:760px){.bottom{left:16px;width:430px}.controls{right:18px;top:125px}}
+@media(max-height:690px){.controls{top:calc(env(safe-area-inset-top) + 93px)}.note,.camera{display:none}.legend{margin-top:5px}.panel{padding:9px}}
+button:disabled{opacity:.55;cursor:default}
+.restart{background:none;border:0;color:#a7c1c7;font-size:11px;min-height:32px;text-decoration:underline;padding:0 4px}
+.steps button,.replay{min-height:44px}
+</style>
+</head>
+<body>
+<div id="map" role="application" aria-label="Three fictional beacons on a Tampere map"></div>
+<header class="top">
+ <div class="eyebrow">MAJAKKA / PLAYTEST</div>
+ <h1>Restore the light</h1>
+ <small>Local fictional test world · no GPS or shared progress</small>
+</header>
+<div class="controls" aria-label="Map camera">
+ <button id="zoomIn" aria-label="Zoom in">+</button>
+ <button id="zoomOut" aria-label="Zoom out">−</button>
+ <button id="home" class="tiny" aria-label="Show network">HOME</button>
+ <button id="pitch" class="tiny" aria-label="Tilt map">2D</button>
+ <button id="north" class="tiny" aria-label="North up">N ↑</button>
+</div>
+<div class="bottom"><section class="panel" aria-label="Restoration playtest">
+ <div class="head"><strong>RESTORATION</strong><span class="pill" id="wallet">6 LUMEN</span></div>
+ <p id="status" role="status" aria-live="polite">Restore three beacons.</p>
+ <div class="steps" style="grid-template-columns:repeat(3,minmax(0,1fr))" role="group" aria-label="Restore beacons">
+  <button id="restore-relay" type="button">Relay · 2</button>
+  <button id="restore-grove" type="button">Grove · 2</button>
+  <button id="restore-prism" type="button">Prism · 2</button>
+ </div>
+ <button id="link" type="button" class="replay">Connect beacons</button>
+ <p id="progress" class="note" style="display:block"></p>
+ <button id="restart" class="restart" type="button">Restart playtest</button>
+ <div class="graphic" role="group" aria-label="Graphics quality and mist">
+  <span>GRAPHICS</span>
+  <button id="quality-low" type="button" aria-pressed="false">LOW</button>
+  <button id="quality-medium" type="button" aria-pressed="true">MED</button>
+  <button id="quality-high" type="button" aria-pressed="false">HIGH</button>
+  <button id="mistToggle" type="button" aria-pressed="true" aria-label="Toggle mist">MIST ON</button>
+ </div>
+ <p class="note">Fixed test budget. No real POIs or shared progress. Map needs internet.</p>
+ <div class="camera"><span id="camera">—</span><a href="../node-network-v08/" aria-label="Compare visual reference">Visual reference</a><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
+</section></div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+import {NODES as IDS,initial,load,save,lumen,nextEdge,transition} from './play-core.mjs';
+const $=id=>document.getElementById(id);
+let storage;try{storage=window.localStorage;}catch{}
+const loaded=load(storage);
+let play=loaded.state, storageOK=loaded.status==='new'||loaded.status==='saved';
+const labels={relay:'Relay',grove:'Grove',prism:'Prism'};
+
+const NODES=[
+ {id:'relay',coords:[23.7603,61.4991],color:'#d9a075'},
+ {id:'grove',coords:[23.7622,61.4992],color:'#89e6ae'},
+ {id:'prism',coords:[23.7612,61.5006],color:'#b5baff'}
+]; // fixed fictional DEMO points; NOT real approved visitor POIs
+const center=[
+ NODES.reduce((s,n)=>s+n.coords[0],0)/3,
+ NODES.reduce((s,n)=>s+n.coords[1],0)/3
+];
+const query=new URLSearchParams(location.search);
+function numeric(key,defaultValue,min,max){
+ const raw=query.get(key);
+ if(raw===null)return defaultValue;
+ const value=Number(raw);
+ return Number.isFinite(value)?Math.max(min,Math.min(max,value)):defaultValue;
+}
+const camera={zoom:numeric('zoom',17,10,19),pitch:numeric('pitch',55,0,70),
+ bearing:numeric('bearing',-15,-360,360)};
+let stage=play.stage;
+const requestedQuality=query.get('quality');
+let quality=['low','medium','high'].includes(requestedQuality)?requestedQuality:'medium';
+let mistEnabled=query.get('mist')!=='0';
+function updateMistButton(){
+ $('mistToggle').setAttribute('aria-pressed',String(mistEnabled));
+ $('mistToggle').textContent=mistEnabled?'MIST ON':'MIST OFF';
+}
+function toggleMist(){
+ mistEnabled=!mistEnabled;
+ network?.setCoverageEnabled(mistEnabled);
+ updateMistButton();
+}
+const styleURL='https://tiles.openfreemap.org/styles/dark';
+let map=null,network=null,error=false;
+let worldReady=false;
+
+const setStatus=(value,failed=false)=>{
+ $('status').textContent=value;
+ $('status').classList.toggle('error',failed);
+};
+const ROAD_PAINT = {
+ 'highway_path':{'line-color':'#38535c','line-opacity':0.83},
+ 'highway_minor':{'line-color':'#46616b','line-opacity':0.90},
+ 'highway_major_casing':{'line-color':'#2b414a','line-opacity':0.95},
+ 'highway_major_inner':{'line-color':'#5f7881','line-opacity':0.95},
+ 'highway_major_subtle':{'line-color':'#445d65','line-opacity':0.93},
+ 'highway_motorway_casing':{'line-color':'#324751','line-opacity':0.97},
+ 'highway_motorway_inner':{'line-color':'#657f87','line-opacity':0.94},
+ 'highway_motorway_subtle':{'line-color':'#47616b','line-opacity':0.92},
+ 'road_pier':{'line-color':'#29404a'},
+ 'waterway':{'line-color':'#2c5361'},
+ 'railway':{'line-color':'#465a61'},
+ 'railway_minor':{'line-color':'#40545a'},
+ 'railway_transit':{'line-color':'#40545a'}
+};
+function applyReadableDark() {
+ const paint = {...ROAD_PAINT};
+ const road = {'text-color':'#bdced0','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.35};
+ const place = {'text-color':'#abbfc2','text-opacity':0.96,'text-halo-color':'#071119','text-halo-width':1.2};
+ const water = {'text-color':'#87afbb','text-opacity':0.93,'text-halo-color':'#071119','text-halo-width':1.2};
+ for(const layer of map.getStyle().layers||[]){
+  if(layer.type!=='symbol')continue;
+  if(layer.id.startsWith('highway_name_'))paint[layer.id]=road;
+  else if(layer.id.startsWith('place_'))paint[layer.id]=place;
+  else if(layer.id==='water_name')paint[layer.id]=water;
+ }
+ for(const [id,properties] of Object.entries(paint)){
+  if(!map.getLayer(id))continue;
+  for(const [key,value] of Object.entries(properties)){
+   try{map.setPaintProperty(id,key,value);}catch(error){console.debug('Unapplied paint',id,key,error);}
+  }
+ }
+}
+
+
+
+function addGroundGlows(){
+ map.addSource('three-beacon-glows',{type:'geojson',data:{
+  type:'FeatureCollection',features:NODES.map((n,i)=>({
+   type:'Feature',geometry:{type:'Point',coordinates:n.coords},properties:{index:i}
+  }))
+ }});
+ const firstLabel=(map.getStyle().layers||[]).find(x=>x.type==='symbol')?.id;
+ map.addLayer({
+  id:'network-beacon-glow',source:'three-beacon-glows',type:'circle',
+  paint:{
+   'circle-color':['match',['get','index'],0,'#cb8d5e',1,'#5cb98a','#aeb7e7'],
+   'circle-radius':['interpolate',['linear'],['zoom'],12,8,15,20,17,43,19,68],
+   'circle-blur':1,'circle-opacity':.19,
+   'circle-pitch-alignment':'map','circle-pitch-scale':'map'
+  }
+ },firstLabel);
+}
+function onStageStatus(){refreshPlay();}
+function refreshPlay(){
+ $('wallet').textContent=lumen(play)+' LUMEN';
+ for(const id of IDS){
+  const done=play.restored.includes(id);
+  const b=$('restore-'+id);b.disabled=!worldReady||done||lumen(play)<2;b.textContent=labels[id]+(done?' ✓':' · 2');
+ }
+ const edge=nextEdge(play),button=$('link');
+ button.disabled=!worldReady||!edge||!edge.every(id=>play.restored.includes(id));
+ button.textContent=edge?'Connect '+edge.map(id=>labels[id]).join(' + '):'Network complete';
+ $('progress').textContent=play.restored.length+'/3 restored · '+play.stage+'/3 links'+(!storageOK?' · progress not saved':'');
+ if(!error)setStatus(!worldReady?'Loading 3D world…':play.stage===3?'The field is awake.':play.stage===1?'First Chord: the world is responding.':play.stage===2?'Close the triangle to awaken the field.':'Restore beacons for 2 Lumen each, then connect them.');
+ if(map?.getLayer('network-beacon-glow')){
+  map.setPaintProperty('network-beacon-glow','circle-opacity',['match',['get','index'],0,play.restored.includes('relay')?.55:.08,1,play.restored.includes('grove')?.55:.08,2,play.restored.includes('prism')?.55:.08,.08]);
+ }
+}
+function act(action){
+ if(!worldReady||error)return;
+ const result=transition(play,action);if(!result.ok)return;
+ play=result.state;stage=play.stage;
+ storageOK=save(storage,play);
+ network?.setStage(stage);refreshPlay();
+}
+function chooseQuality(value){
+ if(!['low','medium','high'].includes(value))return;
+ quality=value;
+ network?.setQuality(value);
+ for(const id of ['low','medium','high'])
+  $('quality-'+id).setAttribute('aria-pressed',String(id===value));
+}
+function cameraInfo(){
+ if(!map)return;
+ $('camera').textContent='z '+map.getZoom().toFixed(1)+' · '+Math.round(map.getPitch())+'° · '+Math.round((360+map.getBearing())%360)+'°';
+ $('pitch').textContent=map.getPitch()<10?'3D':'2D';
+}
+function addNetwork3D(){
+ import('../node-network-v08/network-world.js?v=081').then(({createNetworkLayer})=>{
+  if(!map||map.getLayer('majakka-three-node-3d-network'))return;
+  try{
+   const instance=createNetworkLayer(maplibregl,stage,quality,onStageStatus,err=>{
+    error=true;worldReady=false;refreshPlay();setStatus('3D network failed. Map remains available.',true);
+   },mistEnabled);
+   // Append after basemap and glow layers — v0.4.2 occlusion fix.
+   const draw=instance.render;
+   instance.render=function(...args){
+    draw.apply(this,args);
+    if(!error&&!this.failed&&args[1]?.defaultProjectionData?.mainMatrix){
+     document.body.dataset.renderedStage=String(instance.getStage());
+     if(!worldReady){worldReady=true;refreshPlay();}
+    }
+   };
+   map.addLayer(instance);
+   network=instance;
+   chooseQuality(quality);
+  }catch(err){
+   error=true;console.error('3D network start',err);
+   setStatus('3D startup failed. Map remains available.',true);
+  }
+ }).catch(err=>{
+  error=true;console.error('Network module load',err);
+  setStatus('3D module failed to load. Check internet.',true);
+ });
+}
+for(const id of IDS)$('restore-'+id).onclick=()=>act({type:'restore',id});
+$('link').onclick=()=>act({type:'link'});
+$('restart').onclick=()=>{if(!confirm('Restart this local playtest?'))return;play=initial();stage=0;storageOK=save(storage,play);network?.setStage(0);refreshPlay();};
+refreshPlay();
+const gl2=(()=>{try{return !!document.createElement('canvas').getContext('webgl2');}catch{return false;}})();
+if(!gl2){error=true;setStatus('WebGL2 is unavailable.',true);}
+else{
+ try{
+  map=new maplibregl.Map({
+   container:'map',style:styleURL,center,
+   zoom:camera.zoom,minZoom:10,maxZoom:19,pitch:camera.pitch,maxPitch:70,bearing:camera.bearing,
+   antialias:true,canvasContextAttributes:{antialias:true},
+   dragRotate:true,touchZoomRotate:true,touchPitch:true,
+   cooperativeGestures:false,renderWorldCopies:false
+  });
+  let styleReady=false;
+  const timeout=setTimeout(()=>{if(!styleReady&&!error)setStatus('Map is loading slowly. Check internet.',true);},26000);
+  map.on('style.load',()=>{
+   try{
+    applyReadableDark();
+    addGroundGlows();refreshPlay();
+    addNetwork3D();
+    styleReady=true;clearTimeout(timeout);
+   }catch(err){error=true;console.error('3D scene map style',err);setStatus('Map layer initialization failed.',true);}
+  });
+  map.on('error',event=>console.error('MapLibre error',event?.error||event));
+  map.on('move',cameraInfo);
+  $('zoomIn').onclick=()=>map.zoomTo(Math.min(19,map.getZoom()+1),{duration:300});
+  $('zoomOut').onclick=()=>map.zoomTo(Math.max(10,map.getZoom()-1),{duration:300});
+  $('home').onclick=()=>map.flyTo({center,zoom:17,pitch:55,bearing:-15,duration:720,essential:true});
+  $('pitch').onclick=()=>map.easeTo({pitch:map.getPitch()<10?55:0,duration:430,essential:true});
+  $('north').onclick=()=>map.easeTo({bearing:0,duration:350,essential:true});
+  $('mistToggle').onclick=toggleMist;
+  for(const id of ['low','medium','high'])$('quality-'+id).onclick=()=>chooseQuality(id);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)map.resize();});
+  chooseQuality(quality);
+  updateMistButton();
+  cameraInfo();
+ }catch(err){error=true;console.error('Map startup',err);setStatus('Map could not start.',true);}
+}
+</script>
+</body>
+</html>
