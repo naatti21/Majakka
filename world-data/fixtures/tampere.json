@@ -1,0 +1,54 @@
+{
+  "version": "fixture-tampere-v1",
+  "fixtureOnly": true,
+  "sites": [
+    {
+      "id": "test:tampere:a",
+      "kind": "test_site",
+      "category": "Nature",
+      "name": "Synthetic A — Tampere scenario",
+      "geo": {
+        "latitude": 61.5,
+        "longitude": 23.7
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:tampere:b",
+      "kind": "test_site",
+      "category": "History",
+      "name": "Synthetic B — Tampere scenario",
+      "geo": {
+        "latitude": 61.501,
+        "longitude": 23.702
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:tampere:c",
+      "kind": "test_site",
+      "category": "Art",
+      "name": "Synthetic C — Tampere scenario",
+      "geo": {
+        "latitude": 61.504,
+        "longitude": 23.706
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    },
+    {
+      "id": "test:tampere:d",
+      "kind": "test_site",
+      "category": "Culture",
+      "name": "Synthetic D — Tampere scenario",
+      "geo": {
+        "latitude": 61.509,
+        "longitude": 23.71
+      },
+      "safetyClass": "remote_only",
+      "walkable": false
+    }
+  ]
+}

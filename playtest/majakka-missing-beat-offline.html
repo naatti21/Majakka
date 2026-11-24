@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#091016">
+<meta name="description" content="Majakka – First Light. The Missing Beat: isolated interactive mobile research playtest.">
+<title>Majakka · The Missing Beat [Gate 2 playtest]</title>
+<style>
+:root{color-scheme:dark;--bg:#091016;--panel:#131f29;--panel2:#192a34;--ink:#eaf4ee;--muted:#aec2c2;--line:#32464c;--mint:#77e0c5;--gold:#f3ce8e;--violet:#ae96f2;--focus:#ffffff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 52% -16%,#24483c 0%,#0b1720 44%,#091016 84%);color:var(--ink);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background:repeating-linear-gradient(0deg,transparent 0,transparent 38px,#648b85 39px,transparent 40px)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+button:disabled{opacity:.48;cursor:not-allowed}
+.app{position:relative;max-width:620px;min-height:100vh;margin:0 auto;padding:16px 16px 44px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border:1px solid #b6d7a8;border-radius:12px;color:var(--gold);font-size:22px;box-shadow:0 0 20px #d1c38e16 inset}
+.brand-word{font-weight:750;letter-spacing:.15em;font-size:.88rem}
+.brand-small{font-size:.68rem;letter-spacing:.07em;color:var(--muted)}
+.credits{display:flex;align-items:center;gap:7px;border:1px solid #527266;padding:8px 12px;border-radius:999px;background:#1c332c;font-variant-numeric:tabular-nums}
+.credits .count{color:var(--gold);font-size:1.06rem;font-weight:750}
+.label-row{margin:20px 0 7px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.kicker{font-size:.71rem;letter-spacing:.13em;color:var(--mint);font-weight:700}
+.step{font-size:.76rem;color:var(--muted)}
+h1{font-size:clamp(1.75rem,7vw,2.55rem);letter-spacing:-.036em;line-height:1.13;margin:0}
+.lead{font-size:.98rem;color:#cee1db;line-height:1.52;margin:12px 0 16px}
+.mapframe{border:1px solid #42615d;border-radius:20px;overflow:hidden;background:linear-gradient(145deg,#172c32 0%,#10242d 53%,#15192c 100%);position:relative;box-shadow:0 14px 32px #0003}
+.map-head{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #ffffff1a}
+.micro{font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;color:#bfd5d0;font-weight:650}
+.map-state{font-size:.69rem;color:#d9c4ff;border:1px solid #8062a677;border-radius:100px;padding:5px 8px}
+.svg-holder{padding:8px 7px 0;max-height:232px}
+.route-map{display:block;width:100%;height:auto;max-height:223px}
+.route-map .thread{fill:none;stroke:#5e9c8f;stroke-width:3.5;stroke-linecap:round;opacity:.58;transition:stroke .25s,opacity .25s,stroke-width .25s}
+.route-map .thread.picked{stroke:#f7d492;stroke-width:5;opacity:1;filter:drop-shadow(0 0 4px #ffc675)}
+.route-map .thread.dim{opacity:.18}
+.route-map .region{fill:#9d7beb;opacity:.065;stroke:#c9a6f1;stroke-width:1.5}
+.route-map .node-ring{fill:#10282d;stroke:#8fe5c6;stroke-width:2.5}
+.route-map .node-core{fill:#ffe0a3;filter:drop-shadow(0 0 5px #fcd27a)}
+.route-map .node-label{font-size:13px;font-weight:800;fill:#effff3}
+.route-map .node-caption{font-size:9px;fill:#b6d1c7}
+.route-map .noise{fill:none;stroke:#c998ef;stroke-width:2;stroke-dasharray:3 8;opacity:.7}
+.map-footer{padding:0 14px 13px;font-size:.72rem;line-height:1.42;color:var(--muted)}
+.panel{margin-top:16px;background:linear-gradient(160deg,#162630,#11202b);border:1px solid var(--line);border-radius:20px;padding:17px 16px 16px;box-shadow:0 12px 26px #0002}
+.panel h2{margin:0 0 9px;font-size:1.13rem;line-height:1.32}
+.panel p{margin:0 0 13px;color:var(--muted);line-height:1.5;font-size:.92rem}
+.eyebrow{font-size:.69rem;color:var(--mint);font-weight:750;letter-spacing:.11em;text-transform:uppercase;margin-bottom:9px}
+.actions{display:grid;gap:10px}
+.action{width:100%;border:1px solid #4a6768;background:#20343d;color:var(--ink);padding:14px 16px;min-height:54px;border-radius:13px;text-align:left;transition:background .18s,border .18s}
+.action:hover,.action:active{background:#28474c;border-color:#6bbda8}
+.action.primary{background:linear-gradient(120deg,#90e9c4,#c2dbab);color:#132a29;border-color:#a3e8cb;font-weight:800;text-align:center;box-shadow:0 8px 24px #64d4af2c}
+.action.primary:hover{background:linear-gradient(120deg,#affadc,#e3f3cf)}
+.action .primary-name{display:block;font-weight:740;font-size:.99rem}
+.action .details{display:block;font-size:.83rem;line-height:1.42;margin-top:5px;color:#c1d3d2}
+.action.selected{border-color:#e9d29a;background:#353d36}
+.action span.cost{float:right;color:var(--gold);font-weight:650}
+.callout{border-left:3px solid var(--mint);padding:10px 12px;background:#20413a61;border-radius:0 10px 10px 0;font-size:.89rem;line-height:1.47;margin:12px 0}
+.callout.error{border-color:#e9b18e;background:#4f2c2960}
+.callout strong{display:block;margin-bottom:4px}
+.bottombar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 1px;font-size:.75rem;color:var(--muted)}
+.secondary{padding:9px 11px;border:1px solid #556466;background:#1b2b30;border-radius:10px;font-size:.78rem}
+.journal{padding:13px;border:1px solid #64806c;background:#233d35;border-radius:13px;margin-top:12px}
+.journal .unlock{color:var(--gold);font-weight:720}
+.quiet{font-size:.77rem;color:var(--muted);line-height:1.45;margin:11px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.pill{font-size:.72rem;border:1px solid #466b66;padding:4px 8px;border-radius:999px;color:#cbdfd7}
+.progress-track{height:3px;background:#284044;border-radius:99px;overflow:hidden;margin:12px 0 16px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--mint));transition:width .3s}
+@media(min-width:750px){.app{padding:28px 26px 60px}.panel{padding:23px}.svg-holder{max-height:260px}.route-map{max-height:250px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<main class="app">
+ <header class="topbar">
+  <div class="brand">
+   <div class="brand-mark" aria-hidden="true">✧</div>
+   <div><div class="brand-word">MAJAKKA</div><div class="brand-small">FIRST LIGHT · EXPERIMENT 01</div></div>
+  </div>
+  <div class="credits" aria-label="Playtest Lumen balance"><span aria-hidden="true">◈</span><span id="lumen-count" class="count">6</span><span>L</span></div>
+ </header>
+ <div class="label-row"><div class="kicker">THE MISSING BEAT</div><div class="step">STEP <span id="step-count">1 / 5</span></div></div>
+ <h1>Listen to the light.</h1>
+ <p class="lead">A second signal appears along one route. Observe the field, choose your method, and explain the delay.</p>
+ <div class="progress-track" aria-hidden="true"><div id="progress-fill" class="progress-fill" style="width:0"></div></div>
+ <section class="mapframe" aria-label="Schematic three-node signal network">
+  <div class="map-head"><span class="micro">THREE-NODE FIELD · SIMULATION</span><span class="map-state" id="map-label">ARCHIVED SIGNAL</span></div>
+  <div class="svg-holder">
+   <svg class="route-map" viewBox="0 0 360 216" role="img" aria-labelledby="network-title network-desc">
+    <title id="network-title">Triangle field: A, B and C</title>
+    <desc id="network-desc">Three preconstructed test links connect A to B, B to C, and A directly to C. The optional route through B adds a delayed signal.</desc>
+    <defs><radialGradient id="halo" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#a68ad0" stop-opacity=".2"/><stop offset="1" stop-color="#a68ad0" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="183" cy="113" rx="164" ry="101" fill="url(#halo)"/>
+    <path class="region" d="M51 164 Q150 77 177 34 Q250 63 310 165 Q180 212 51 164 Z"/>
+    <path id="thread-ab" class="thread" d="M51 164 Q97 85 177 34"/>
+    <path id="thread-bc" class="thread" d="M177 34 Q267 81 310 165"/>
+    <path id="thread-ac" class="thread" d="M51 164 Q180 187 310 165"/>
+    <path class="noise" d="M153 80 Q186 106 216 93"/>
+    <g><circle class="node-ring" cx="51" cy="164" r="14"/><circle class="node-core" cx="51" cy="164" r="4"/><text class="node-label" x="50" y="143" text-anchor="middle">A</text><text class="node-caption" x="51" y="193" text-anchor="middle">SOURCE</text></g>
+    <g><circle class="node-ring" cx="177" cy="34" r="14"/><circle class="node-core" cx="177" cy="34" r="4"/><text class="node-label" x="176" y="11" text-anchor="middle">B</text><text class="node-caption" x="179" y="65" text-anchor="middle">RELAY</text></g>
+    <g><circle class="node-ring" cx="310" cy="165" r="14"/><circle class="node-core" cx="310" cy="165" r="4"/><text class="node-label" x="310" y="144" text-anchor="middle">C</text><text class="node-caption" x="309" y="194" text-anchor="middle">RECEIVER</text></g>
+   </svg>
+  </div>
+  <div class="map-footer">Schematic routes, not a geographic map. All three anchors are synthetic test data. The anomaly is archived: there is no live countdown or location requirement.</div>
+ </section>
+ <div id="feedback" aria-live="polite"></div>
+ <div id="game"></div>
+ <footer class="bottombar"><span id="storage-status">Private local playtest • No GPS</span><button type="button" class="secondary" id="reset">↺ Reset test</button></footer>
+ <p class="quiet">Development playtest · Real Majakka rules engine, fictional authored signals. Does not affect the public Majakka world. No account required.</p>
+</main>
+<script>
+const __modules=Object.create(null);
+__modules["game-rules/identity.mjs"]=(function(){
+'use strict';
+
+// Opaque, published world IDs only. Never infer world identity from geometry.
+function checked(ids, count) {
+  if (ids.length !== count) throw new TypeError(`Expected ${count} node IDs`);
+  for (const id of ids) {
+    if (typeof id !== 'string' || id.length === 0 || id.trim() !== id || /[\u0000-\u001f\u007f-\u009f\ud800-\udfff]/u.test(id)) throw new TypeError('Expected nonempty canonical world node ID');
+  }
+  if (new Set(ids).size !== count) throw new RangeError('Distinct world nodes required');
+  // JS UTF-16 lexical order is specified; avoid locale-dependent ordering.
+  return [...ids].sort();
+}
+function linkId(a, b) { return 'link:v1:' + JSON.stringify(checked([a, b], 2)); }
+function fieldId(a, b, c) { return 'field:v1:' + JSON.stringify(checked([a, b, c], 3)); }
+
+return {linkId,fieldId};
+})();
+__modules["game-rules/geo.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+// Pure Gate 1 candidate. No camera, GPS permission, network or storage dependencies.
+
+const { direct_efficiency_keypoints_km: points, far_efficiency_floor: floor,
+  far_efficiency_exponential_scale_km: scale } = config.parameters;
+const EARTH_RADIUS_KM = 6371.0088;
+function validateCoordinates(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError('Expected {latitude, longitude}');
+  const { latitude, longitude } = value;
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new TypeError('Coordinates must be finite numbers');
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) throw new RangeError('Coordinates outside geographic bounds');
+  return { latitude, longitude };
+}
+function distanceKm(first, second) {
+  const a = validateCoordinates(first), b = validateCoordinates(second);
+  const rad = Math.PI / 180;
+  const lat = (b.latitude - a.latitude) * rad;
+  const lon = (b.longitude - a.longitude) * rad;
+  const h = Math.sin(lat / 2) ** 2 + Math.cos(a.latitude * rad) * Math.cos(b.latitude * rad) * Math.sin(lon / 2) ** 2;
+  return 2 * EARTH_RADIUS_KM * Math.atan2(Math.sqrt(Math.min(1, Math.max(0, h))), Math.sqrt(Math.max(0, 1 - h)));
+}
+function e(distance) {
+  if (!Number.isFinite(distance)) throw new TypeError('Distance must be finite');
+  if (distance < 0) throw new RangeError('Distance must be nonnegative');
+  for (let i = 1; i < points.length; i++) {
+    const [x0, y0] = points[i - 1], [x1, y1] = points[i];
+    if (distance <= x1) return y0 + (y1 - y0) * ((distance - x0) / (x1 - x0));
+  }
+  const [lastDistance, lastEfficiency] = points.at(-1);
+  return floor + (lastEfficiency - floor) * Math.exp(-(distance - lastDistance) / scale);
+}
+
+return {EARTH_RADIUS_KM,validateCoordinates,distanceKm,e};
+})();
+__modules["game-rules/wallet.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+// Gate 1 PR-02 candidate wallet. Pure values only; trusted server time required.
+
+const P = config.parameters;
+const HOUR = 3600000;
+const DAY = 24 * HOUR;
+function amount(n){if(!Number.isSafeInteger(n)||n<0)throw new TypeError('Lumen amount must be a nonnegative safe integer');return n;}
+function time(n){if(!Number.isSafeInteger(n)||n<0)throw new TypeError('Trusted UTC milliseconds required');return n;}
+function createWallet(balance=P.wallet_start){
+ amount(balance);
+ if(balance>P.wallet_cap)throw new RangeError('Wallet exceeds capacity');
+ return {balance,earned:[],lastChannelAtMs:null};
+}
+function spendLumen(wallet,cost){
+ const n=amount(cost);
+ if(!wallet||!Number.isSafeInteger(wallet.balance)||wallet.balance<0||wallet.balance>P.wallet_cap)throw new TypeError('Invalid wallet');
+ if(wallet.balance<n)return {ok:false,reason:'INSUFFICIENT_LUMEN',wallet};
+ return {ok:true,spent:n,wallet:{...wallet,balance:wallet.balance-n}};
+}
+// This is personal earned income, NOT a claim that a physical grain was verified.
+function grantEarnedLumen(wallet,requested,atMs){
+ const n=amount(requested),now=time(atMs);
+ if(!wallet||!Array.isArray(wallet.earned)||!Number.isSafeInteger(wallet.balance)||wallet.balance<0||wallet.balance>P.wallet_cap)throw new TypeError('Invalid wallet');
+ for(const x of wallet.earned){
+  if(!x||!Number.isSafeInteger(x.atMs)||!Number.isSafeInteger(x.amount)||x.amount<=0||x.atMs>now)throw new TypeError('Invalid or future earned Lumen record');
+ }
+ const window=wallet.earned.filter(x=>now-x.atMs<DAY);
+ const earned=window.reduce((sum,x)=>sum+x.amount,0);
+ const actual=Math.max(0,Math.min(n,P.wallet_cap-wallet.balance,P.earned_cap_rolling_24h-earned));
+ if(actual===0)return {ok:false,reason:'NO_EARNING_CAPACITY',granted:0,wallet};
+ return {ok:true,granted:actual,wallet:{...wallet,balance:wallet.balance+actual,earned:[...window,{atMs:now,amount:actual}]}};
+}
+// Channel does not require GPS. Neither an unsuccessful grant nor a failed
+// request consumes the next channel opportunity. The total 24h cap includes
+// any separately server-validated physical grain grants.
+function channelLumen(wallet,atMs){
+ const now=time(atMs);
+ if(wallet.lastChannelAtMs!==null&&wallet.lastChannelAtMs!==undefined){
+  time(wallet.lastChannelAtMs);
+  if(now<wallet.lastChannelAtMs)throw new RangeError('Clock moved backwards');
+  if(now-wallet.lastChannelAtMs<P.channel_cooldown_hours*HOUR)
+   return {ok:false,reason:'CHANNEL_COOLDOWN',granted:0,wallet,
+    availableAtMs:wallet.lastChannelAtMs+P.channel_cooldown_hours*HOUR};
+ }
+ const credit=grantEarnedLumen(wallet,P.channel_grant,now);
+ if(!credit.ok)return credit;
+ return {...credit,wallet:{...credit.wallet,lastChannelAtMs:now}};
+}
+const WALLET_LIMITS=Object.freeze({
+ start:P.wallet_start,cap:P.wallet_cap,channel:P.channel_grant,
+ channelCooldownHours:P.channel_cooldown_hours,earnedRolling24h:P.earned_cap_rolling_24h
+});
+
+return {createWallet,spendLumen,grantEarnedLumen,channelLumen,WALLET_LIMITS};
+})();
+__modules["game-rules/research.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+// Gate 1 PR-02: server-approved, genuinely distinct proof stages.
+// This module never accepts a client's "correct:true" or arbitrary credit.
+// Stage authoring and validation belong to Gate 2; the trusted server injects
+// approved grant records into the state, never into the action request.
+
+const P=config.parameters;
+const RESEARCH_STAGES=Object.freeze(['survey','compare','interpret']);
+function researchKey(actorId,nodeId,stage){
+ if(!RESEARCH_STAGES.includes(stage))throw new RangeError('Unknown node research stage');
+ return JSON.stringify([actorId,nodeId,stage]);
+}
+function verifiedResearchGrant(state,actorId,nodeId,stage){
+ const key=researchKey(actorId,nodeId,stage);
+ return state?.researchGrants?.[key]===true;
+}
+function researchCreditUnits(){
+ return Math.round(P.node_research_delta_each*10000);
+}
+function researchCost(){return P.node_research_cost_each;}
+function validateResearchConfig(){
+ if(RESEARCH_STAGES.length!==P.node_research_ways || RESEARCH_STAGES.length*P.node_research_delta_each>1)
+  throw new RangeError('Research stage configuration violates contribution limits');
+}
+validateResearchConfig();
+
+return {RESEARCH_STAGES,researchKey,verifiedResearchGrant,researchCreditUnits,researchCost,validateResearchConfig};
+})();
+__modules["game-rules/node.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+const {distanceKm,e,validateCoordinates} = __modules["game-rules/geo.mjs"];
+const {createWallet,spendLumen,channelLumen} = __modules["game-rules/wallet.mjs"];
+const {RESEARCH_STAGES,researchKey,verifiedResearchGrant,researchCreditUnits,researchCost} = __modules["game-rules/research.mjs"];
+// Majakka Gate 1 PR-02. Deterministic, immutable candidate reducer.
+// NOT an API security boundary: identity, time, proof grant and atomic DB commit
+// must be supplied/verified by an authoritative server in Gate 3.
+
+
+
+
+const P=config.parameters;
+const CHARGE_SCALE=10000;
+const HOUR_MS=3600000;
+const own=(obj,key)=>Object.prototype.hasOwnProperty.call(obj||{},key);
+function textId(value){
+ if(typeof value!=='string'||value.length<1||value.length>160||value.trim()!==value||/[\u0000-\u001f\u007f]/u.test(value))throw new TypeError('Invalid identity');
+ return value;
+}
+function trustedTime(value){
+ if(!Number.isSafeInteger(value)||value<0)throw new TypeError('Expected authoritative UTC milliseconds');
+ return value;
+}
+function createPlayer(home,initialLumen=P.wallet_start){
+ return {home:validateCoordinates(home),wallet:createWallet(initialLumen),lastNodePulses:{},usedResearch:{}};
+}
+function createWorldNode(geo,chargeUnits=0){
+ if(!Number.isSafeInteger(chargeUnits)||chargeUnits<0||chargeUnits>CHARGE_SCALE)throw new RangeError('Invalid node charge');
+ return {geo:validateCoordinates(geo),chargeUnits,status:chargeUnits===CHARGE_SCALE?'Awakened':'Dormant'};
+}
+function createRulesState({players={},nodes={},researchGrants={}}={}){
+ return {players:{...players},nodes:{...nodes},researchGrants:{...researchGrants},receipts:{}};
+}
+function applyNodeAction(state,action){
+ if(!state||!action||typeof action!=='object')throw new TypeError('Missing state or action');
+ const actorId=textId(action.actorId),operationId=textId(action.operationId);
+ const type=action.type;
+ if(!['ATTUNE','RESEARCH','CHANNEL'].includes(type))throw new RangeError('Unsupported action');
+ const now=trustedTime(action.nowMs);
+ const targetId=type==='CHANNEL'?null:textId(action.nodeId);
+ const stage=type==='RESEARCH'?action.stage:null;
+ if(type==='RESEARCH'&&!RESEARCH_STAGES.includes(stage))throw new RangeError('Unknown research stage');
+ // Clock is server-verified; neither camera, client GPS nor action-provided
+ // coordinates are ever used to select the home anchor or target geometry.
+ const key=JSON.stringify([actorId,operationId]);
+ const signature=JSON.stringify([type,targetId,stage]);
+ const old=state.receipts?.[key];
+ if(old)return old.signature===signature?{state,result:{...old.result,replayed:true}}:
+  {state,result:{ok:false,code:'OPERATION_ID_CONFLICT'}};
+ if(!own(state.players,actorId))return {state,result:{ok:false,code:'UNKNOWN_ACTOR'}};
+ const player=state.players[actorId],wallet=player.wallet;
+ let nextWallet=wallet,nextNode=null,nextPlayer=null,result=null;
+ if(type==='CHANNEL'){
+  const channel=channelLumen(wallet,now);
+  if(!channel.ok)return {state,result:{ok:false,code:channel.reason,availableAtMs:channel.availableAtMs??null}};
+  nextWallet=channel.wallet;
+  result={ok:true,code:'CHANNELLED',granted:channel.granted,balance:nextWallet.balance};
+ }else{
+  if(!own(state.nodes,targetId))return {state,result:{ok:false,code:'UNKNOWN_NODE'}};
+  const node=state.nodes[targetId];
+  if(!node||!Number.isSafeInteger(node.chargeUnits)||node.chargeUnits<0||node.chargeUnits>CHARGE_SCALE)
+   throw new TypeError('Corrupt canonical node');
+  if(node.chargeUnits===CHARGE_SCALE)return {state,result:{ok:false,code:'ALREADY_AWAKENED'}};
+  let units,cost;
+  if(type==='ATTUNE'){
+   const last=player.lastNodePulses?.[targetId];
+   if(last!==undefined){
+    trustedTime(last);
+    if(now<last)throw new RangeError('Trusted clock moved backwards');
+    if(now-last<P.node_attune_cooldown_hours*HOUR_MS)
+     return {state,result:{ok:false,code:'PULSE_COOLDOWN',availableAtMs:last+P.node_attune_cooldown_hours*HOUR_MS}};
+   }
+   units=Math.max(1,Math.round(CHARGE_SCALE*e(distanceKm(player.home,node.geo))));
+   cost=P.node_attune_lumen;
+   nextPlayer={...player,lastNodePulses:{...player.lastNodePulses,[targetId]:now}};
+  }else{
+   const stageKey=researchKey(actorId,targetId,stage);
+   if(player.usedResearch?.[stageKey])return {state,result:{ok:false,code:'STAGE_ALREADY_USED'}};
+   // Authoritative Grant is written only by a future content validator.
+   // Passing "verified:true", "solved:true" etc. in action does nothing.
+   if(!verifiedResearchGrant(state,actorId,targetId,stage))
+    return {state,result:{ok:false,code:'PROOF_NOT_APPROVED'}};
+   units=researchCreditUnits();
+   cost=researchCost();
+   nextPlayer={...player,usedResearch:{...player.usedResearch,[stageKey]:true}};
+  }
+  const spend=spendLumen(wallet,cost);
+  if(!spend.ok)return {state,result:{ok:false,code:spend.reason}};
+  nextWallet=spend.wallet;
+  const after=Math.min(CHARGE_SCALE,node.chargeUnits+units);
+  nextNode={...node,chargeUnits:after,status:after===CHARGE_SCALE?'Awakened':'Dormant'};
+  result={ok:true,code:type==='ATTUNE'?'NODE_ATTUNED':'NODE_RESEARCHED',
+    nodeId:targetId,stage,spent:cost,contributedUnits:after-node.chargeUnits,
+    chargeUnits:after,awakened:after===CHARGE_SCALE,balance:nextWallet.balance};
+ }
+ const savedPlayer={...(nextPlayer||player),wallet:nextWallet};
+ const nextState={
+  ...state,
+  players:{...state.players,[actorId]:savedPlayer},
+  nodes:nextNode?{...state.nodes,[targetId]:nextNode}:state.nodes,
+  receipts:{...state.receipts,[key]:{signature,result}}
+ };
+ return {state:nextState,result};
+}
+
+return {CHARGE_SCALE,HOUR_MS,createPlayer,createWorldNode,createRulesState,applyNodeAction};
+})();
+__modules["game-rules/field.mjs"]=(function(){
+'use strict';
+const {linkId,fieldId} = __modules["game-rules/identity.mjs"];
+// Majakka Gate 1 PR-03: world topology, not cartographic shape.
+// Fields are formed by three committed edges, irrespective of size,
+// overlap, crossing, zoom or player camera position.
+
+const FIELD_AREA_LUMEN=0;
+function isCommitted(links,a,b){
+ const link=links?.[linkId(a,b)];
+ return Boolean(link&&link.status==='Committed'&&
+  link.a!==link.b&&
+  ((link.a===a&&link.b===b)||(link.a===b&&link.b===a)));
+}
+function isClosedField(links,a,b,c){
+ if(new Set([a,b,c]).size!==3)throw new RangeError('Three distinct world nodes required');
+ return isCommitted(links,a,b)&&isCommitted(links,b,c)&&isCommitted(links,c,a);
+}
+// Read only the neighbours of the latest committed edge. Do not scan
+// all triples in a world containing millions of possible nodes.
+function fieldsClosedByLink(links,a,b){
+ if(!isCommitted(links,a,b))return [];
+ const aNeighbours=new Set(),bNeighbours=new Set();
+ for(const link of Object.values(links||{})){
+  if(link?.status!=='Committed')continue;
+  if(link.a===a&&link.b!==b)aNeighbours.add(link.b);
+  if(link.b===a&&link.a!==b)aNeighbours.add(link.a);
+  if(link.a===b&&link.b!==a)bNeighbours.add(link.b);
+  if(link.b===b&&link.a!==a)bNeighbours.add(link.a);
+ }
+ const out=[];
+ for(const c of aNeighbours){
+  if(c===a||c===b||!bNeighbours.has(c))continue;
+  if(!isClosedField(links,a,b,c))continue;
+  out.push({id:fieldId(a,b,c),nodes:[a,b,c].sort(),status:'Committed'});
+ }
+ out.sort((x,y)=>x.id<y.id?-1:x.id>y.id?1:0);
+ return out;
+}
+function readField(links,a,b,c){
+ return isClosedField(links,a,b,c)?{id:fieldId(a,b,c),nodes:[a,b,c].sort(),status:'Committed'}:null;
+}
+
+return {FIELD_AREA_LUMEN,isCommitted,isClosedField,fieldsClosedByLink,readField};
+})();
+__modules["game-rules/relay.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+const {distanceKm,e,validateCoordinates} = __modules["game-rules/geo.mjs"];
+// Majakka Gate 1 PR-03: bounded, deterministic relay reach through committed links.
+// A pure candidate, not a world-sized query engine or authentication layer.
+
+
+const P=config.parameters;
+const allowed=id=>typeof id==='string'&&id.length>0;
+const finite=(v)=>Number.isFinite(v)&&v>=0;
+function liveLinks(nodes,links){
+ const edges=[],vertices=new Set();
+ for(const link of Object.values(links||{})){
+  if(!link||link.status!=='Committed'||!allowed(link.a)||!allowed(link.b)||link.a===link.b)continue;
+  if(!nodes?.[link.a]||!nodes?.[link.b])continue;
+  if(nodes[link.a].status!=='Awakened'||nodes[link.b].status!=='Awakened')continue;
+  const length=distanceKm(nodes[link.a].geo,nodes[link.b].geo);
+  const cost=P.relay_edge_penalty_km+P.relay_attenuation_distance_fraction*length;
+  if(!finite(cost)||cost<=0)continue;
+  edges.push({a:link.a,b:link.b,cost});vertices.add(link.a);vertices.add(link.b);
+ }
+ return {edges,vertices:[...vertices].sort()};
+}
+function effectiveReach(home,target,nodes={},links={},maxHops=P.relay_max_hops){
+ const a=validateCoordinates(home),b=validateCoordinates(target);
+ if(!Number.isSafeInteger(maxHops)||maxHops<0||maxHops>6)throw new RangeError('Invalid relay hop budget');
+ const directKm=distanceKm(a,b),direct=e(directKm);
+ if(maxHops===0)return {effectiveness:direct,direct,relay:0,directKm,relayVirtualKm:null,hops:0};
+ const {edges,vertices}=liveLinks(nodes,links);
+ if(!edges.length)return {effectiveness:direct,direct,relay:0,directKm,relayVirtualKm:null,hops:0};
+ // Shortest path with a hop limit: entering and exiting the published graph
+ // are charged at their full real-world geographic distances. Each completed
+ // edge has strictly positive virtual length, so an optimal route has no cycles.
+ let distances=new Map(vertices.map(id=>[id,distanceKm(a,nodes[id].geo)]));
+ let minKm=Infinity,bestHops=0;
+ const evaluate=(v,hops)=>{
+  for(const id of vertices){
+   const d=v.get(id)+distanceKm(nodes[id].geo,b);
+   if(d<minKm){minKm=d;bestHops=hops;}
+  }
+ };
+ for(let step=1;step<=maxHops;step++){
+  const next=new Map();
+  for(const {a:x,b:y,cost} of edges){
+   const f=distances.get(x)+cost,g=distances.get(y)+cost;
+   if(f<(next.get(y)??Infinity))next.set(y,f);
+   if(g<(next.get(x)??Infinity))next.set(x,g);
+  }
+  if(next.size===0)break;
+  evaluate(next,step);
+  distances=next;
+ }
+ const relay=Math.min(P.relay_max_effectiveness,e(minKm));
+ return {effectiveness:Math.max(direct,relay),direct,relay,directKm,
+  relayVirtualKm:Number.isFinite(minKm)?minKm:null,
+  hops:relay>direct?bestHops:0};
+}
+
+return {effectiveReach};
+})();
+__modules["game-rules/graph.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+const {distanceKm} = __modules["game-rules/geo.mjs"];
+const {linkId} = __modules["game-rules/identity.mjs"];
+const {effectiveReach} = __modules["game-rules/relay.mjs"];
+const {fieldsClosedByLink} = __modules["game-rules/field.mjs"];
+const {spendLumen} = __modules["game-rules/wallet.mjs"];
+// Majakka Gate 1 PR-03: deterministic shared-graph candidate.
+// A trusted server must authenticate all actor/state/proof/time inputs and
+// commit wallet, operation receipt, link and fields atomically (Gate 3).
+
+
+
+
+
+
+const P=config.parameters;
+const WORK_SCALE=10000;
+const LINK_PROOF_STAGES=Object.freeze(['survey','interpret','route']);
+const LINK_LIGHT_STAGES=Object.freeze(['anchor','align','reinforce']);
+const HOUR=3600000;
+function validId(v){
+ if(typeof v!=='string'||!v||v.length>160||v.trim()!==v||/[\u0000-\u001f\u007f-\u009f\ud800-\udfff]/u.test(v))
+  throw new TypeError('Invalid world, player or operation ID');
+ return v;
+}
+function validTime(v){
+ if(!Number.isSafeInteger(v)||v<0)throw new TypeError('Expected trusted UTC milliseconds');
+ return v;
+}
+function linkWorkKm(lengthKm){
+ if(!Number.isFinite(lengthKm)||lengthKm<0)throw new RangeError('Invalid link distance');
+ return P.link_min_work+Math.min(P.link_max_work-P.link_min_work,
+  Math.max(0,Math.log10(Math.max(1,lengthKm/2))));
+}
+function linkRequiredUnits(lengthKm){return Math.round(linkWorkKm(lengthKm)*WORK_SCALE);}
+function linkProofKey(actor,id,stage){
+ if(!LINK_PROOF_STAGES.includes(stage))throw new RangeError('Unknown link proof stage');
+ return JSON.stringify([validId(actor),validId(id),stage]);
+}
+function createGraphState(state){
+ if(!state||!state.players||!state.nodes||!state.receipts)throw new TypeError('Requires current node rules state');
+ return {...state,links:{...(state.links||{})},fields:{...(state.fields||{})},
+  linkProofGrants:{...(state.linkProofGrants||{})}};
+}
+function getLink(state,id,a,b){
+ const old=state.links?.[id];
+ if(old){
+  const valid=old.a===a&&old.b===b&&Number.isSafeInteger(old.workRequiredUnits)&&
+   Number.isSafeInteger(old.workDoneUnits)&&Number.isSafeInteger(old.lightWorkUnits)&&
+   Number.isSafeInteger(old.proofWorkUnits)&&
+   old.workDoneUnits===old.lightWorkUnits+old.proofWorkUnits&&
+   old.workDoneUnits>=0&&old.workDoneUnits<=old.workRequiredUnits&&
+   old.proofWorkUnits<=Math.floor(old.workRequiredUnits*P.link_max_proof_fraction);
+  if(!valid)throw new TypeError('Invalid committed/progress link state');
+  return old;
+ }
+ const lengthKm=distanceKm(state.nodes[a].geo,state.nodes[b].geo);
+ const workRequiredUnits=linkRequiredUnits(lengthKm);
+ return {id,a,b,status:'Building',lengthKm,workRequiredUnits,workDoneUnits:0,
+  lightWorkUnits:0,proofWorkUnits:0};
+}
+function preview(type,action,state,player,link,id,now){
+ const stage=action.stage;
+ const stageKey=JSON.stringify([id,stage]);
+ if(type==='WEAVE'){
+  if(!LINK_LIGHT_STAGES.includes(stage))throw new RangeError('Unknown link stage');
+  const used=player.linkStages||{};
+  if(stage==='align'&&!used[JSON.stringify([id,'anchor'])])
+   return {ok:false,code:'ANCHOR_FIRST'};
+  if(stage==='reinforce'&&!used[JSON.stringify([id,'align'])])
+   return {ok:false,code:'ALIGN_FIRST'};
+  if(stage!=='reinforce'&&used[stageKey])return {ok:false,code:'STAGE_ALREADY_USED'};
+  if(stage==='reinforce'){
+   const last=player.lastReinforce?.[id];
+   if(last!==undefined){
+    validTime(last);
+    if(now<last)throw new RangeError('Trusted UTC time went backwards');
+    if(now-last<P.link_reinforce_cooldown_hours*HOUR)
+     return {ok:false,code:'LINK_COOLDOWN',availableAtMs:last+P.link_reinforce_cooldown_hours*HOUR};
+   }
+  }
+  const ra=effectiveReach(player.home,state.nodes[link.a].geo,state.nodes,state.links);
+  const rb=effectiveReach(player.home,state.nodes[link.b].geo,state.nodes,state.links);
+  const q=Math.sqrt(ra.effectiveness*rb.effectiveness);
+  return {ok:true,stageKey,cost:P.weave_lumen,
+   workUnits:Math.max(1,Math.round(WORK_SCALE*q)),effectiveness:q,
+   reachA:ra.effectiveness,reachB:rb.effectiveness};
+ }
+ if(!LINK_PROOF_STAGES.includes(stage))throw new RangeError('Unknown link proof stage');
+ if(link.lengthKm<=P.link_research_min_distance_km)return {ok:false,code:'PROOF_REQUIRES_LONG_LINK'};
+ if(player.linkProofStages?.[stageKey])return {ok:false,code:'STAGE_ALREADY_USED'};
+ if(state.linkProofGrants?.[linkProofKey(action.actorId,id,stage)]!==true)
+  return {ok:false,code:'PROOF_NOT_APPROVED'};
+ // Total proof cap is shared by everyone, not per actor. Rounding down ensures
+ // a fraction of actual light work is ALWAYS required.
+ const remaining=Math.floor(link.workRequiredUnits*P.link_max_proof_fraction)-link.proofWorkUnits;
+ if(remaining<=0)return {ok:false,code:'PROOF_LIMIT_REACHED'};
+ return {ok:true,stageKey,cost:P.link_research_cost_each,
+  workUnits:Math.min(remaining,Math.round(P.link_research_work_each*WORK_SCALE)),effectiveness:null};
+}
+// Pure preview: no debit, no stage consumption, no camera/movement input.
+function previewLinkAction(state,action){
+ if(!state||!action||typeof action!=='object')throw new TypeError('State and action required');
+ const actorId=validId(action.actorId),a=validId(action.a),b=validId(action.b);
+ if(a===b)throw new RangeError('Cannot link node to itself');
+ const type=action.type;
+ if(type!=='WEAVE'&&type!=='LINK_PROOF')throw new RangeError('Unsupported link operation');
+ const now=validTime(action.nowMs);
+ if(!state.players?.[actorId])return {ok:false,code:'UNKNOWN_ACTOR'};
+ if(!state.nodes?.[a]||!state.nodes?.[b])return {ok:false,code:'UNKNOWN_NODE'};
+ if([a,b].some(id=>state.nodes[id].status!=='Awakened'||state.nodes[id].chargeUnits!==10000))
+  return {ok:false,code:'NODE_NOT_AWAKENED'};
+ const [left,right]=[a,b].sort(),id=linkId(left,right);
+ const link=getLink(state,id,left,right);
+ if(link.status==='Committed')return {ok:false,code:'LINK_ALREADY_COMMITTED',id};
+ const step=preview(type,action,state,state.players[actorId],link,id,now);
+ if(!step.ok)return {...step,id};
+ return {...step,id,link,actorId,a:left,b:right,type,stage:action.stage,now};
+}
+function applyLinkAction(state,action){
+ if(!state||!action||typeof action!=='object')throw new TypeError('State and action required');
+ const actorId=validId(action.actorId),operationId=validId(action.operationId);
+ const [a,b]=[validId(action.a),validId(action.b)].sort();
+ if(a===b)throw new RangeError('Cannot link node to itself');
+ const targetId=linkId(a,b);
+ const signature=JSON.stringify(['link-rule-v1',action.type,targetId,action.stage]);
+ const receiptKey=JSON.stringify([actorId,operationId]);
+ const existing=state.receipts?.[receiptKey];
+ if(existing)return existing.signature===signature?
+  {state,result:{...existing.result,replayed:true}}:
+  {state,result:{ok:false,code:'OPERATION_ID_CONFLICT'}};
+ const detail=previewLinkAction(state,action);
+ if(!detail.ok)return {state,result:{ok:false,code:detail.code,
+  availableAtMs:detail.availableAtMs??null}};
+ const player=state.players[actorId];
+ const paid=spendLumen(player.wallet,detail.cost);
+ if(!paid.ok)return {state,result:{ok:false,code:paid.reason}};
+ const link=detail.link,delta=Math.min(link.workRequiredUnits-link.workDoneUnits,detail.workUnits);
+ if(delta<=0)return {state,result:{ok:false,code:'NO_WORK_REMAINING'}};
+ const isProof=detail.type==='LINK_PROOF',isReinforce=detail.stage==='reinforce';
+ const after=link.workDoneUnits+delta;
+ const updated={...link,workDoneUnits:after,
+  lightWorkUnits:link.lightWorkUnits+(isProof?0:delta),
+  proofWorkUnits:link.proofWorkUnits+(isProof?delta:0),
+  status:after===link.workRequiredUnits?'Committed':'Building'};
+ const nextLinks={...state.links,[detail.id]:updated};
+ const nextPlayer={...player,wallet:paid.wallet};
+ if(isProof)nextPlayer.linkProofStages={
+  ...(player.linkProofStages||{}),[detail.stageKey]:true};
+ else if(isReinforce)nextPlayer.lastReinforce={
+  ...(player.lastReinforce||{}),[detail.id]:detail.now};
+ else nextPlayer.linkStages={
+  ...(player.linkStages||{}),[detail.stageKey]:true};
+ const born=updated.status==='Committed'?
+  fieldsClosedByLink(nextLinks,detail.a,detail.b):[];
+ const nextFields={...(state.fields||{})};
+ const newFieldIds=[];
+ for(const field of born)if(!nextFields[field.id]){
+  nextFields[field.id]=field;newFieldIds.push(field.id);
+ }
+ const result={ok:true,code:updated.status==='Committed'?'LINK_COMMITTED':
+  (isProof?'LINK_PROOF_ACCEPTED':'LINK_PROGRESS'),
+  linkId:detail.id,stage:detail.stage,spent:detail.cost,
+  creditedUnits:delta,workDoneUnits:after,workRequiredUnits:link.workRequiredUnits,
+  proofWorkUnits:updated.proofWorkUnits,committed:updated.status==='Committed',
+  newFieldIds,balance:nextPlayer.wallet.balance};
+ return {state:{...state,players:{...state.players,[actorId]:nextPlayer},
+  links:nextLinks,fields:nextFields,
+  receipts:{...state.receipts,[receiptKey]:{signature,result}}},result};
+}
+
+return {WORK_SCALE,LINK_PROOF_STAGES,LINK_LIGHT_STAGES,linkWorkKm,linkRequiredUnits,linkProofKey,createGraphState,previewLinkAction,applyLinkAction};
+})();
+__modules["game-rules/events.mjs"]=(function(){
+'use strict';
+const config = {"schema":"majakka-gate1-candidate-1.2","status":"CANDIDATE_FOR_TESTING_NOT_APPROVED","derived_from":"Work 04_DISTANCE_NETWORK_FIELDS_INTERFERENCE_RULES.md + balance-config.v1.1.json","supersedes_for_gate1":"Only test implementation inputs; does NOT supersede locked Foundation rules or deployable config","version":"1.2.0","parameters":{"schema":"majakka-balance-proposal-1.2","status":"PROVISIONAL_GATE1","node_progress_threshold":1,"wallet_start":8,"wallet_cap":18,"channel_grant":4,"channel_cooldown_hours":20,"earned_cap_rolling_24h":10,"grain_pickup_radius_m":30,"grain_reclaim_days":7,"node_attune_lumen":2,"weave_lumen":2,"node_attune_cooldown_hours":20,"link_initial_design_actions":["anchor","align"],"link_reinforce_cooldown_hours":20,"node_investigation_max_per_person":1,"node_research_ways":3,"node_research_delta_each":0.3,"node_research_cost_each":1,"link_research_ways":3,"link_research_work_each":1.5,"link_research_cost_each":1,"link_proof_max_per_player_project":3,"link_research_min_distance_km":100,"link_max_proof_fraction":0.8,"home_change_cooldown_days":30,"relay_attenuation_distance_fraction":0.12,"relay_edge_penalty_km":20,"relay_max_hops":6,"relay_max_effectiveness":0.6,"interference_min_gap_days_same_region":21,"interference_signal_hours":24,"interference_active_hours":72,"interference_recovery_hours":48,"interference_one_event_penalty_pp":20,"interference_total_penalty_pp":40,"focus_slots":2,"field_area_lumen_reward":0,"direct_efficiency_keypoints_km":[[0,1],[5,1],[25,0.65],[100,0.3],[1000,0.08]],"far_efficiency_floor":0.02,"far_efficiency_exponential_scale_km":1400,"link_min_work":2,"link_max_work":6,"map_default_fps_target":30,"authored_challenges_min_for_alpha":12},"decisions":{"canonical_world":"one shared world, server authoritative for common effects","home_region":"one selectable coarse region; 30-day switch interval is provisional","geographical_identity":"immutable published Majakka node_uuid with source aliases","world_sites":"real sourced safe places, plus clearly fictional published regional phenomena in coverage gaps","distance_engine":"haversine and piecewise linear curve from Work section 04","link_work":"2 + min(4,max(0,log10(max(1,length_km/2))))","link_action_effect":"sqrt(effective_distance_A * effective_distance_B)","field_rule":"three different nodes and exactly all three committed links, no auto link, no passive area yield","field_roles":"Beacon, Shelter, Lens; personal focus only, other players cannot overwrite","interference":"Calm > Signal 24h > Active <=72h > Recovery 48h > Calm; max 20pp/event and 40pp combined; reversible with no permanent destruction","client_world":"render, inspect and request; no authoritative wallet or graph modifications","gps":"optional; map camera never changes action center; GPS economic benefits are unapproved","research":"authored meaningful one-time alternatives; no button-spam repeatable surrogates","content":"first pilot six distinct cases, minimum twelve genuinely distinct validated choices/challenges before public alpha"},"risk_gates":{"RG1":"8 L start -> exactly first local link costs 8 L; first empty-world field costs 18 L. Verify no forced session waiting or wallet deadlock.","RG2":"A 6-day event may still create pressure although permanent assets are safe; compare with 30-hour option.","RG3":"Remote node/link proof options are authored and costly; prove they are not renamed repetitive clicks.","RG4":"GPS-optional player must have usable Lumen, not only one +4 claim per 20h; compare home-channel/collect alternatives at identical rolling cap.","RG5":"2 active fields versus 3 expedition roles must be tested for UX clarity; do not combine both models.","RG6":"global server atomicity and multiaccount abuse not solved by mock tests."}};
+const {linkId} = __modules["game-rules/identity.mjs"];
+const {isCommitted} = __modules["game-rules/field.mjs"];
+// Majakka Gate 1 PR-04. Pure UTC event scheduler, never a browser timer.
+// Only a trusted world scheduler may publish an event; player actions cannot.
+
+
+
+const P=config.parameters, HOUR=3600000, DAY=24*HOUR;
+const EVENT_PHASES=Object.freeze(['Scheduled','Signal','Interference','Recovery','Calm']);
+function utcMs(value){
+ if(!Number.isSafeInteger(value)||value<0)throw new TypeError('Trusted UTC milliseconds required');
+ return value;
+}
+function canonicalId(value){
+ if(typeof value!=='string'||!value||value.length>160||value.trim()!==value||
+  /[\u0000-\u001f\u007f-\u009f\ud800-\udfff]/u.test(value))
+  throw new TypeError('Invalid canonical ID');
+ return value;
+}
+const SIGNAL_MS=P.interference_signal_hours*HOUR;
+const ACTIVE_MS=P.interference_active_hours*HOUR;
+const RECOVERY_MS=P.interference_recovery_hours*HOUR;
+const EVENT_GAP_MS=P.interference_min_gap_days_same_region*DAY;
+function eventPhase(event,nowMs){
+ const now=utcMs(nowMs);
+ if(!event||!Number.isSafeInteger(event.startsAtMs)||event.startsAtMs<0)
+  throw new TypeError('Invalid scheduled event');
+ const start=event.startsAtMs,signalEnd=start+SIGNAL_MS,activeEnd=signalEnd+ACTIVE_MS;
+ if(now<start)return {phase:'Scheduled',lossPP:0,fade:0};
+ if(now<signalEnd)return {phase:'Signal',lossPP:0,fade:0};
+ if(event.stabilizedAtMs!==null&&event.stabilizedAtMs!==undefined){
+  const stopped=utcMs(event.stabilizedAtMs);
+  if(stopped<signalEnd||stopped>=activeEnd)throw new TypeError('Invalid stabilization time');
+  if(now>=stopped){
+   const elapsed=now-stopped;
+   return elapsed<RECOVERY_MS?
+    {phase:'Recovery',lossPP:0,fade:1-elapsed/RECOVERY_MS}:
+    {phase:'Calm',lossPP:0,fade:0};
+  }
+ }
+ if(now<activeEnd)return {phase:'Interference',lossPP:P.interference_one_event_penalty_pp,fade:1};
+ const remaining=now-activeEnd;
+ if(remaining<RECOVERY_MS)return {phase:'Recovery',
+  lossPP:P.interference_one_event_penalty_pp*(1-remaining/RECOVERY_MS),
+  fade:1-remaining/RECOVERY_MS};
+ return {phase:'Calm',lossPP:0,fade:0};
+}
+// The world-state record contains region, permanent ID and a sparse list
+// of affected *existing* fields with exactly one affected committed edge each.
+// No GPS, camera center or dynamically spawned POI belongs in this record.
+function createInterferenceEvent(state,{eventId,regionId,startsAtMs,fieldImpacts}){
+ const id=canonicalId(eventId),region=canonicalId(regionId),at=utcMs(startsAtMs);
+ if(!state||!state.fields||!state.links||!state.players)throw new TypeError('Graph state required');
+ if(state.events?.[id])throw new RangeError('Event ID already exists');
+ const existing=Object.values(state.events||{}).filter(ev=>ev.regionId===region);
+ for(const older of existing){
+  if(Math.abs(at-older.startsAtMs)<EVENT_GAP_MS)throw new RangeError('Regional interference cooldown');
+ }
+ if(!Array.isArray(fieldImpacts)||!fieldImpacts.length)throw new RangeError('Event needs canonical field impacts');
+ const seen=new Set(),impacts=[];
+ for(const input of fieldImpacts){
+  const fieldId=canonicalId(input?.fieldId),affectedLinkId=canonicalId(input?.affectedLinkId);
+  if(seen.has(fieldId))throw new RangeError('Duplicate field impact');
+  seen.add(fieldId);
+  const field=state.fields[fieldId];
+  if(!field||field.status!=='Committed'||!Array.isArray(field.nodes)||field.nodes.length!==3)
+   throw new RangeError('Interference may only affect committed fields');
+  const [a,b,c]=field.nodes;
+  const candidates=[linkId(a,b),linkId(a,c),linkId(b,c)];
+  if(!candidates.includes(affectedLinkId))throw new RangeError('Affected edge not in field');
+  const edge=state.links[affectedLinkId];
+  if(!edge||!isCommitted(state.links,edge.a,edge.b))
+   throw new RangeError('Affected edge must be committed');
+  impacts.push({fieldId,affectedLinkId});
+ }
+ const event=Object.freeze({id,regionId:region,startsAtMs:at,
+  stabilizedAtMs:null,fieldImpacts:impacts});
+ return {...state,events:{...(state.events||{}),[id]:event}};
+}
+function createEventState(graph){
+ if(!graph||!graph.players||!graph.links||!graph.fields||!graph.receipts)throw new TypeError('Graph state required');
+ return {...graph,events:{...(graph.events||{})},investigationGrants:{...(graph.investigationGrants||{})}};
+}
+function archivedEvent(event,nowMs){
+ const current=eventPhase(event,nowMs);
+ return current.phase==='Calm';
+}
+
+return {EVENT_PHASES,utcMs,canonicalId,SIGNAL_MS,ACTIVE_MS,RECOVERY_MS,EVENT_GAP_MS,eventPhase,createInterferenceEvent,createEventState,archivedEvent};
+})();
+__modules["world-data/catalog-policy.mjs"]=(function(){
+'use strict';
+const {distanceKm,validateCoordinates} = __modules["game-rules/geo.mjs"];
+// Gate 2 / PR-05: canonical published-site validation, not live OSM ingestion.
+// Camera/GPS data NEVER creates a site; fixture-only locations are rejected by default.
+
+const SITE_KINDS=Object.freeze(['real_place','regional_phenomenon']);
+const SITE_CATEGORIES=Object.freeze(['Nature','History','Art','Culture','Regional']);
+const unsafeKinds=new Set(['private_home','school','healthcare','emergency_access','restricted_access','military','sensitive']);
+function string(v,label,max=200){
+ if(typeof v!=='string'||v.length===0||v.length>max||v.trim()!==v||
+  /[\u0000-\u001f\u007f-\u009f\ud800-\udfff]/u.test(v))throw new TypeError('Invalid '+label);
+ return v;
+}
+function record(x,label){if(!x||typeof x!=='object'||Array.isArray(x))throw new TypeError('Invalid '+label);return x;}
+function sourceKey(s){
+ record(s,'source');
+ const ns=string(s.namespace,'namespace',40),key=string(s.sourceId,'sourceId',200);
+ return JSON.stringify([ns,key]);
+}
+function siteFromRaw(raw,{allowFixtures}){
+ const s=record(raw,'site');
+ const id=string(s.id,'canonical ID',160),kind=string(s.kind,'kind',32);
+ if(kind==='test_site'&&!allowFixtures)throw new RangeError('Fixture-only site cannot be published');
+ if(kind!=='test_site'&&!SITE_KINDS.includes(kind))throw new RangeError('Unknown site kind');
+ const category=string(s.category,'category',32);
+ if(!SITE_CATEGORIES.includes(category))throw new RangeError('Unknown category');
+ const name=string(s.name,'name');
+ const geo=validateCoordinates(s.geo);
+ if(unsafeKinds.has(s.safetyClass))throw new RangeError('Sensitive/restricted site must be excluded');
+ if(s.safetyClass!=='reviewed_public'&&s.safetyClass!=='remote_only')
+  throw new RangeError('Access safety not reviewed: must default remote_only explicitly');
+ const visitAllowed=s.safetyClass==='reviewed_public';
+ if(s.walkable!==visitAllowed)throw new RangeError('Walking suggestion must match access review');
+ if(kind==='real_place'){
+  if(category==='Regional')throw new RangeError('Real place must use a real-place category');
+  const sources=record(s.source,'source metadata');
+  sourceKey(sources);
+  if(typeof sources.attribution!=='string'||!sources.attribution.trim())
+   throw new TypeError('Real places require source attribution');
+  if(typeof sources.license!=='string'||!sources.license.trim())
+   throw new TypeError('Real places require an explicit license review label');
+  if(s.safetyClass==='reviewed_public'&&s.accessReview!=='verified')
+   throw new RangeError('A real public visit requires verified access review');
+ }else if(kind==='regional_phenomenon'){
+  if(category!=='Regional'||s.safetyClass!=='remote_only'||s.walkable)
+   throw new RangeError('Fictional region is not a physical walkable place');
+  string(s.regionId,'published region id',160);
+  if(s.fictionLabel!=='Fictional regional signal')
+   throw new RangeError('Region must be explicitly labelled fictional');
+  if(s.source)throw new RangeError('A fictional signal must not impersonate a real data source');
+ }else{
+  if(category==='Regional'||s.safetyClass!=='remote_only'||s.walkable)
+   throw new RangeError('Test sites are not walking targets or real regional phenomena');
+  if(s.source)throw new RangeError('Synthetic fixtures cannot claim real source records');
+ }
+ const aliases=[];
+ if(kind==='real_place'){
+  const all=[s.source,...(s.aliases||[])];
+  if(!Array.isArray(s.aliases||[]))throw new TypeError('aliases must be a list');
+  for(const source of all)aliases.push(sourceKey(source));
+  if(new Set(aliases).size!==aliases.length)throw new RangeError('Duplicate source alias');
+ }
+ return Object.freeze({...s,id,kind,category,name,geo:Object.freeze(geo),
+  sourceAliases:aliases,visitAllowed});
+}
+function validateCatalog(input,{allowFixtures=false}={}){
+ const x=record(input,'catalog');
+ const version=string(x.version,'catalog version',100);
+ if(!Array.isArray(x.sites)||x.sites.length<1)throw new RangeError('Catalog needs published site records');
+ if(allowFixtures!==true&&x.fixtureOnly===true)throw new RangeError('A fixture cannot be published');
+ if(allowFixtures===true&&x.fixtureOnly!==true)throw new RangeError('Fixture validation requires fixtureOnly:true');
+ const sites=new Map(),aliases=new Map(),regional=new Map();
+ for(const raw of x.sites){
+  const s=siteFromRaw(raw,{allowFixtures});
+  if(sites.has(s.id))throw new RangeError('Duplicate immutable site ID');
+  sites.set(s.id,s);
+  for(const alias of s.sourceAliases){
+   if(aliases.has(alias))throw new RangeError('Source alias maps to more than one world node');
+   aliases.set(alias,s.id);
+  }
+  if(s.kind==='regional_phenomenon'){
+   if(regional.has(s.regionId))throw new RangeError('Only one published regional phenomenon per region');
+   regional.set(s.regionId,s.id);
+  }
+ }
+ return Object.freeze({version,fixtureOnly:x.fixtureOnly===true,
+  sites:Object.freeze([...sites.values()].sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0)),
+  byId:sites,aliases,regional});
+}
+function assessCoverage(catalog,center,{localRadiusKm=15,reachableRadiusKm=50,authoredResearch=false}={}){
+ if(!catalog?.sites)throw new TypeError('Published catalog required');
+ const home=validateCoordinates(center);
+ for(const radius of [localRadiusKm,reachableRadiusKm])
+  if(!Number.isFinite(radius)||radius<=0)throw new RangeError('Bad coverage radius');
+ if(reachableRadiusKm<localRadiusKm)throw new RangeError('Reach must cover local radius');
+ const available=catalog.sites
+  .filter(s=>s.safetyClass==='reviewed_public'||s.safetyClass==='remote_only')
+  .map(s=>({id:s.id,kind:s.kind,km:distanceKm(home,s.geo)}))
+  .sort((a,b)=>a.km-b.km||(a.id<b.id?-1:1));
+ const local=available.filter(s=>s.km<=localRadiusKm);
+ const reachable=available.filter(s=>s.km<=reachableRadiusKm);
+ const nearHome=available.some(s=>s.km<=5);
+ const enough=reachable.length>=3 && nearHome;
+ const needsResearch=reachable.some(s=>s.km>5);
+ return {localCount:local.length,reachableCount:reachable.length,
+  nearHome,needsRegionalSupport:local.filter(s=>s.kind==='real_place').length<2,
+  requiresRemoteResearch:needsResearch,
+  readyForPilot:enough&&(!needsResearch||authoredResearch===true),
+  status:!enough?'INSUFFICIENT_PUBLISHED_SITES':
+   needsResearch&&!authoredResearch?'MISSING_AUTHORED_RESEARCH':'READY_FOR_PILOT',
+  nearestIds:reachable.map(s=>s.id).slice(0,3)};
+}
+function resolveSourceAlias(catalog,source){
+ const alias=sourceKey(source);
+ return catalog.aliases.get(alias)??null;
+}
+
+return {SITE_KINDS,SITE_CATEGORIES,validateCatalog,assessCoverage,resolveSourceAlias};
+})();
+__modules["gameplay/mission-planner.mjs"]=(function(){
+'use strict';
+const chapter = {"id":"the-missing-beat","version":"0.1-fixture","fixtureOnly":true,"title":"The Missing Beat","fictionNotice":"Fictional signal case. The coordinates are synthetic reference anchors, not claims about real locations.","question":"Why does the second pulse arrive late only when the signal passes through node B?","anchors":{"a":"test:tampere:a","b":"test:tampere:b","c":"test:tampere:c"},"fieldRequirements":["A–B","B–C","A–C"],"hypothesisOptions":[{"id":"route_echo","label":"The existing route repeats the signal"},{"id":"local_noise","label":"Local interference creates an unrelated pulse"},{"id":"hidden_source","label":"A fourth source is secretly transmitting"}],"roles":[{"id":"Lens","effect":"Separate overlapping pulses from the B detour; the source signature becomes readable"},{"id":"Shelter","effect":"Create a clean 100% reference; compare direct and detour paths"},{"id":"Beacon","effect":"Show where the delay starts; a second observation is still needed"}],"outcome":{"findingId":"finding:the-missing-beat:route-echo","methodUnlock":"Echo Differentiation","nextQuestion":"Does the same route-dependent echo appear beyond the home region?"},"authoredEvidence":{"direct":{"signalCount":1,"delayMs":0,"frequency":"low","label":"One clean pulse on A–C"},"via_b":{"signalCount":2,"delayMs":300,"frequency":"low","label":"A second pulse follows the A–B–C route"}}};
+const {linkId,fieldId} = __modules["game-rules/identity.mjs"];
+const {isCommitted} = __modules["game-rules/field.mjs"];
+const {eventPhase} = __modules["game-rules/events.mjs"];
+// Gate 2 / PR-06: authored evidence and interpretation logic.
+// This is a fixture-only narrative, not fabricated history about a real place.
+
+
+
+
+const MISSING_BEAT=chapter;
+const ROUTES=Object.freeze(['direct','via_b']);
+const ROLES=Object.freeze(['Lens','Shelter','Beacon']);
+function caseTopology(state){
+ const {a,b,c}=chapter.anchors;
+ for(const id of [a,b,c])if(state.nodes?.[id]?.status!=='Awakened')
+  return {ok:false,code:'MISSING_AWAKENED_ANCHOR',nodeId:id};
+ for(const pair of [[a,b],[b,c],[a,c]])
+  if(!isCommitted(state.links,...pair))return {ok:false,code:'MISSING_COMMITTED_THREAD',threadId:linkId(...pair)};
+ const id=fieldId(a,b,c);
+ if(state.fields?.[id]?.status!=='Committed')return {ok:false,code:'MISSING_COMMITTED_FIELD'};
+ if(state.catalog?.fixtureOnly!==true||!Object.values(chapter.anchors).every(nodeId=>state.catalog.byId.has(nodeId)))
+  return {ok:false,code:'REQUIRES_APPROVED_FIXTURE_CATALOG'};
+ return {ok:true,fieldId:id};
+}
+function caseSnapshot(state){
+ const topology=caseTopology(state);
+ if(!topology.ok)return topology;
+ const snapshot=state.caseSnapshots?.[chapter.id];
+ if(!snapshot||!Number.isSafeInteger(snapshot.atMs)||!snapshot.eventId)
+  return {ok:false,code:'CASE_SNAPSHOT_MISSING'};
+ const ev=state.events?.[snapshot.eventId];
+ if(!ev||!ev.fieldImpacts?.some(x=>x.fieldId===topology.fieldId)||
+  eventPhase(ev,snapshot.atMs).phase!=='Interference')
+  return {ok:false,code:'CASE_SNAPSHOT_NOT_VALIDATED'};
+ const phase=eventPhase(ev,snapshot.atMs);
+ return {...topology,atMs:snapshot.atMs,eventId:snapshot.eventId,
+  signalQuality:1-phase.lossPP/100};
+}
+function measurementFor(role,route,baselineQuality){
+ if(!ROLES.includes(role)||!ROUTES.includes(route))throw new RangeError('Unknown role or measurement path');
+ if(!Number.isFinite(baselineQuality)||baselineQuality<0||baselineQuality>1)
+  throw new RangeError('Invalid fixed case signal quality');
+ const quality=role==='Shelter'?1:baselineQuality;
+ const evidence=route==='direct'?['direct-clean']:
+  role==='Lens'?['detour-delay','same-source-signature']:
+  role==='Shelter'?['detour-delay','clean-detour']:
+  ['detour-delay','direction-b'];
+ const visible=route==='direct'?['Single pulse on the direct A–C link','No additional delay']:
+  role==='Lens'?['Two pulses share a source signature','The second pulse is delayed only along A–B–C']:
+  role==='Shelter'?['Clean recording isolates the A–B–C delay','Detour and direct routes differ']:
+  ['The extra pulse begins near relay B','The direct route should be checked'];
+ return {route,role,quality,evidence,visible,costDescription:'First tutorial reading is free; later readings cost 1 Lumen.'};
+}
+function evaluateHypothesis(measurements,hypothesis){
+ if(!chapter.hypothesisOptions.some(o=>o.id===hypothesis))throw new RangeError('Unknown hypothesis');
+ const evidence=new Set(measurements.flatMap(m=>m.evidence));
+ const byLens=evidence.has('same-source-signature')&&evidence.has('detour-delay');
+ const byComparison=evidence.has('direct-clean')&&evidence.has('clean-detour')&&evidence.has('detour-delay');
+ const byDirection=evidence.has('direct-clean')&&evidence.has('direction-b')&&evidence.has('detour-delay');
+ if(hypothesis!=='route_echo')return {solved:false,code:'CONTRADICTED',
+  explanation:hypothesis==='local_noise'?
+   'Unrelated local noise would not follow the same route-dependent timing.':
+   'A hidden source is not supported by the recorded source and route comparison.'};
+ if(byLens)return {solved:true,method:'LENS_SIGNATURE',
+  explanation:'Lens reveals the same origin twice, but the second copy follows the B detour.'};
+ if(byComparison)return {solved:true,method:'SHELTER_COMPARISON',
+  explanation:'The sheltered direct reference is clean; the detour adds precisely the delayed second pulse.'};
+ if(byDirection)return {solved:true,method:'BEACON_TRIANGULATION',
+  explanation:'Beacon identifies B as the delay origin, while the direct route rules out a fourth sender.'};
+ return {solved:false,code:'NEEDS_COMPARISON',
+  explanation:'You need a distinctive source signature or a direct-vs-detour observation before concluding.'};
+}
+
+return {MISSING_BEAT,ROUTES,ROLES,caseTopology,caseSnapshot,measurementFor,evaluateHypothesis};
+})();
+__modules["gameplay/first-light-flow.mjs"]=(function(){
+'use strict';
+const {spendLumen} = __modules["game-rules/wallet.mjs"];
+const {MISSING_BEAT,ROLES,ROUTES,caseSnapshot,measurementFor,evaluateHypothesis} = __modules["gameplay/mission-planner.mjs"];
+// Gate 2 / PR-06: full small, deterministic, map-independent story loop.
+// An archived case snapshot is immutable. Nothing here writes the live
+// world's historical event, node, graph, field or another player's story.
+
+
+const ID=MISSING_BEAT.id;
+const actorKey=id=>JSON.stringify([id,ID]);
+const validId=x=>{if(typeof x!=='string'||!x||x.length>160||x.trim()!==x||
+ /[\u0000-\u001f\u007f-\u009f\ud800-\udfff]/u.test(x))throw new TypeError('Invalid action ID');return x;};
+function createExpeditionState(existing){
+ if(!existing?.players||!existing?.nodes||!existing?.receipts)throw new TypeError('World state required');
+ return {...existing,expeditions:{...(existing.expeditions||{})}};
+}
+function getExpeditionView(state,actorId){
+ const actor=validId(actorId),player=state?.players?.[actor];
+ if(!player)throw new RangeError('Unknown player');
+ const exp=state.expeditions?.[actorKey(actor)]??null;
+ const status=exp?.status??'NotStarted';
+ return {caseId:ID,title:MISSING_BEAT.title,question:MISSING_BEAT.question,
+  fictionNotice:MISSING_BEAT.fictionNotice,
+  status,role:exp?.role??null,measurements:exp?.measurements?.map(x=>({
+   route:x.route,quality:x.quality,visible:x.visible}))??[],
+  hypotheses:MISSING_BEAT.hypothesisOptions.map(h=>({...h})),
+  roleChoices:MISSING_BEAT.roles.map(r=>({...r})),
+  availableRoutes:[...ROUTES],lumen:player.wallet.balance,
+  nextAction:status==='NotStarted'?'START':
+   status==='Completed'?'JOURNAL':
+   status==='Solved'?'FINISH':
+   !exp.role?'SELECT_ROLE':
+   exp.measurements.length===0?'MEASURE':
+   'INTERPRET_OR_MEASURE',
+  purpose:'Compare routes to explain a repeated signal; your finding will be saved permanently.'};
+}
+function applyExpeditionAction(state,action){
+ if(!state||!action||typeof action!=='object')throw new TypeError('State and action required');
+ const actorId=validId(action.actorId),op=validId(action.operationId);
+ const type=action.type;
+ if(!['START','SELECT_ROLE','MEASURE','INTERPRET','FINISH'].includes(type))
+  throw new RangeError('Unknown expedition action');
+ const role=type==='SELECT_ROLE'?action.role:null,
+  route=type==='MEASURE'?action.route:null,
+  hypothesis=type==='INTERPRET'?action.hypothesis:null;
+ // The registered ID/actor is injected by the authoritative controller.
+ // Client-supplied answer flags, quality, timestamp, GPS or Lumen are ignored.
+ const signature=JSON.stringify(['expedition-v1',ID,type,role,route,hypothesis]);
+ const receiptKey=JSON.stringify([actorId,op]);
+ const old=state.receipts?.[receiptKey];
+ if(old)return old.signature===signature?
+  {state,result:{...old.result,replayed:true}}:
+  {state,result:{ok:false,code:'OPERATION_ID_CONFLICT'}};
+ if(!state.players?.[actorId])return {state,result:{ok:false,code:'UNKNOWN_ACTOR'}};
+ const player=state.players[actorId],key=actorKey(actorId);
+ const current=state.expeditions?.[key]??null;
+ let next=current,nextPlayer=player;
+ let result;
+ if(type==='START'){
+  if(current)return {state,result:{ok:false,code:'EXPEDITION_ALREADY_STARTED'}};
+  if(player.findings?.[ID])return {state,result:{ok:false,code:'CASE_ALREADY_SOLVED'}};
+  const snap=caseSnapshot(state);
+  if(!snap.ok)return {state,result:{ok:false,code:snap.code}};
+  next={id:ID,version:MISSING_BEAT.version,fieldId:snap.fieldId,
+   eventId:snap.eventId,snapshotAtMs:snap.atMs,baselineQuality:snap.signalQuality,
+   role:null,measurements:[],status:'ChoosingRole',method:null};
+  result={ok:true,code:'CASE_STARTED',question:MISSING_BEAT.question,
+   options:ROLES,why:'Choose what your triangle should measure before comparing the two routes.'};
+ }else{
+  if(!current)return {state,result:{ok:false,code:'CASE_NOT_STARTED'}};
+  if(current.status==='Completed')return {state,result:{ok:false,code:'CASE_ALREADY_SOLVED'}};
+  if(type==='SELECT_ROLE'){
+   if(!ROLES.includes(role))throw new RangeError('Unknown field function');
+   if(current.measurements.length)return {state,result:{ok:false,code:'ROLE_LOCKED_AFTER_MEASUREMENT'}};
+   next={...current,role,status:'ReadyToMeasure'};
+   result={ok:true,code:'ROLE_SELECTED',role,why:MISSING_BEAT.roles.find(r=>r.id===role).effect};
+  }else if(type==='MEASURE'){
+   if(!ROUTES.includes(route))throw new RangeError('Unknown route');
+   if(!current.role)return {state,result:{ok:false,code:'CHOOSE_ROLE_FIRST'}};
+   if(current.status==='Solved')return {state,result:{ok:false,code:'ALREADY_SOLVED'}};
+   if(current.measurements.some(m=>m.route===route))
+    return {state,result:{ok:false,code:'ROUTE_ALREADY_MEASURED'}};
+   const cost=player.tutorialMeasurementUsed?1:0;
+   const payment=spendLumen(player.wallet,cost);
+   if(!payment.ok)return {state,result:{ok:false,code:payment.reason}};
+   const observation=measurementFor(current.role,route,current.baselineQuality);
+   next={...current,status:'Investigating',measurements:[...current.measurements,observation]};
+   nextPlayer={...player,wallet:payment.wallet,tutorialMeasurementUsed:true};
+   result={ok:true,code:'MEASURED',route,role:current.role,spent:cost,
+    quality:observation.quality,observation:observation.visible,
+    why:'Choose another route or test the explanation using the evidence.'};
+  }else if(type==='INTERPRET'){
+   if(current.measurements.length===0)return {state,result:{ok:false,code:'MEASURE_FIRST'}};
+   const judgement=evaluateHypothesis(current.measurements,hypothesis);
+   if(!judgement.solved)return {state,result:{ok:false,code:judgement.code,
+    explanation:judgement.explanation,spent:0}};
+   next={...current,status:'Solved',method:judgement.method,conclusion:judgement.explanation};
+   result={ok:true,code:'INTERPRETATION_SUPPORTED',method:judgement.method,
+    explanation:judgement.explanation,spent:0,
+    why:'Finish to archive the finding and unlock the next question.'};
+  }else{
+   if(current.status!=='Solved')return {state,result:{ok:false,code:'CASE_NOT_SOLVED'}};
+   const discovery=MISSING_BEAT.outcome;
+   next={...current,status:'Completed'};
+   nextPlayer={...player,findings:{...(player.findings||{}),
+    [ID]:{findingId:discovery.findingId,method:current.method,version:current.version}},
+    unlockedMethods:{...(player.unlockedMethods||{}),[discovery.methodUnlock]:true}};
+   result={ok:true,code:'FINDING_ARCHIVED',spent:0,
+    findingId:discovery.findingId,method:current.method,unlocked:discovery.methodUnlock,
+    nextQuestion:discovery.nextQuestion};
+  }
+ }
+ const output={...state,players:{...state.players,[actorId]:nextPlayer},
+  expeditions:{...(state.expeditions||{}),[key]:next},
+  receipts:{...state.receipts,[receiptKey]:{signature,result}}};
+ return {state:output,result};
+}
+
+return {createExpeditionState,getExpeditionView,applyExpeditionAction};
+})();
+__modules["playtest/session.mjs"]=(function(){
+'use strict';
+const fixture = {"version":"fixture-tampere-v1","fixtureOnly":true,"sites":[{"id":"test:tampere:a","kind":"test_site","category":"Nature","name":"Synthetic A — Tampere scenario","geo":{"latitude":61.5,"longitude":23.7},"safetyClass":"remote_only","walkable":false},{"id":"test:tampere:b","kind":"test_site","category":"History","name":"Synthetic B — Tampere scenario","geo":{"latitude":61.501,"longitude":23.702},"safetyClass":"remote_only","walkable":false},{"id":"test:tampere:c","kind":"test_site","category":"Art","name":"Synthetic C — Tampere scenario","geo":{"latitude":61.504,"longitude":23.706},"safetyClass":"remote_only","walkable":false},{"id":"test:tampere:d","kind":"test_site","category":"Culture","name":"Synthetic D — Tampere scenario","geo":{"latitude":61.509,"longitude":23.71},"safetyClass":"remote_only","walkable":false}]};
+const {validateCatalog} = __modules["world-data/catalog-policy.mjs"];
+const {createPlayer,createWorldNode,createRulesState} = __modules["game-rules/node.mjs"];
+const {createGraphState,applyLinkAction} = __modules["game-rules/graph.mjs"];
+const {createEventState,createInterferenceEvent} = __modules["game-rules/events.mjs"];
+const {linkId,fieldId} = __modules["game-rules/identity.mjs"];
+const {MISSING_BEAT} = __modules["gameplay/mission-planner.mjs"];
+const {createExpeditionState,applyExpeditionAction,getExpeditionView} = __modules["gameplay/first-light-flow.mjs"];
+// Isolated Gate 2 / PR-07 playtest adapter. Uses the PR-01..PR-06 rules,
+// NOT a mock success flag or a live world backend.
+
+
+
+
+
+
+
+
+const PLAYTEST_KEY='majakka-missing-beat-gate2-playtest-v1';
+const ACTOR='demo:player';
+const ids=Object.values(MISSING_BEAT.anchors);
+function createDemoState(){
+ const catalog=validateCatalog(fixture,{allowFixtures:true});
+ const nodes=Object.fromEntries(catalog.sites.map(site=>[site.id,createWorldNode(site.geo,10000)]));
+ const home=catalog.byId.get(ids[0]).geo;
+ // Only the isolated scenario starts with a ready field and 18 L.
+ // Authentic Gate 2 progression from a new 8-L wallet is NOT simulated here.
+ const players={[ACTOR]:createPlayer(home,18)};
+ let state=createGraphState(createRulesState({nodes,players}));
+ for(const [i,[a,b]] of [[ids[0],ids[1]],[ids[1],ids[2]],[ids[0],ids[2]]].entries()){
+  for(const stage of ['anchor','align']){
+   const attempt=applyLinkAction(state,{type:'WEAVE',actorId:ACTOR,
+    operationId:'fixture:'+i+':'+stage,a,b,stage,nowMs:0});
+   if(!attempt.result.ok)throw new Error('Fixture graph setup failed: '+attempt.result.code);
+   state=attempt.state;
+  }
+ }
+ const field=fieldId(...ids);
+ if(!state.fields[field])throw new Error('Fixture did not close the expected field');
+ state=createEventState(state);
+ state=createInterferenceEvent(state,{eventId:'demo:missing-beat',
+  regionId:'demo:tampere',startsAtMs:0,
+  fieldImpacts:[{fieldId:field,affectedLinkId:linkId(ids[0],ids[1])}]});
+ return createExpeditionState({...state,catalog,caseSnapshots:{
+  [MISSING_BEAT.id]:{eventId:'demo:missing-beat',atMs:25*3600000}}});
+}
+function getDemoView(state){return getExpeditionView(state,ACTOR);}
+function applyDemoAction(state,{type,...rest}){
+ // Unique only within this ephemeral local UI, never a trusted online action.
+ const id='playtest:'+Date.now()+':'+Math.random().toString(36).slice(2);
+ return applyExpeditionAction(state,{...rest,type,actorId:ACTOR,operationId:id});
+}
+function saveDemoState(state){
+ try {
+  const snapshot={version:1,player:state.players[ACTOR],
+   expedition:state.expeditions[JSON.stringify([ACTOR,MISSING_BEAT.id])]??null,
+   receipts:state.receipts};
+  localStorage.setItem(PLAYTEST_KEY,JSON.stringify(snapshot));
+  return true;
+ }catch{return false;}
+}
+function loadDemoState(){
+ let state=createDemoState();
+ try {
+  const data=JSON.parse(localStorage.getItem(PLAYTEST_KEY)||'null');
+  if(data?.version!==1||!data?.player)return state;
+  const validWallet=data.player.wallet?.balance;
+  if(!Number.isSafeInteger(validWallet)||validWallet<0||validWallet>18)return state;
+  // This snapshot is a local, user-editable TEST record, not a server receipt.
+  const actorId=JSON.stringify([ACTOR,MISSING_BEAT.id]);
+  state={...state,players:{...state.players,[ACTOR]:data.player},
+   expeditions:data.expedition?{[actorId]:data.expedition}:{},
+   receipts:data.receipts&&typeof data.receipts==='object'?data.receipts:state.receipts};
+  getDemoView(state); // Reject corrupted snapshots by falling back to fresh.
+ }catch{state=createDemoState();}
+ return state;
+}
+function resetDemoState(){
+ try{localStorage.removeItem(PLAYTEST_KEY);}catch{}
+ return createDemoState();
+}
+
+return {PLAYTEST_KEY,createDemoState,getDemoView,applyDemoAction,saveDemoState,loadDemoState,resetDemoState};
+})();
+__modules["playtest/ui.mjs"]=(function(){
+'use strict';
+const {loadDemoState,resetDemoState,saveDemoState,getDemoView,applyDemoAction} = __modules["playtest/session.mjs"];
+// PR-07 mobile controller. Calls the real Gate 2 expedition reducer.
+
+let state=loadDemoState(),feedback=null,lastRoute=null;
+const byId=id=>document.getElementById(id);
+const ui=byId('game'),message=byId('feedback'),lumen=byId('lumen-count'),step=byId('step-count'),
+ progress=byId('progress-fill');
+const label={
+ NotStarted:'1 / 5',ChoosingRole:'2 / 5',ReadyToMeasure:'3 / 5',
+ Investigating:'3 / 5',Solved:'4 / 5',Completed:'5 / 5'
+};
+const levels={NotStarted:0,ChoosingRole:20,ReadyToMeasure:40,Investigating:60,Solved:80,Completed:100};
+const meanings={
+ EXPEDITION_ALREADY_STARTED:'This investigation is already under way.',
+ CASE_ALREADY_SOLVED:'The finding is already saved in your journal.',
+ MISSING_COMMITTED_THREAD:'This route has not been constructed.',
+ MISSING_COMMITTED_FIELD:'The three threads must first form a field.',
+ ROLE_LOCKED_AFTER_MEASUREMENT:'The research tool is locked after the first observation.',
+ CHOOSE_ROLE_FIRST:'Choose how to investigate before measuring a route.',
+ ROUTE_ALREADY_MEASURED:'You have already recorded this route. Compare your observations.',
+ NEEDS_COMPARISON:'The evidence is not yet sufficient. Try measuring the other route.',
+ MEASURE_FIRST:'Measure at least one route before choosing a conclusion.',
+ INSUFFICIENT_LUMEN:'Not enough Lumen for another reading. You can still inspect existing evidence.',
+ OPERATION_ID_CONFLICT:'The operation ID was already used for another action.',
+ CASE_NOT_SOLVED:'Interpret the evidence before finishing the case.'
+};
+function el(tag,cls,txt){
+ const x=document.createElement(tag);
+ if(cls)x.className=cls;
+ if(txt!==undefined)x.textContent=txt;
+ return x;
+}
+function add(parent,...children){for(const child of children)parent.appendChild(child);return parent;}
+function p(text,cls=''){return el('p',cls,text);}
+function section(eyebrow,title,description){
+ const wrap=el('section','panel');
+ add(wrap,el('div','eyebrow',eyebrow),el('h2','',title),p(description));
+ return wrap;
+}
+function button(title,detail,action,primary=false,badge=''){
+ const b=el('button','action'+(primary?' primary':''));
+ b.type='button';
+ add(b,el('span','primary-name',title));
+ if(badge)add(b,el('span','cost',badge));
+ if(detail)add(b,el('span','details',detail));
+ b.addEventListener('click',action);
+ return b;
+}
+function run(type,args={}){
+ try{
+  const {state:updated,result}=applyDemoAction(state,{type,...args});
+  if(result.ok){
+   state=updated;
+   const saved=saveDemoState(state);
+   if(type==='MEASURE')lastRoute=args.route;
+   feedback={kind:'ok',title:'Action recorded',
+    text:type==='INTERPRET'?'Your explanation matches the evidence.':
+    type==='FINISH'?'Your discovery is saved in this local playtest.':
+    type==='MEASURE'?'Observation recorded. Compare the evidence below.':
+    type==='SELECT_ROLE'?'Your field tool is selected.':result.why||'Done.'};
+   if(!saved)feedback={kind:'warning',title:'Playtest session',text:'The browser blocked local storage. Your work remains available until the page is closed.'};
+  }else{
+   feedback={kind:'warning',title:result.code==='CONTRADICTED'?'The evidence disagrees':'Not yet',
+    text:result.explanation||meanings[result.code]||('The game refused this action: '+result.code)};
+  }
+ }catch(error){
+  feedback={kind:'warning',title:'Test error',
+   text:'The action failed. You can reset the playtest without affecting the live game.'};
+  console.error(error);
+ }
+ render();
+}
+function actionList(section,...buttons){
+ const holder=el('div','actions');
+ for(const b of buttons)holder.appendChild(b);
+ section.appendChild(holder);
+}
+function setupMap(view){
+ const routes=view.measurements||[];
+ const latest=lastRoute||routes.at(-1)?.route||null;
+ for(const [id,route] of [['thread-ab','via_b'],['thread-bc','via_b'],['thread-ac','direct']]){
+  const x=byId(id);if(!x)continue;
+  x.classList.toggle('picked',latest===route);
+  x.classList.toggle('dim',Boolean(latest)&&latest!==route);
+ }
+ byId('map-label').textContent=view.status==='Completed'?'DISCOVERY SAVED':
+  view.status==='Solved'?'PATTERN IDENTIFIED':'ARCHIVED SIGNAL';
+}
+function renderMessage(){
+ message.replaceChildren();
+ if(!feedback)return;
+ const box=el('div','callout'+(feedback.kind!=='ok'?' error':''));
+ box.setAttribute('role',feedback.kind==='ok'?'status':'alert');
+ add(box,el('strong','',feedback.title),el('span','',feedback.text));
+ message.appendChild(box);
+}
+function roleCards(view){
+ const s=section('Make a decision','Choose how to investigate',
+  'Each tool changes what you can observe. None changes the shared network for other players.');
+ const descriptions={
+ Lens:'Separate overlapping pulses. One detour measurement may reveal their common source.',
+ Shelter:'Capture a clean reference. Compare the direct route with the detour.',
+ Beacon:'Find where the delay begins. You will need another route to confirm the cause.'
+ };
+ for(const name of ['Lens','Shelter','Beacon']){
+  const card=button(name,descriptions[name],()=>run('SELECT_ROLE',{role:name}));
+  card.setAttribute('aria-label',name+'. '+descriptions[name]);
+  s.appendChild(card);
+ }
+ return s;
+}
+function observationCards(view){
+ if(!view.measurements.length)return null;
+ const s=section('Evidence','What the field revealed',
+  'These readings are saved in your current investigation. Neither a wrong answer nor an interruption deletes them.');
+ for(const [i,obs] of view.measurements.entries()){
+  const card=el('div','journal');
+  const route=obs.route==='direct'?'A → C · direct route':'A → B → C · detour';
+  add(card,el('div','eyebrow','READING '+(i+1)+' · '+route),
+   el('div','',obs.visible.join(' · ')),
+   p('Signal quality: '+Math.round(obs.quality*100)+'%','quiet'));
+  s.appendChild(card);
+ }
+ return s;
+}
+function routeCards(view){
+ if(view.status==='Solved'||view.status==='Completed')return null;
+ const s=section('Investigate the network','Which path will you examine?',
+  'A direct signal and one passing through B should not necessarily arrive in the same way.');
+ const used=new Set(view.measurements.map(x=>x.route));
+ const direct=button('A → C · Direct',
+  used.has('direct')?'Already recorded': 'Record a clean baseline along the short route.',
+  ()=>run('MEASURE',{route:'direct'}),false,used.has('direct')?'DONE':'READ');
+ const detour=button('A → B → C · Detour',
+  used.has('via_b')?'Already recorded':'Compare the additional signal path through relay B.',
+  ()=>run('MEASURE',{route:'via_b'}),false,used.has('via_b')?'DONE':'READ');
+ direct.disabled=used.has('direct');detour.disabled=used.has('via_b');
+ actionList(s,direct,detour);
+ s.appendChild(p('The first measurement in this test is free. A second distinct reading uses 1 Lumen.','quiet'));
+ return s;
+}
+function hypothesisCards(view){
+ if(view.status==='Solved'||view.status==='Completed')return null;
+ const s=section('Interpret','What causes the missing beat?',
+  'Your explanation must be supported by the route readings. A wrong hypothesis costs no Lumen.');
+ actionList(s,...view.hypotheses.map(h=>button(h.label,
+  'Check this interpretation against your observations.',
+  ()=>run('INTERPRET',{hypothesis:h.id}))));
+ return s;
+}
+function render(){
+ const view=getDemoView(state);
+ lumen.textContent=String(view.lumen);
+ step.textContent=label[view.status]||'1 / 5';
+ progress.style.width=(levels[view.status]??0)+'%';
+ setupMap(view);renderMessage();
+ ui.replaceChildren();
+ if(view.status==='NotStarted'){
+  const s=section('First playable experiment','A signal arrives twice',
+   'Three fixed test nodes form one field. Something changes the rhythm when the signal travels through B. Your task is to explain why.');
+  const tip=el('div','callout');
+  add(tip,el('strong','','Why do this?'),el('span','',
+   'Solve the anomaly to save a discovery and unlock a new observation method. No GPS or timed return is required.'));
+  add(s,tip,button('Begin investigation','A short, self-contained research case.',()=>run('START'),true));
+  ui.appendChild(s);
+ }else if(view.status==='Completed'){
+  const s=section('Mission complete','You found the missing beat',
+   'The field shows a route-dependent echo rather than a second hidden transmitter.');
+  const a=state.players['demo:player'].findings?.['the-missing-beat'];
+  const box=el('div','journal');
+  add(box,el('div','eyebrow','PERMANENT PLAYTEST JOURNAL'),
+   el('div','unlock','Echo Differentiation unlocked'),
+   p('Solved with: '+(a?.method||'research')+'.','quiet'),
+   p('Next question: Does this echo repeat beyond your home region?',''));
+  add(s,box,p('This record is saved locally on this device, not in the shared Majakka world.','quiet'));
+  ui.appendChild(s);
+ }else if(view.status==='Solved'){
+  const s=section('Interpretation supported','The pattern makes sense',
+   'You used real observations from the selected path to identify a route-dependent echo.');
+  const exp=state.expeditions[JSON.stringify(['demo:player','the-missing-beat'])];
+  add(s,el('div','callout',exp?.conclusion||'Your evidence supports the route-echo hypothesis.'));
+  add(s,button('Save discovery to journal','Unlock a new method and end this research case.',()=>run('FINISH'),true));
+  ui.appendChild(s);
+  const observed=observationCards(view);if(observed)ui.appendChild(observed);
+ }else{
+  if(!view.role)ui.appendChild(roleCards(view));
+  else{
+   const intro=section('Chosen field tool',view.role,
+    'The tool changes which clues you can observe. Your reading route determines what else you learn.');
+   if(view.measurements.length===0){
+    add(intro,button('Choose a different tool','You can reconsider before the first reading.',
+     ()=>run('SELECT_ROLE',{role:view.role==='Lens'?'Shelter':'Lens'})));
+   }
+   ui.appendChild(intro);
+   const obs=observationCards(view);if(obs)ui.appendChild(obs);
+   ui.appendChild(routeCards(view));
+   if(view.measurements.length)ui.appendChild(hypothesisCards(view));
+  }
+ }
+ byId('storage-status').textContent='Private local playtest • No GPS';
+}
+byId('reset').addEventListener('click',()=>{
+ if(!confirm('Reset The Missing Beat on this device? Only the local test session will be erased.'))return;
+ state=resetDemoState();feedback={kind:'ok',title:'Scenario reset',text:'Ready to test another solution path.'};
+ lastRoute=null;render();
+});
+render();
+
+return {};
+})();
+
+</script>
+</body>
+</html>
