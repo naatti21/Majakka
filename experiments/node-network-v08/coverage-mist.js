@@ -48,6 +48,7 @@ export function coverageHeight(a,b,c,heights){
 export function coverageWave(a,b,c,time){
   // Zero at boundary; broad travelling crests, stronger than the old 0.9 m ripple.
   const interior=Math.min(1,Math.max(0,27*a*b*c));
+  if(interior===0)return 0;
   return interior*(3.2*Math.sin(8*b+4*c-time*.75)+1.5*Math.sin(6*c-3*a+time*.48));
 }
 function heightSampler(curve){
