@@ -1,0 +1,60 @@
+name: GPS World S1
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'world/**'
+      - 'tools/world/**'
+      - 'game-rules/**'
+      - 'world-data/**'
+      - 'tests/gps-world.test.mjs'
+      - '.github/workflows/gps-world.yml'
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rebuild catalog from pinned OSM and regional excerpts
+        run: |
+          git fetch --depth=1 origin e684e4e04487adf1984c3cdedc05cfe5e92e7c32
+          node tools/world/import.mjs
+          test -z "$(git status --porcelain world/data)"
+          node --test tests/*.test.mjs
+          node --check backend/worker.mjs
+      - name: Install browser
+        working-directory: world
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Drive portrait atlas
+        run: |
+          python3 -m http.server 4187 --bind 127.0.0.1 >/tmp/majakka-world.log 2>&1 &
+          EVIDENCE=/tmp/world-screens node world/browser-qa.mjs
+      - name: Build and verify static phone preview
+        run: |
+          node tools/world/build-preview.mjs
+          python3 -m http.server 4188 --bind 127.0.0.1 --directory .preview-build >/tmp/majakka-preview.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4188/world/ >/dev/null && break; sleep 1; done
+          WORLD_URL=http://127.0.0.1:4188/world/ EVIDENCE=/tmp/preview-screens node world/browser-qa.mjs
+      - name: Test the Pages CDN dependency route
+        run: |
+          WORLD_URL=http://127.0.0.1:4188/world/?deps=cdn EVIDENCE=/tmp/cdn-screens node world/browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gps-world-static-preview
+          path: .preview-build/
+          include-hidden-files: true
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gps-world-portrait
+          path: /tmp/world-screens/

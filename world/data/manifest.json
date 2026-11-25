@@ -1,0 +1,38 @@
+{
+  "version": "58dcd56e57d9f0a8",
+  "regions": [
+    {
+      "id": "tampere",
+      "name": "Tampere",
+      "bounds": [
+        23.7,
+        61.47,
+        23.84,
+        61.53
+      ],
+      "file": "tampere-3acac80e57a92b17.json"
+    },
+    {
+      "id": "nokia",
+      "name": "Nokia",
+      "bounds": [
+        23.32,
+        61.43,
+        23.6,
+        61.51
+      ],
+      "file": "nokia-8557743cc17be170.json"
+    },
+    {
+      "id": "ruovesi",
+      "name": "Ruovesi",
+      "bounds": [
+        23.7,
+        61.94,
+        24.05,
+        62.12
+      ],
+      "file": "ruovesi-c472e7a3a98570b3.json"
+    }
+  ]
+}
