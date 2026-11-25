@@ -38,6 +38,18 @@ jobs:
         run: |
           python3 -m http.server 4187 --bind 127.0.0.1 >/tmp/majakka-world.log 2>&1 &
           EVIDENCE=/tmp/world-screens node world/browser-qa.mjs
+      - name: Build and verify static phone preview
+        run: |
+          node tools/world/build-preview.mjs
+          python3 -m http.server 4188 --bind 127.0.0.1 --directory .preview-build >/tmp/majakka-preview.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4188/world/ >/dev/null && break; sleep 1; done
+          WORLD_URL=http://127.0.0.1:4188/world/ EVIDENCE=/tmp/preview-screens node world/browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gps-world-static-preview
+          path: .preview-build/
+          include-hidden-files: true
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         if: always()
         with:
