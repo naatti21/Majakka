@@ -1,8 +1,9 @@
-import * as lib from './node_modules/maplibre-gl/dist/maplibre-gl.mjs';
+const cdn=location.hostname.endsWith(".github.io")||new URLSearchParams(location.search).get("deps")==="cdn";
+const lib=await import(cdn?'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs':'./node_modules/maplibre-gl/dist/maplibre-gl.mjs');
 import {beaconLayer} from './beacons.mjs';
 const url='https://tiles.openfreemap.org/styles/dark';
 const fc=features=>({type:'FeatureCollection',features});
-const offline=()=>({version:8,'font-faces':{Inter:[{url:new URL('./node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2',location.href).href}]},sources:{streets:{type:'geojson',data:new URL('data/tampere-streets.geojson',location.href).href,
+const offline=()=>({version:8,'font-faces':{Inter:[{url:new URL(cdn?'https://unpkg.com/@fontsource/inter@5.2.8/files/inter-latin-400-normal.woff2':'./node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2',location.href).href}]},sources:{streets:{type:'geojson',data:new URL('data/tampere-streets.geojson',location.href).href,
  attribution:'© OpenStreetMap contributors · Tampere extract'}},layers:[
  {id:'land',type:'background',paint:{'background-color':'#111e26'}},
  ...[['park','#203e37'],['water','#193846'],['building','#29383e']].map(([id,color])=>({id,type:'fill',source:'streets',filter:['==','kind',id],paint:{'fill-color':color}})),

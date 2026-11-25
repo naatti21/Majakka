@@ -409,3 +409,7 @@ Käyttäjän pyynnöstä tallennettu [Master Development Blueprint v1.0](docs/MA
 ## 2026-11-25 · GPS World S0–S1
 
 Kehityshaaran `feature/gps-world-s1` pelireitti on `/world/`. Kolmen alueen lähdekatalogissa on yksi paikkatietoaineistolla tarkistettu kävelykohde ja kuusi etätutkimuskohdetta. GPS, paikalliset tutkimushavainnot ja Gate 1 -ehdokaslompakko toimivat samalla kartalla. Fyysinen Android-kävely ja paikan ajantasainen tarkistus ovat vielä avoinna. [Lähtöauditointi, lähteet, käyttöohjeet ja S2:n rajapinta](docs/GPS_WORLD_S0_S1.md)
+
+
+## 2026-11-25 — Native target and S1 phone preview
+Owner confirmed native mobile game as final target, not PWA. Browser S1 is a temporary gameplay validation client; keep engine-neutral rules/contracts and reusable asset pipeline, avoid committing to a specific native engine before representative Android load benchmarks. Owner explicitly approved isolated S1 browser test publication, not final release or validation. S1 retains only one dataset-reviewed walking anchor and six remote records; no artificial POI filler. Existing root app remains unchanged. Branch-based Pages preview uses the same pinned MapLibre 6.15.0, Three 0.178.0 and Inter 5.2.8 via CDN; CI standalone package uses local pinned dependencies. Online CDN/physical Android test status must be reported separately.

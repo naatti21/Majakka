@@ -44,6 +44,9 @@ jobs:
           python3 -m http.server 4188 --bind 127.0.0.1 --directory .preview-build >/tmp/majakka-preview.log 2>&1 &
           for i in {1..20}; do curl -fsS http://127.0.0.1:4188/world/ >/dev/null && break; sleep 1; done
           WORLD_URL=http://127.0.0.1:4188/world/ EVIDENCE=/tmp/preview-screens node world/browser-qa.mjs
+      - name: Test the Pages CDN dependency route
+        run: |
+          WORLD_URL=http://127.0.0.1:4188/world/?deps=cdn EVIDENCE=/tmp/cdn-screens node world/browser-qa.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: gps-world-static-preview

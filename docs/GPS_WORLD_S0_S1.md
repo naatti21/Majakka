@@ -69,3 +69,5 @@ Kehitysympäristön koonnissa 33 testitiedostossa oli yhteensä 217 läpäistyä
 
 ## Puhelimen HTTPS-esikatselu
 Staattinen jakelupaketti: `npm ci --prefix world --ignore-scripts` ja `node tools/world/build-preview.mjs`. Valmis `.preview-build/` sisältää vain tarvittavat pelitiedostot, lukitut npm-ajonaikaiset kirjastot ja katalogin. CI ajaa myös valmiin paketin selainpelitestin ja tuottaa `gps-world-static-preview`-artefaktin. Artefakti EI itsessään ole toimiva puhelinpelilinkki. Julkaise sisältö erilliselle HTTPS-esikatselupolulle vasta omistajan hyväksynnällä; säilytä olemassa oleva Pages-julkaisu, älä vaihda sen lähdehaaraa. Testaa URL ja GPS-lupa julkaisemisen jälkeen. Ei muutoksia gameplayhin tässä paketointikorjauksessa.
+
+S1 browser preview on GitHub Pages: https://naatti21.github.io/Majakka/world/ (owner-authorized test only). Pages uses pinned unpkg runtime dependencies, while local and packaged CI builds use the same versions locally. CDN loading and physical GPS must be tested separately; if CDN fails the 2D fallback may appear. Native client is the final product target, not a PWA.

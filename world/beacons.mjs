@@ -1,4 +1,5 @@
-import * as THREE from './node_modules/three/build/three.module.js';
+const cdn=location.hostname.endsWith(".github.io")||new URLSearchParams(location.search).get("deps")==="cdn";
+const THREE=await import(cdn?'https://unpkg.com/three@0.178.0/build/three.module.js':'./node_modules/three/build/three.module.js');
 import {buildBeacon} from '../experiments/node-family-v01/beacon-model.js?v=001';
 
 export function beaconLayer(glMap){
