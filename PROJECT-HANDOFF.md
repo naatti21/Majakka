@@ -405,3 +405,7 @@ Mist defect: old coverage was fixed at y=12 while link ends were y=54.1; the new
 
 ## 2026-11-24 — kokonaispelin kehitysohje
 Käyttäjän pyynnöstä tallennettu [Master Development Blueprint v1.0](docs/MAJAKKA_MASTER_DEVELOPMENT_BLUEPRINT_v1.0.md) ja [Codex S0–S1](docs/CODEX_GPS_WORLD_S0_S1_v1.0.md). S1 on yksi oikea GPS-kartta, automaattinen lähdepohjainen Node-katalogi, Lumen ja karttavuorovaikutus. S2 verkko, S3 Kaiku-keräys + Resonance Bond -ehdotus ja talentit, S4 Interference, S5 shared world. Nämä kaikki samaan peliin. Uusi pelisuunnittelu on ehdotus; aiemmat hyväksytyt periaatteet säilyvät. Ei uutta sovelluskoodia tässä dokumenttipäivityksessä. v082 mist CI, WebGL ja Pages PASS SHA 07056869db83715f17430d786bd1b77d24ae867b; fyysinen Android-hyväksyntä avoin.
+
+## 2026-11-25 · GPS World S0–S1
+
+Kehityshaaran `feature/gps-world-s1` pelireitti on `/world/`. Kolmen alueen lähdekatalogissa on yksi paikkatietoaineistolla tarkistettu kävelykohde ja kuusi etätutkimuskohdetta. GPS, paikalliset tutkimushavainnot ja Gate 1 -ehdokaslompakko toimivat samalla kartalla. Fyysinen Android-kävely ja paikan ajantasainen tarkistus ovat vielä avoinna. [Lähtöauditointi, lähteet, käyttöohjeet ja S2:n rajapinta](docs/GPS_WORLD_S0_S1.md)

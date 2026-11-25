@@ -1,0 +1,1 @@
+{"name":"majakka-gps-world","private":true,"type":"module","dependencies":{"@fontsource/inter":"5.2.8","maplibre-gl":"6.15.0","three":"0.178.0"},"devDependencies":{"playwright":"1.58.2"}}
