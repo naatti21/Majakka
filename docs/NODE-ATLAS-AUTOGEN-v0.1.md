@@ -2,6 +2,8 @@
 **26.10.2026 · Toteutettu sääntömoottori, ei vielä tuotantoon ajettu maailmanlaajuinen aineisto**
 
 ## Suunnanmuutos
+**2026-11-25 jatko-ohje:** [Shared Ecology, Atlas Automation & Lumen v0.1](MAJAKKA_SHARED_ECOLOGY_ATLAS_LUMEN_v0.1.md) täydentää automaattivalintaa: patsaat, kirkot ja maaseudun todelliset erikoiskohteet; alueellinen tiheys ja parviälyehdotus, sama julkaistu katalogi kaikille. Ei turvallisuussuodatuksen ohitusta eikä henkilökohtaista POI-generointia.
+
 
 Manuaalinen Node Atlas 0B -kartta EI ole pelimaailman rakentamismenetelmä. Yhden kehittäjän tai pelaajayhteisön ei kuulu tarkistaa maailman jokaista kiinnostavaa paikkaa. **Päämalli on automaattisesti generoitu, paikkatiedosta johdettu pysyvä maailmanverkko.**
 
