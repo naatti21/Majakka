@@ -26,10 +26,11 @@ try{
    await session.send('Browser.setPermission',{permission:{name:'geolocation'},setting:'denied',origin:new URL(base).origin,browserContextId:(await session.send('Target.getTargetInfo')).targetInfo.browserContextId});
    await p.locator('#gps').click();await p.waitForFunction(()=>document.querySelector('#fix').textContent.includes('denied'));
    assert(await p.locator('#visit').isDisabled());
-   await ctx.grantPermissions(['geolocation']);
+   await ctx.grantPermissions(['geolocation'],{origin:new URL(base).origin});
+   await p.waitForFunction(async()=>(await navigator.permissions.query({name:'geolocation'})).state==='granted');
    await ctx.setGeolocation({latitude:61.498723,longitude:23.760697,accuracy:80});
    await p.locator('#gps').click();
-   await p.waitForFunction(()=>document.querySelector('#fix').textContent.includes('accurate'));
+   await p.waitForFunction(()=>document.querySelector('#fix').textContent.includes('accurate')).catch(async e=>{throw Error(e.message+' '+await p.locator('#fix').innerText());});
    await ctx.setGeolocation({latitude:61.498723,longitude:23.760697,accuracy:4});
    await p.waitForSelector('.avatar');await p.locator('#visit').click();
    await p.locator('#close').click();
